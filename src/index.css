@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Design tokens — ported from CoolAdmin's "app" theme so this product reads
+   as a sibling of the CoolAdmin dashboard family. Override here to retheme.
+   ============================================================================ */
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface-2: #f4f6f8;
+  --sidebar: #2c3e50;
+  --sidebar-soft: #24333f;
+
+  --border: #e9ecef;
+  --border-soft: #f1f3f5;
+  --divider: #f1f3f5;
+
+  --text: #333333;
+  --text-muted: #666666;
+  --text-faint: #98a2ae;
+  --text-on-dark: #f1f5f9;
+
+  --accent: #4272d7;
+  --accent-rgb: 66, 114, 215;
+  --accent-hover: #355cb8;
+  --accent-soft: #eaf0fc;
+
+  --success: #28a745;
+  --success-soft: #eaf7ed;
+  --warning: #ffc107;
+  --warning-soft: #fff8e1;
+  --danger: #dc3545;
+  --danger-soft: #fdecee;
+  --info: #17a2b8;
+  --info-soft: #e0f3f6;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  --radius-sm: 3px;
+  --radius: 4px;
+  --radius-lg: 8px;
+
+  --sidebar-width: 240px;
+  --topbar-height: 70px;
+
+  --font: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #1c1f24;
+  --surface-2: #171a1f;
+  --sidebar: #0b0d12;
+  --sidebar-soft: #171a22;
+
+  --border: #2a2e35;
+  --border-soft: #23262c;
+  --divider: #23262c;
+
+  --text: #e9ecef;
+  --text-muted: #adb5bd;
+  --text-faint: #6b7280;
+  --text-on-dark: #f1f5f9;
+
+  --accent-soft: #182238;
+  --success-soft: #08251c;
+  --warning-soft: #2a1f06;
+  --danger-soft: #2a0f0f;
+  --info-soft: #0c2126;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-soft: var(--sidebar-soft);
+
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-divider: var(--divider);
+
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-text-on-dark: var(--text-on-dark);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius-lg);
+
+  --font-sans: var(--font);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+}
