@@ -14,15 +14,13 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-surface-2 text-text-faint">
-        <Icon className="size-6" />
-      </div>
-      <div>
-        <p className="text-sm font-medium text-text">{title}</p>
-        {description && <p className="mt-1 text-sm text-text-muted">{description}</p>}
-      </div>
-      {action}
+    <div className="empty-state">
+      <span className="empty-state__icon">
+        <Icon size={22} />
+      </span>
+      <h3 className="empty-state__title">{title}</h3>
+      {description && <p className="empty-state__text">{description}</p>}
+      {action && <div className="empty-state__actions">{action}</div>}
     </div>
   )
 }

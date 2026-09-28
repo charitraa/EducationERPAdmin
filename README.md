@@ -1,15 +1,37 @@
 # Education ERP — Admin Panel
 
-React + TypeScript admin dashboard for [EducationERP](../EducationERP), themed to match
-[CoolAdmin](../CoolAdmin)'s modern design system (`css/app.css`, `body.app { --m-* }` tokens,
-Inter, `theme-blue`).
+React + TypeScript admin dashboard for [EducationERP](../EducationERP), built directly on top of
+[CoolAdmin](../CoolAdmin)'s real stylesheets and markup — not a Tailwind reinterpretation. Every
+page renders CoolAdmin's actual CSS classes (`.m-card`, `.m-btn`, `.m-table`, `.page-header`,
+Bootstrap's `.form-control`/`.modal`/`.badge`, the real `.menu-sidebar`/`.header-desktop` chrome).
 
 ## Stack
 
 - **Vite + React 19 + TypeScript**
-- **Tailwind CSS v4** — design tokens ported from CoolAdmin's `--m-*` variables into `src/index.css`
+- **CoolAdmin's own CSS**, vendored as static files: Bootstrap 5.3.8, Font Awesome 7.3.1,
+  `theme.css` (legacy) and `app.css` (the modern `body.app { --m-* }` overlay CoolAdmin's own
+  pages actually use) — see `public/vendor/cooladmin/` and `index.html`'s `<link>` chain. No
+  Tailwind: see **Styling** below for why, and how the few remaining utility classNames work.
 - **TanStack Query** — server state, with a typed cache-key factory (`src/lib/query/keys.ts`)
 - **React Router v7**, **React Hook Form + Zod**, **Zustand**, **axios**
+
+## Styling
+
+`public/vendor/cooladmin/` holds CoolAdmin's actual `bootstrap.min.css`, `theme.css` and `app.css`,
+copied verbatim from `../CoolAdmin` and loaded in `index.html` in that order, before our own
+`src/index.css`. `components/ui/*` and `components/layout/*` render CoolAdmin's real classes
+directly (`.m-card`, `.m-btn--primary`, `.form-control`, `.modal-dialog`, `.menu-sidebar`, ...) —
+open `../CoolAdmin/*.html` or its `docs.html` to see the source of truth for any of these.
+
+Tailwind was deliberately removed rather than kept alongside Bootstrap: both frameworks define
+utility classes under the *same names* (`.p-3`, `.gap-2`, `.rounded`, `.text-danger`, `.shadow-sm`,
+...) with different pixel values, and CSS has no reliable way to make one win over the other by
+source order alone. A handful of feature pages still use small Tailwind-style utility classNames
+for one-off layout — rather than rewrite every page, `src/index.css`'s "Compat utilities" section
+hand-defines exactly that subset (see the comment there), scoped under `body.app` with `!important`
+so they deterministically beat any same-named Bootstrap utility regardless of load order. New code
+should prefer Bootstrap's own utilities (`d-flex`, `gap-3`, `mb-3`, ...) or a real CoolAdmin class
+over adding to that compat list.
 
 ## Getting started
 
@@ -45,8 +67,12 @@ cp .env.example .env
 src/
   App.tsx                  Providers only (QueryClient, BrowserRouter, Toaster)
   main.tsx                 React root
-  index.css                Design tokens (ported from CoolAdmin) + Tailwind v4 @theme
+  index.css                Extensions CoolAdmin's own CSS doesn't ship (button variants,
+                            neutral badge, underline tabs) + the compat utilities layer
   vite-env.d.ts             Typed import.meta.env
+
+public/vendor/cooladmin/    CoolAdmin's real bootstrap.min.css / theme.css / app.css / Font
+                            Awesome, vendored verbatim — linked from index.html
 
   routes/                  Route tree + auth/permission route guards
     AppRoutes.tsx

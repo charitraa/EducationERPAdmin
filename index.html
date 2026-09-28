@@ -10,9 +10,20 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet"
     />
+    <!--
+      CoolAdmin's real stylesheet chain (Bootstrap 5 -> legacy theme -> modern
+      "app" overlay), vendored as static files in public/vendor/cooladmin/ —
+      see that folder's source at ../CoolAdmin. Loaded before our own
+      src/index.css so our small set of extension classes (button variants
+      CoolAdmin doesn't ship, etc.) can safely layer on top.
+    -->
+    <link href="/vendor/cooladmin/fontawesome/css/all.min.css" rel="stylesheet" />
+    <link href="/vendor/cooladmin/bootstrap.min.css" rel="stylesheet" />
+    <link href="/vendor/cooladmin/css/theme.css" rel="stylesheet" />
+    <link href="/vendor/cooladmin/css/app.css" rel="stylesheet" />
     <title>Education ERP</title>
   </head>
-  <body>
+  <body class="app theme-blue">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

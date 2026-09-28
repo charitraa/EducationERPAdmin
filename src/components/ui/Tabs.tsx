@@ -10,18 +10,13 @@ export function Tabs({
   onChange: (key: string) => void
 }) {
   return (
-    <div className="flex gap-1 border-b border-border-soft">
+    <div className="m-tabs">
       {tabs.map((tab) => (
         <button
           key={tab.key}
           type="button"
           onClick={() => onChange(tab.key)}
-          className={cn(
-            'border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
-            active === tab.key
-              ? 'border-accent text-accent'
-              : 'border-transparent text-text-muted hover:text-text',
-          )}
+          className={cn('m-tabs__item', active === tab.key && 'is-active')}
         >
           {tab.label}
         </button>

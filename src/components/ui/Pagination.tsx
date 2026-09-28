@@ -20,20 +20,29 @@ export function Pagination({
   const end = Math.min(page * pageSize, count)
 
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-border-soft px-5 py-3">
-      <p className="text-sm text-text-muted">
-        Showing <span className="font-medium text-text">{start}–{end}</span> of{' '}
-        <span className="font-medium text-text">{count}</span>
+    <div
+      className="d-flex align-items-center justify-content-between"
+      style={{ gap: 16, borderTop: '1px solid var(--m-divider)', marginTop: 12, paddingTop: 12 }}
+    >
+      <p style={{ margin: 0, fontSize: 13, color: 'var(--m-text-muted)' }}>
+        Showing <strong style={{ color: 'var(--m-text)' }}>{start}–{end}</strong> of{' '}
+        <strong style={{ color: 'var(--m-text)' }}>{count}</strong>
       </p>
-      <div className="flex items-center gap-1">
-        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
-          <ChevronLeft className="size-4" />
+      <div className="d-flex align-items-center gap-1">
+        <Button variant="ghost" size="sm" className="m-btn--icon" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+          <ChevronLeft size={16} />
         </Button>
-        <span className="px-2 text-sm text-text-muted">
+        <span style={{ padding: '0 8px', fontSize: 13, color: 'var(--m-text-muted)' }}>
           Page {page} of {totalPages}
         </span>
-        <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)}>
-          <ChevronRight className="size-4" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="m-btn--icon"
+          disabled={page >= totalPages}
+          onClick={() => onPageChange(page + 1)}
+        >
+          <ChevronRight size={16} />
         </Button>
       </div>
     </div>

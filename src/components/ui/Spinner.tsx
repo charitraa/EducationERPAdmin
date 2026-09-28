@@ -3,9 +3,12 @@ import { cn } from '@/lib/utils'
 
 export function Spinner({ className, label = 'Loading…' }: { className?: string; label?: string }) {
   return (
-    <div className={cn('flex items-center justify-center gap-2 py-12 text-text-muted', className)}>
-      <Loader2 className="size-5 animate-spin" />
-      <span className="text-sm">{label}</span>
+    <div
+      className={cn('d-flex align-items-center justify-content-center gap-2', className)}
+      style={{ padding: '48px 0', color: 'var(--m-text-muted)' }}
+    >
+      <Loader2 className="m-spin" size={18} />
+      <span style={{ fontSize: 13.5 }}>{label}</span>
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { LogOut, User } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useLogout } from '@/features/auth/useAuth'
 import { initials } from '@/lib/utils'
@@ -13,40 +12,56 @@ export function Topbar() {
   if (!user) return null
 
   return (
-    <header className="fixed inset-x-0 top-0 z-20 flex h-(--topbar-height) items-center justify-end border-b border-border bg-surface pl-(--sidebar-width) pr-6">
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          className="flex items-center gap-2.5 rounded-md py-1.5 pl-1.5 pr-2 hover:bg-surface-2"
-        >
-          <span className="flex size-8 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-accent">
-            {initials(user.full_name || user.email)}
-          </span>
-          <span className="text-sm font-medium text-text">{user.full_name || user.email}</span>
-        </button>
+    <header className="header-desktop">
+      <div className="section__content section__content--p30">
+        <div className="container-fluid">
+          <div className="header-wrap">
+            <div className={`account-wrap${menuOpen ? ' show-dropdown' : ''}`} style={{ marginLeft: 'auto', position: 'relative' }}>
+              <div
+                className="account-item clearfix js-item-menu"
+                role="button"
+                tabIndex={0}
+                aria-haspopup="true"
+                aria-label="Account menu"
+                onClick={() => setMenuOpen((v) => !v)}
+                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+              >
+                <span className="account-avatar">{initials(user.full_name || user.email)}</span>
+                <div className="content">
+                  <span className="js-acc-btn">{user.full_name || user.email}</span>
+                </div>
+              </div>
 
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-md border border-border bg-surface py-1 shadow-md">
-              <Link
-                to="/profile"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-text hover:bg-surface-2"
-              >
-                <User className="size-4" /> My profile
-              </Link>
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger hover:bg-danger-soft"
-              >
-                <LogOut className="size-4" /> Sign out
-              </button>
+              {menuOpen && (
+                <>
+                  <div style={{ position: 'fixed', inset: 0, zIndex: 10 }} onClick={() => setMenuOpen(false)} />
+                  <div className="account-dropdown js-dropdown" style={{ zIndex: 20 }}>
+                    <div className="account-dropdown__body">
+                      <div className="account-dropdown__item">
+                        <Link to="/profile" onClick={() => setMenuOpen(false)}>
+                          <i className="fa-solid fa-user" aria-hidden="true" />
+                          My profile
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="account-dropdown__footer">
+                      <a
+                        href="#logout"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          logout()
+                        }}
+                      >
+                        <i className="fa-solid fa-power-off" aria-hidden="true" />
+                        Sign out
+                      </a>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </header>
   )

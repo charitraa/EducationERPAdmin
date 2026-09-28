@@ -3,13 +3,15 @@ import { cn } from '@/lib/utils'
 
 type Tone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
 
-const toneClasses: Record<Tone, string> = {
-  neutral: 'bg-surface-2 text-text-muted border-border',
-  success: 'bg-success-soft text-success border-transparent',
-  warning: 'bg-warning-soft text-warning border-transparent',
-  danger: 'bg-danger-soft text-danger border-transparent',
-  info: 'bg-info-soft text-info border-transparent',
-  accent: 'bg-accent-soft text-accent border-transparent',
+/** CoolAdmin's app.css re-skins Bootstrap's `.badge.bg-*` classes; `bg-neutral`
+ * is our own addition (index.css) for the one tone it doesn't ship. */
+const toneClass: Record<Tone, string> = {
+  neutral: 'bg-neutral',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-danger',
+  info: 'bg-info',
+  accent: 'bg-primary',
 }
 
 export function Badge({
@@ -17,16 +19,7 @@ export function Badge({
   className,
   ...props
 }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize',
-        toneClasses[tone],
-        className,
-      )}
-      {...props}
-    />
-  )
+  return <span className={cn('badge', toneClass[tone], 'text-capitalize', className)} {...props} />
 }
 
 const STATUS_TONE: Record<string, Tone> = {

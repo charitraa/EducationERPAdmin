@@ -4,14 +4,18 @@ import { Topbar } from './Topbar'
 
 export function AppShell() {
   return (
-    <div className="min-h-screen">
+    <div className="page-wrapper">
       <Sidebar />
-      <Topbar />
-      <main className="pl-(--sidebar-width) pt-(--topbar-height)">
-        <div className="mx-auto max-w-7xl px-6 py-6">
-          <Outlet />
-        </div>
-      </main>
+      <div className="page-container">
+        <Topbar />
+        <main className="main-content">
+          <div className="section__content section__content--p30">
+            <div className="container-fluid">
+              <Outlet />
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
