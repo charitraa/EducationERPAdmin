@@ -12,7 +12,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 flex w-(--sidebar-width) flex-col bg-sidebar text-text-on-dark">
       <div className="flex h-(--topbar-height) items-center gap-2.5 px-5">
-        <div className="flex size-8 items-center justify-center rounded bg-accent text-white">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-accent text-white">
           <GraduationCap className="size-4" />
         </div>
         <div className="min-w-0">

@@ -1,4 +1,7 @@
 import { createCrudApi } from './crud'
+import { env } from '@/config/env'
+import { createMockCrudApi } from '@/mocks/mock-crud'
+import { mockRoles } from '@/mocks/data/roles'
 
 export interface Role {
   id: number
@@ -21,4 +24,6 @@ export interface RolePayload {
   permissions: string[]
 }
 
-export const rolesApi = createCrudApi<Role, RolePayload>('/roles/')
+export const rolesApi = env.useMocks
+  ? createMockCrudApi<Role, RolePayload>(mockRoles, ['name', 'code', 'description'])
+  : createCrudApi<Role, RolePayload>('/roles/')

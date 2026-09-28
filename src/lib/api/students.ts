@@ -1,5 +1,9 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
+import { env } from '@/config/env'
+import { createMockCrudApi, mockAware } from '@/mocks/mock-crud'
+import { mockEnrollments, mockStudents } from '@/mocks/data/students'
+import { mockCampuses } from '@/mocks/data/campuses'
 import type { ListParams, PaginatedEnvelope } from './types'
 
 export type Gender = 'male' | 'female' | 'other' | 'undisclosed'
@@ -50,7 +54,10 @@ export type StudentPayload = Omit<
   'id' | 'organization' | 'full_name' | 'campus_name' | 'status' | 'current_enrollment' | 'created_at' | 'updated_at'
 >
 
-const base = createCrudApi<Student, StudentPayload>('/students/')
+const store = mockStudents
+const base = env.useMocks
+  ? createMockCrudApi<Student, StudentPayload>(store, ['full_name', 'student_number', 'email'])
+  : createCrudApi<Student, StudentPayload>('/students/')
 
 export interface StudentListParams extends ListParams {
   campus?: number
@@ -61,13 +68,50 @@ export interface StudentListParams extends ListParams {
 export const studentsApi = {
   ...base,
   list: (params?: StudentListParams) =>
-    api.get<PaginatedEnvelope<Student>>('/students/', { params }).then((r) => r.data),
-  me: () => api.get<Student>('/students/me/').then((r) => r.data),
+    mockAware<PaginatedEnvelope<Student>>(
+      env.useMocks,
+      () => base.list(params),
+      () => api.get<PaginatedEnvelope<Student>>('/students/', { params }).then((r) => r.data),
+    ),
+  me: () =>
+    mockAware<Student>(env.useMocks, () => Promise.resolve(store[0]), () => api.get<Student>('/students/me/').then((r) => r.data)),
   changeStatus: (id: number, payload: { status: StudentStatus; on_date?: string; reason?: string }) =>
-    api.post<Student>(`/students/${id}/change-status/`, payload).then((r) => r.data),
-  enrollments: (id: number) => api.get<EnrollmentRef[]>(`/students/${id}/enrollments/`).then((r) => r.data),
+    mockAware<Student>(
+      env.useMocks,
+      () => {
+        const idx = store.findIndex((s) => s.id === id)
+        if (idx === -1) throw new Error(`Not found (mock id ${id})`)
+        store[idx] = {
+          ...store[idx],
+          status: payload.status,
+          current_enrollment: payload.status === 'active' ? store[idx].current_enrollment : null,
+        }
+        return Promise.resolve(store[idx])
+      },
+      () => api.post<Student>(`/students/${id}/change-status/`, payload).then((r) => r.data),
+    ),
+  enrollments: (id: number) =>
+    mockAware<EnrollmentRef[]>(
+      env.useMocks,
+      () => Promise.resolve(mockEnrollments[id] ?? []),
+      () => api.get<EnrollmentRef[]>(`/students/${id}/enrollments/`).then((r) => r.data),
+    ),
   place: (id: number, payload: { section: number; on_date?: string; reason?: string; allow_over_capacity?: boolean }) =>
-    api.post<Student>(`/students/${id}/place/`, payload).then((r) => r.data),
+    mockAware<Student>(
+      env.useMocks,
+      () => Promise.resolve(store.find((s) => s.id === id) ?? store[0]),
+      () => api.post<Student>(`/students/${id}/place/`, payload).then((r) => r.data),
+    ),
   transfer: (id: number, payload: { campus: number; on_date?: string; reason?: string }) =>
-    api.post<Student>(`/students/${id}/transfer/`, payload).then((r) => r.data),
+    mockAware<Student>(
+      env.useMocks,
+      () => {
+        const idx = store.findIndex((s) => s.id === id)
+        if (idx === -1) throw new Error(`Not found (mock id ${id})`)
+        const campus = mockCampuses.find((c) => c.id === payload.campus)
+        store[idx] = { ...store[idx], campus: payload.campus, campus_name: campus?.name ?? store[idx].campus_name }
+        return Promise.resolve(store[idx])
+      },
+      () => api.post<Student>(`/students/${id}/transfer/`, payload).then((r) => r.data),
+    ),
 }

@@ -1,4 +1,8 @@
 import { api } from './client'
+import { env } from '@/config/env'
+import { mockAware } from '@/mocks/mock-crud'
+import { mockFilter, mockPaginate } from '@/mocks/pagination'
+import { mockAuditLogs } from '@/mocks/data/audit'
 import type { ListParams, PaginatedEnvelope } from './types'
 
 export type AuditAction =
@@ -45,6 +49,19 @@ export interface AuditLogListParams extends ListParams {
 
 export const auditApi = {
   list: (params?: AuditLogListParams) =>
-    api.get<PaginatedEnvelope<AuditLog>>('/audit-logs/', { params }).then((r) => r.data),
-  get: (id: number) => api.get<AuditLog>(`/audit-logs/${id}/`).then((r) => r.data),
+    mockAware<PaginatedEnvelope<AuditLog>>(
+      env.useMocks,
+      () => Promise.resolve(mockPaginate(mockFilter(mockAuditLogs, params, ['actor_name', 'actor_email', 'object_repr']), params)),
+      () => api.get<PaginatedEnvelope<AuditLog>>('/audit-logs/', { params }).then((r) => r.data),
+    ),
+  get: (id: number) =>
+    mockAware<AuditLog>(
+      env.useMocks,
+      () => {
+        const found = mockAuditLogs.find((l) => l.id === id)
+        if (!found) throw new Error(`Not found (mock id ${id})`)
+        return Promise.resolve(found)
+      },
+      () => api.get<AuditLog>(`/audit-logs/${id}/`).then((r) => r.data),
+    ),
 }

@@ -43,7 +43,7 @@ export function Modal({ open, onClose, title, description, children, footer, siz
         aria-modal="true"
         aria-labelledby="modal-title"
         className={cn(
-          'relative flex max-h-[calc(100vh-2rem)] w-full flex-col rounded bg-surface shadow-lg',
+          'relative flex max-h-[calc(100vh-2rem)] w-full flex-col rounded-lg bg-surface shadow-lg',
           sizeClasses[size],
         )}
       >

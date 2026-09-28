@@ -1,5 +1,8 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
+import { env } from '@/config/env'
+import { createMockCrudApi, mockAware } from '@/mocks/mock-crud'
+import { mockAdmissions } from '@/mocks/data/admissions'
 import type { Gender } from './students'
 import type { ListParams, PaginatedEnvelope } from './types'
 
@@ -61,21 +64,58 @@ export type AdmissionPayload = Omit<
   | 'updated_at'
 >
 
-const base = createCrudApi<Admission, AdmissionPayload>('/admissions/')
+const store = mockAdmissions
+const base = env.useMocks
+  ? createMockCrudApi<Admission, AdmissionPayload>(store, ['full_name', 'application_number'])
+  : createCrudApi<Admission, AdmissionPayload>('/admissions/')
 
 export interface AdmissionListParams extends ListParams {
   campus?: number
   status?: AdmissionStatus
 }
 
+function mockDecide(id: number, status: AdmissionStatus, note: string | undefined): Promise<Admission> {
+  const idx = store.findIndex((a) => a.id === id)
+  if (idx === -1) throw new Error(`Not found (mock id ${id})`)
+  store[idx] = { ...store[idx], status, decided_at: new Date().toISOString(), decision_note: note ?? '' }
+  return Promise.resolve(store[idx])
+}
+
 export const admissionsApi = {
   ...base,
   list: (params?: AdmissionListParams) =>
-    api.get<PaginatedEnvelope<Admission>>('/admissions/', { params }).then((r) => r.data),
-  approve: (id: number, note?: string) => api.post<Admission>(`/admissions/${id}/approve/`, { note }).then((r) => r.data),
-  reject: (id: number, note: string) => api.post<Admission>(`/admissions/${id}/reject/`, { note }).then((r) => r.data),
+    mockAware<PaginatedEnvelope<Admission>>(
+      env.useMocks,
+      () => base.list(params),
+      () => api.get<PaginatedEnvelope<Admission>>('/admissions/', { params }).then((r) => r.data),
+    ),
+  approve: (id: number, note?: string) =>
+    mockAware<Admission>(
+      env.useMocks,
+      () => mockDecide(id, 'approved', note),
+      () => api.post<Admission>(`/admissions/${id}/approve/`, { note }).then((r) => r.data),
+    ),
+  reject: (id: number, note: string) =>
+    mockAware<Admission>(
+      env.useMocks,
+      () => mockDecide(id, 'rejected', note),
+      () => api.post<Admission>(`/admissions/${id}/reject/`, { note }).then((r) => r.data),
+    ),
   enroll: (id: number, payload: { student_number: string; started_on?: string }) =>
-    api.post<Admission>(`/admissions/${id}/enroll/`, payload).then((r) => r.data),
+    mockAware<Admission>(
+      env.useMocks,
+      () => {
+        const idx = store.findIndex((a) => a.id === id)
+        if (idx === -1) throw new Error(`Not found (mock id ${id})`)
+        store[idx] = { ...store[idx], status: 'enrolled', decided_at: new Date().toISOString(), student: 999000 + id }
+        return Promise.resolve(store[idx])
+      },
+      () => api.post<Admission>(`/admissions/${id}/enroll/`, payload).then((r) => r.data),
+    ),
   withdraw: (id: number, note?: string) =>
-    api.post<Admission>(`/admissions/${id}/withdraw/`, { note }).then((r) => r.data),
+    mockAware<Admission>(
+      env.useMocks,
+      () => mockDecide(id, 'withdrawn', note),
+      () => api.post<Admission>(`/admissions/${id}/withdraw/`, { note }).then((r) => r.data),
+    ),
 }

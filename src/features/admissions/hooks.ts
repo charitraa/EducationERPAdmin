@@ -8,6 +8,7 @@ import {
 import { createResourceHooks } from '@/lib/query/useResource'
 
 export const {
+  keys: admissionKeys,
   useList: useAdmissions,
   useDetail: useAdmission,
   useCreate: useCreateAdmission,
@@ -19,8 +20,8 @@ function useAdmissionAction<TArgs>(mutationFn: (id: number, args: TArgs) => Prom
   return useMutation({
     mutationFn: ({ id, args }: { id: number; args: TArgs }) => mutationFn(id, args),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['admissions', 'list'] })
-      qc.invalidateQueries({ queryKey: ['admissions', 'detail', vars.id] })
+      qc.invalidateQueries({ queryKey: admissionKeys.lists() })
+      qc.invalidateQueries({ queryKey: admissionKeys.detail(vars.id) })
     },
   })
 }

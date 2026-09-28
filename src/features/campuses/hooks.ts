@@ -9,6 +9,7 @@ export interface CampusListParams extends ListParams {
 }
 
 export const {
+  keys: campusKeys,
   useList: useCampuses,
   useDetail: useCampus,
   useCreate: useCreateCampus,

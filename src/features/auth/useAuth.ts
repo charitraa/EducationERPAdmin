@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { authApi } from '@/lib/api/auth'
 import { clearTokens, getRefreshToken, registerAuthExpiredHandler, setTokens } from '@/lib/api/client'
 import { toApiError } from '@/lib/api/errors'
+import { env } from '@/config/env'
 import { useAuthStore } from '@/stores/auth-store'
 
 /** Bootstraps the auth store from a persisted refresh token on app load, and
- * wires the axios client's "session expired" callback to a real logout. */
+ * wires the axios client's "session expired" callback to a real logout.
+ * In dummy-data mode there's no real backend to refresh a token against, so
+ * it signs straight in as the mock user instead of hitting the network. */
 export function useAuthBootstrap() {
   const setUser = useAuthStore((s) => s.setUser)
   const setStatus = useAuthStore((s) => s.setStatus)
@@ -20,6 +23,12 @@ export function useAuthBootstrap() {
   }, [logout])
 
   useEffect(() => {
+    if (env.useMocks) {
+      setTokens({ access: 'mock-access-token', refresh: 'mock-refresh-token' })
+      authApi.me().then(setUser)
+      return
+    }
+
     const refresh = getRefreshToken()
     if (!refresh) {
       setStatus('unauthenticated')

@@ -10,6 +10,7 @@ import {
 import { createResourceHooks } from '@/lib/query/useResource'
 
 export const {
+  keys: studentKeys,
   useList: useStudents,
   useDetail: useStudent,
   useCreate: useCreateStudent,
@@ -18,7 +19,7 @@ export const {
 
 export function useStudentEnrollments(id: number | null) {
   return useQuery<EnrollmentRef[]>({
-    queryKey: ['students', 'enrollments', id],
+    queryKey: [...studentKeys.detail(id as number), 'enrollments'],
     queryFn: () => studentsApi.enrollments(id as number),
     enabled: id !== null,
   })
@@ -30,8 +31,8 @@ export function useChangeStudentStatus() {
     mutationFn: ({ id, payload }: { id: number; payload: { status: StudentStatus; on_date?: string; reason?: string } }) =>
       studentsApi.changeStatus(id, payload),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['students', 'list'] })
-      qc.invalidateQueries({ queryKey: ['students', 'detail', vars.id] })
+      qc.invalidateQueries({ queryKey: studentKeys.lists() })
+      qc.invalidateQueries({ queryKey: studentKeys.detail(vars.id) })
     },
   })
 }
@@ -42,8 +43,8 @@ export function useTransferStudent() {
     mutationFn: ({ id, payload }: { id: number; payload: { campus: number; on_date?: string; reason?: string } }) =>
       studentsApi.transfer(id, payload),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['students', 'list'] })
-      qc.invalidateQueries({ queryKey: ['students', 'detail', vars.id] })
+      qc.invalidateQueries({ queryKey: studentKeys.lists() })
+      qc.invalidateQueries({ queryKey: studentKeys.detail(vars.id) })
     },
   })
 }

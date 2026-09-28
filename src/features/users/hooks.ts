@@ -9,6 +9,7 @@ export interface UserListParams extends ListParams {
 }
 
 export const {
+  keys: userKeys,
   useList: useUsers,
   useDetail: useUser,
   useCreate: useCreateUser,
@@ -26,8 +27,8 @@ export function useDeactivateUser() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: UserPayload }) => usersApi.deactivate(id, payload),
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['users', 'list'] })
-      qc.invalidateQueries({ queryKey: ['users', 'detail', vars.id] })
+      qc.invalidateQueries({ queryKey: userKeys.lists() })
+      qc.invalidateQueries({ queryKey: userKeys.detail(vars.id) })
     },
   })
 }
@@ -41,7 +42,7 @@ export function useAssignRole() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: { role: number; campus?: number | null; expires_at?: string | null } }) =>
       usersApi.assignRole(id, payload),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ['users', 'detail', vars.id] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: userKeys.detail(vars.id) }),
   })
 }
 
@@ -50,6 +51,6 @@ export function useRevokeRole() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: { role: number; campus?: number | null } }) =>
       usersApi.revokeRole(id, payload),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ['users', 'detail', vars.id] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: userKeys.detail(vars.id) }),
   })
 }

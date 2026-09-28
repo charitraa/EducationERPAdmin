@@ -2,6 +2,7 @@ import { staffApi, type StaffListParams, type StaffMember, type StaffPayload } f
 import { createResourceHooks } from '@/lib/query/useResource'
 
 export const {
+  keys: staffKeys,
   useList: useStaffMembers,
   useDetail: useStaffMember,
   useCreate: useCreateStaffMember,

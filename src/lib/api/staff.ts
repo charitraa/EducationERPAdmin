@@ -1,5 +1,8 @@
 import { api } from './client'
 import { createCrudApi } from './crud'
+import { env } from '@/config/env'
+import { createMockCrudApi, mockAware } from '@/mocks/mock-crud'
+import { mockStaff } from '@/mocks/data/staff'
 import type { Gender } from './students'
 import type { ListParams, PaginatedEnvelope } from './types'
 
@@ -33,7 +36,10 @@ export interface StaffMember {
 
 export type StaffPayload = Omit<StaffMember, 'id' | 'organization' | 'full_name' | 'campus_name' | 'created_at' | 'updated_at'>
 
-const base = createCrudApi<StaffMember, StaffPayload>('/staff/')
+const store = mockStaff
+const base = env.useMocks
+  ? createMockCrudApi<StaffMember, StaffPayload>(store, ['full_name', 'employee_number', 'email'])
+  : createCrudApi<StaffMember, StaffPayload>('/staff/')
 
 export interface StaffListParams extends ListParams {
   campus?: number
@@ -43,6 +49,12 @@ export interface StaffListParams extends ListParams {
 
 export const staffApi = {
   ...base,
-  list: (params?: StaffListParams) => api.get<PaginatedEnvelope<StaffMember>>('/staff/', { params }).then((r) => r.data),
-  me: () => api.get<StaffMember>('/staff/me/').then((r) => r.data),
+  list: (params?: StaffListParams) =>
+    mockAware<PaginatedEnvelope<StaffMember>>(
+      env.useMocks,
+      () => base.list(params),
+      () => api.get<PaginatedEnvelope<StaffMember>>('/staff/', { params }).then((r) => r.data),
+    ),
+  me: () =>
+    mockAware<StaffMember>(env.useMocks, () => Promise.resolve(store[0]), () => api.get<StaffMember>('/staff/me/').then((r) => r.data)),
 }

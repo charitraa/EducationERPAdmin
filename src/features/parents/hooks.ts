@@ -10,15 +10,20 @@ import {
 import { createResourceHooks } from '@/lib/query/useResource'
 
 export const {
+  keys: parentKeys,
   useList: useParents,
   useDetail: useParent,
   useCreate: useCreateParent,
   useUpdate: useUpdateParent,
 } = createResourceHooks<Parent, ParentPayload, ParentPayload, ParentListParams>('parents', parentsApi)
 
+function childrenKey(id: number) {
+  return [...parentKeys.detail(id), 'children'] as const
+}
+
 export function useParentChildren(id: number | null) {
   return useQuery<{ results: Child[] }>({
-    queryKey: ['parents', 'children', id],
+    queryKey: childrenKey(id as number),
     queryFn: () => parentsApi.students(id as number, { page_size: 200 }),
     enabled: id !== null,
   })
@@ -34,7 +39,7 @@ export function useLinkStudent() {
       id: number
       payload: { student: number; relationship: GuardianRelationship; is_primary_contact?: boolean }
     }) => parentsApi.linkStudent(id, payload),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ['parents', 'children', vars.id] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: childrenKey(vars.id) }),
   })
 }
 
@@ -42,6 +47,6 @@ export function useUnlinkStudent() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, student }: { id: number; student: number }) => parentsApi.unlinkStudent(id, student),
-    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: ['parents', 'children', vars.id] }),
+    onSuccess: (_data, vars) => qc.invalidateQueries({ queryKey: childrenKey(vars.id) }),
   })
 }

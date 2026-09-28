@@ -47,7 +47,7 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-3 flex size-12 items-center justify-center rounded bg-accent text-white">
+          <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-accent text-white">
             <GraduationCap className="size-6" />
           </div>
           <h1 className="text-lg font-semibold text-text">Education ERP</h1>
@@ -56,7 +56,7 @@ export function LoginPage() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="rounded border border-border bg-surface p-6 shadow-sm"
+          className="rounded-lg border border-border bg-surface p-6 shadow-sm"
         >
           {formError && (
             <div className="mb-4 rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger">

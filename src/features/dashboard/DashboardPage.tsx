@@ -2,7 +2,7 @@ import { ClipboardList, GraduationCap, UserRound, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Card, CardBody } from '@/components/ui/Card'
-import { PermissionGate } from '@/components/PermissionGate'
+import { PermissionGate } from '@/components/common/PermissionGate'
 import { useAuthStore } from '@/stores/auth-store'
 
 const SHORTCUTS = [
@@ -28,7 +28,7 @@ export function DashboardPage() {
             <Link to={shortcut.to}>
               <Card className="transition-shadow hover:shadow-md">
                 <CardBody className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded bg-accent-soft text-accent">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-accent-soft text-accent">
                     <shortcut.icon className="size-5" />
                   </div>
                   <span className="text-sm font-medium text-text">{shortcut.label}</span>

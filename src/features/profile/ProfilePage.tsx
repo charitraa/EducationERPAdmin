@@ -13,6 +13,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Badge } from '@/components/ui/Badge'
 import { authApi } from '@/lib/api/auth'
 import { toApiError } from '@/lib/api/errors'
+import { queryKeys } from '@/lib/query/keys'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from '@/stores/toast-store'
 
@@ -70,7 +71,7 @@ export function ProfilePage() {
     onError: (err) => toast({ title: 'Could not change password', description: toApiError(err).message, variant: 'error' }),
   })
 
-  const { data: twoFactor } = useQuery({ queryKey: ['auth', '2fa'], queryFn: authApi.twoFactorStatus })
+  const { data: twoFactor } = useQuery({ queryKey: queryKeys.auth.twoFactor, queryFn: authApi.twoFactorStatus })
 
   if (!user) return null
 
@@ -149,7 +150,7 @@ export function ProfilePage() {
             <TwoFactorSection
               enabled={!!twoFactor?.enabled}
               recoveryCodesLeft={twoFactor?.recovery_codes_left ?? 0}
-              onChanged={() => qc.invalidateQueries({ queryKey: ['auth', '2fa'] })}
+              onChanged={() => qc.invalidateQueries({ queryKey: queryKeys.auth.twoFactor })}
             />
           </CardBody>
         </Card>

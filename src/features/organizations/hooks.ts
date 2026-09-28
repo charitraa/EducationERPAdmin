@@ -3,6 +3,7 @@ import { createResourceHooks } from '@/lib/query/useResource'
 import type { ListParams } from '@/lib/api/types'
 
 export const {
+  keys: organizationKeys,
   useList: useOrganizations,
   useDetail: useOrganization,
   useCreate: useCreateOrganization,

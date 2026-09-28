@@ -1,4 +1,7 @@
 import { createCrudApi } from './crud'
+import { env } from '@/config/env'
+import { createMockCrudApi } from '@/mocks/mock-crud'
+import { mockCampuses } from '@/mocks/data/campuses'
 
 export interface Campus {
   id: number
@@ -23,4 +26,6 @@ export type CampusPayload = Omit<
   'id' | 'organization' | 'organization_name' | 'created_at' | 'updated_at'
 > & { organization?: number }
 
-export const campusesApi = createCrudApi<Campus, CampusPayload>('/campuses/')
+export const campusesApi = env.useMocks
+  ? createMockCrudApi<Campus, CampusPayload>(mockCampuses, ['name', 'code', 'city'])
+  : createCrudApi<Campus, CampusPayload>('/campuses/')

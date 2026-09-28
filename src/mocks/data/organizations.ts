@@ -1,0 +1,36 @@
+import type { Organization } from '@/lib/api/organizations'
+
+export const mockOrganizations: Organization[] = [
+  {
+    id: 1,
+    name: 'Greenwood International School',
+    code: 'greenwood',
+    legal_name: 'Greenwood International School Pvt. Ltd.',
+    type: 'school',
+    email: 'info@greenwoodschool.edu.np',
+    phone: '+977-1-4123456',
+    website: 'https://greenwoodschool.edu.np',
+    address: 'Baneshwor, Kathmandu',
+    timezone: 'Asia/Kathmandu',
+    is_active: true,
+    campus_count: 3,
+    created_at: '2023-04-12T04:15:00Z',
+    updated_at: '2026-01-10T09:00:00Z',
+  },
+  {
+    id: 2,
+    name: 'Himalayan College of Management',
+    code: 'himalayan-cm',
+    legal_name: 'Himalayan College of Management Pvt. Ltd.',
+    type: 'college',
+    email: 'admin@himalayancm.edu.np',
+    phone: '+977-1-4988112',
+    website: 'https://himalayancm.edu.np',
+    address: 'Putalisadak, Kathmandu',
+    timezone: 'Asia/Kathmandu',
+    is_active: true,
+    campus_count: 1,
+    created_at: '2024-01-20T05:30:00Z',
+    updated_at: '2025-11-02T06:20:00Z',
+  },
+]

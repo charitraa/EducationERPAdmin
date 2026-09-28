@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { PaginatedEnvelope } from '@/lib/api/types'
+import { createQueryKeys } from './keys'
 
 interface ResourceApi<T, TCreate, TUpdate, TParams> {
   list: (params?: TParams) => Promise<PaginatedEnvelope<T>>
@@ -11,14 +12,19 @@ interface ResourceApi<T, TCreate, TUpdate, TParams> {
 }
 
 /** Standard list/detail/create/update/patch/delete query+mutation hooks for a
- * DRF router-backed resource, wired to invalidate the list on any write. */
+ * DRF router-backed resource, wired to invalidate the list on any write.
+ * The returned `keys` factory is exported too, so a feature's own custom
+ * mutations (e.g. a status-change action) can invalidate the same cache
+ * entries without redeclaring the resource's key shape. */
 export function createResourceHooks<T, TCreate, TUpdate, TParams extends object = object>(
-  key: string,
+  resource: string,
   api: ResourceApi<T, TCreate, TUpdate, TParams>,
 ) {
+  const keys = createQueryKeys<TParams>(resource)
+
   function useList(params?: TParams) {
     return useQuery({
-      queryKey: [key, 'list', params],
+      queryKey: keys.list(params),
       queryFn: () => api.list(params),
       placeholderData: keepPreviousData,
     })
@@ -26,7 +32,7 @@ export function createResourceHooks<T, TCreate, TUpdate, TParams extends object 
 
   function useDetail(id: number | null) {
     return useQuery({
-      queryKey: [key, 'detail', id],
+      queryKey: keys.detail(id as number),
       queryFn: () => api.get(id as number),
       enabled: id !== null,
     })
@@ -36,7 +42,7 @@ export function createResourceHooks<T, TCreate, TUpdate, TParams extends object 
     const qc = useQueryClient()
     return useMutation({
       mutationFn: api.create,
-      onSuccess: () => qc.invalidateQueries({ queryKey: [key, 'list'] }),
+      onSuccess: () => qc.invalidateQueries({ queryKey: keys.lists() }),
     })
   }
 
@@ -45,8 +51,8 @@ export function createResourceHooks<T, TCreate, TUpdate, TParams extends object 
     return useMutation({
       mutationFn: ({ id, payload }: { id: number; payload: TUpdate }) => api.update(id, payload),
       onSuccess: (_data, vars) => {
-        qc.invalidateQueries({ queryKey: [key, 'list'] })
-        qc.invalidateQueries({ queryKey: [key, 'detail', vars.id] })
+        qc.invalidateQueries({ queryKey: keys.lists() })
+        qc.invalidateQueries({ queryKey: keys.detail(vars.id) })
       },
     })
   }
@@ -56,8 +62,8 @@ export function createResourceHooks<T, TCreate, TUpdate, TParams extends object 
     return useMutation({
       mutationFn: ({ id, payload }: { id: number; payload: Partial<TUpdate> }) => api.patch(id, payload),
       onSuccess: (_data, vars) => {
-        qc.invalidateQueries({ queryKey: [key, 'list'] })
-        qc.invalidateQueries({ queryKey: [key, 'detail', vars.id] })
+        qc.invalidateQueries({ queryKey: keys.lists() })
+        qc.invalidateQueries({ queryKey: keys.detail(vars.id) })
       },
     })
   }
@@ -66,9 +72,9 @@ export function createResourceHooks<T, TCreate, TUpdate, TParams extends object 
     const qc = useQueryClient()
     return useMutation({
       mutationFn: api.remove,
-      onSuccess: () => qc.invalidateQueries({ queryKey: [key, 'list'] }),
+      onSuccess: () => qc.invalidateQueries({ queryKey: keys.lists() }),
     })
   }
 
-  return { useList, useDetail, useCreate, useUpdate, usePatch, useRemove }
+  return { keys, useList, useDetail, useCreate, useUpdate, usePatch, useRemove }
 }
