@@ -1,55 +1,30 @@
-import { Link, useLocation } from 'react-router-dom'
-import { useAuthStore } from '@/stores/auth-store'
-import { NAV_SECTIONS } from './nav-config'
+import { GraduationCap } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { useNavigation } from '@/hooks/useNavigation'
+import { SidebarSection } from './SidebarSection'
 
-export function Sidebar() {
-  const hasAnyPermission = useAuthStore((s) => s.hasAnyPermission)
-  const user = useAuthStore((s) => s.user)
-  const organization = useAuthStore((s) => s.user?.organization)
-  const location = useLocation()
+/** Built from `me.permissions` via navigation.ts — never a hardcoded menu. */
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const sections = useNavigation()
+  const { user } = useAuth()
 
   return (
-    <aside className="menu-sidebar" id="main-sidebar">
-      <div className="logo">
-        <Link className="logo-link" to="/" aria-label="Education ERP home">
-          <span className="logo-mark" aria-hidden="true">
-            E
-          </span>
-          <span className="logo-text">{organization?.name ?? 'Education ERP'}</span>
-        </Link>
-      </div>
-
-      <div className="menu-sidebar__content js-scrollbar1">
-        <nav className="navbar-sidebar">
-          {NAV_SECTIONS.map((section) => {
-            // TEMP: with no user signed in (auth gating stripped in App.tsx for
-            // now), show every nav item regardless of permission so pages are
-            // browsable.
-            const items = section.items.filter(
-              (item) => !item.permission || !user || hasAnyPermission(item.permission),
-            )
-            if (items.length === 0) return null
-            return (
-              <ul key={section.section} className="list-unstyled navbar__list">
-                <li className="nav-group-label" role="presentation">
-                  {section.section}
-                </li>
-                {items.map((item) => {
-                  const isActive = item.to === '/' ? location.pathname === '/' : location.pathname.startsWith(item.to)
-                  return (
-                    <li key={item.to} className={isActive ? 'active' : undefined}>
-                      <Link to={item.to}>
-                        <i className={item.icon} aria-hidden="true" />
-                        {item.label}
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            )
-          })}
-        </nav>
-      </div>
-    </aside>
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <Link to="/" onClick={onNavigate} className="flex h-14 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4">
+        <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/10">
+          <GraduationCap className="h-4.5 w-4.5" aria-hidden />
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold leading-tight">{user?.organization?.name ?? 'Education ERP'}</span>
+          <span className="block text-[11px] leading-tight text-sidebar-muted">School management</span>
+        </span>
+      </Link>
+      <nav aria-label="Main" className="flex-1 overflow-y-auto px-2 py-4 [scrollbar-width:thin]">
+        {sections.map((section) => (
+          <SidebarSection key={section.label} section={section} onNavigate={onNavigate} />
+        ))}
+      </nav>
+    </div>
   )
 }

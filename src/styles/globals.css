@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm paper neutrals with an ink-blue primary: calm for long office days. */
+    --background: 40 20% 98%;
+    --foreground: 222 25% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 25% 14%;
+    --primary: 224 58% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 14% 93%;
+    --secondary-foreground: 222 25% 18%;
+    --muted: 40 14% 94%;
+    --muted-foreground: 220 9% 40%;
+    --accent: 224 50% 95%;
+    --accent-foreground: 224 58% 30%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 36 12% 87%;
+    --input: 36 12% 82%;
+    --ring: 224 58% 45%;
+    --radius: 0.45rem;
+
+    --success: 152 60% 28%;
+    --success-soft: 150 45% 93%;
+    --warning: 32 90% 32%;
+    --warning-soft: 42 90% 92%;
+    --danger: 0 68% 42%;
+    --danger-soft: 0 75% 95%;
+    --info: 205 75% 32%;
+    --info-soft: 205 80% 94%;
+
+    --sidebar: 224 35% 15%;
+    --sidebar-foreground: 220 20% 92%;
+    --sidebar-muted: 222 14% 62%;
+    --sidebar-accent: 224 30% 23%;
+    --sidebar-border: 224 25% 22%;
+  }
+
+  .dark {
+    --background: 224 22% 9%;
+    --foreground: 220 15% 92%;
+    --card: 224 20% 12%;
+    --card-foreground: 220 15% 92%;
+    --popover: 224 20% 12%;
+    --popover-foreground: 220 15% 92%;
+    --primary: 220 75% 66%;
+    --primary-foreground: 224 40% 10%;
+    --secondary: 224 16% 18%;
+    --secondary-foreground: 220 15% 92%;
+    --muted: 224 16% 16%;
+    --muted-foreground: 220 10% 64%;
+    --accent: 224 25% 20%;
+    --accent-foreground: 220 75% 80%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 224 14% 20%;
+    --input: 224 14% 26%;
+    --ring: 220 75% 66%;
+
+    --success: 150 50% 60%;
+    --success-soft: 152 35% 15%;
+    --warning: 40 85% 62%;
+    --warning-soft: 35 45% 15%;
+    --danger: 0 75% 68%;
+    --danger-soft: 0 40% 16%;
+    --info: 205 75% 66%;
+    --info-soft: 205 40% 15%;
+
+    --sidebar: 224 24% 7%;
+    --sidebar-foreground: 220 15% 90%;
+    --sidebar-muted: 222 10% 55%;
+    --sidebar-accent: 224 20% 15%;
+    --sidebar-border: 224 16% 14%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-1 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom), 0px);
+  }
+}

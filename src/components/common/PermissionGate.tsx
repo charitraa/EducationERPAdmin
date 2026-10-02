@@ -1,9 +1,16 @@
 import type { ReactNode } from 'react'
-import { useAuthStore } from '@/stores/auth-store'
+import { usePermissions } from '@/hooks/usePermissions'
+import type { PermissionRequirement } from '@/lib/permissions'
 
-/** Hides children unless the current user has at least one of the given permission codes. */
-export function PermissionGate({ any, children }: { any: string[]; children: ReactNode }) {
-  const hasAnyPermission = useAuthStore((s) => s.hasAnyPermission)
-  if (!hasAnyPermission(any)) return null
-  return <>{children}</>
+interface PermissionGateProps {
+  /** One code, `{ any: [...] }` or `{ all: [...] }`. */
+  permission: PermissionRequirement
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+/** Renders children only when the user holds the permission. UX only: the server decides. */
+export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
+  const { can } = usePermissions()
+  return <>{can(permission) ? children : fallback}</>
 }
