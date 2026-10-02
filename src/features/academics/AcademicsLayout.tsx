@@ -8,6 +8,7 @@ const TABS: Array<{ path: string; label: MessageKey }> = [
   { path: 'subjects', label: 'academics.subjects' },
   { path: 'curriculum', label: 'academics.curriculum' },
   { path: 'classes', label: 'academics.classes' },
+  { path: 'teaching', label: 'academics.teaching' },
   { path: 'academic-years', label: 'academics.academicYears' },
   { path: 'terms', label: 'academics.terms' },
   { path: 'rooms', label: 'academics.rooms' },

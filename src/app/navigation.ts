@@ -70,7 +70,7 @@ export const navigation: NavSection[] = [
       { label: 'nav.parents', path: '/parents', icon: UsersRound, permission: 'parents.view' },
       { label: 'nav.staff', path: '/staff', icon: UserRound, permission: 'staff.view' },
       { label: 'nav.academics', path: '/academics', icon: BookOpen, permission: 'academics.view' },
-      { label: 'nav.timetable', path: '/timetable', icon: CalendarClock, permission: 'timetable.view', status: 'planned' },
+      { label: 'nav.timetable', path: '/timetable', icon: CalendarClock, permission: 'timetable.view' },
       { label: 'nav.attendance', path: '/attendance', icon: CalendarCheck, permission: { any: ['attendance.view', 'attendance.mark'] }, status: 'planned' },
       { label: 'nav.examinations', path: '/examinations', icon: ClipboardCheck, permission: { any: ['exams.view', 'exams.mark'] }, status: 'planned' },
     ],
@@ -86,10 +86,10 @@ export const navigation: NavSection[] = [
   {
     label: 'nav.section.campusLife',
     items: [
-      { label: 'nav.events', path: '/events', icon: PartyPopper, permission: 'events.view', status: 'planned' },
-      { label: 'nav.notices', path: '/notices', icon: Megaphone, status: 'planned' },
-      { label: 'nav.messages', path: '/messages', icon: MessagesSquare, status: 'planned' },
-      { label: 'nav.support', path: '/support', icon: LifeBuoy, status: 'planned' },
+      { label: 'nav.events', path: '/events', icon: PartyPopper, permission: 'events.view' },
+      { label: 'nav.notices', path: '/notices', icon: Megaphone },
+      { label: 'nav.messages', path: '/messages', icon: MessagesSquare },
+      { label: 'nav.support', path: '/support', icon: LifeBuoy },
       { label: 'nav.library', path: '/library', icon: BookOpen, permission: { any: ['library.circulate', 'library.manage'] }, status: 'planned' },
       { label: 'nav.inventory', path: '/inventory', icon: Boxes, permission: 'inventory.view', status: 'planned' },
     ],

@@ -84,6 +84,7 @@ export const en = {
   'academics.subjects': 'Subjects',
   'academics.curriculum': 'Curriculum',
   'academics.classes': 'Classes',
+  'academics.teaching': 'Teaching',
   'academics.academicYears': 'Academic Years',
   'academics.terms': 'Terms',
   'academics.rooms': 'Rooms',

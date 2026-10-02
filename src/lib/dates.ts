@@ -58,3 +58,18 @@ export function formatRelative(value: string, now = new Date()): string {
   if (seconds < 172800) return 'yesterday'
   return toIsoDate(d)
 }
+
+/** A local AD date and `HH:MM` → the API's datetime (UTC ISO). */
+export function combineLocal(date: string, hhmm: string): string {
+  const [y, m, d] = date.split('-').map(Number)
+  const [h, min] = hhmm.split(':').map(Number)
+  return new Date(y!, m! - 1, d!, h, min).toISOString()
+}
+
+/** The API's datetime → the local AD date and `HH:MM` it falls on, for date and time fields. */
+export function splitLocal(iso: string | null | undefined): { date: string; time: string } {
+  if (!iso) return { date: '', time: '' }
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return { date: '', time: '' }
+  return { date: toIsoDate(d), time: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }
+}

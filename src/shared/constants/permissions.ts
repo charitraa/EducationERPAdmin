@@ -43,4 +43,8 @@ export const PERMS = {
   applications: { view: 'applications.view' },
   hr: { view: 'hr.view', approveLeave: 'hr.approve_leave' },
   support: { manage: 'support.manage' },
+  notices: { manage: 'notices.manage' },
+  timetable: { view: 'timetable.view', manage: 'timetable.manage' },
+  events: { view: 'events.view', coordinate: 'events.coordinate', manage: 'events.manage' },
+  communication: { publishSlots: 'communication.publish_slots', manageSlots: 'communication.manage_slots' },
 } as const

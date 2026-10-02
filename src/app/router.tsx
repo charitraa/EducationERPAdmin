@@ -5,6 +5,8 @@ import type { PermissionRequirement } from '@/lib/permissions'
 import { en } from '@/locales/en'
 import { PERMS } from '@/shared/constants/permissions'
 import { AcademicsLayout } from '@/features/academics/AcademicsLayout'
+import { EventsLayout } from '@/features/events/EventsLayout'
+import { TimetableLayout } from '@/features/timetable/TimetableLayout'
 import ServerError from '@/pages/ServerError'
 import { allNavItems } from './navigation'
 import { PermissionRoute } from './PermissionRoute'
@@ -23,6 +25,7 @@ const ProgramsPage = lazy(() => import('@/features/academics/programs/pages/Prog
 const SubjectsPage = lazy(() => import('@/features/academics/subjects/pages/SubjectsPage'))
 const CurriculumPage = lazy(() => import('@/features/academics/curriculum/pages/CurriculumPage'))
 const ClassesPage = lazy(() => import('@/features/academics/classes/pages/ClassesPage'))
+const TeachingPage = lazy(() => import('@/features/academics/teaching/pages/TeachingPage'))
 const AcademicYearsPage = lazy(() => import('@/features/academics/academic-years/pages/AcademicYearsPage'))
 const TermsPage = lazy(() => import('@/features/academics/terms/pages/TermsPage'))
 const RoomsPage = lazy(() => import('@/features/academics/rooms/pages/RoomsPage'))
@@ -46,6 +49,22 @@ const UsersListPage = lazy(() => import('@/features/users/pages/UsersListPage'))
 const UserDetailPage = lazy(() => import('@/features/users/pages/UserDetailPage'))
 const RolesListPage = lazy(() => import('@/features/roles/pages/RolesListPage'))
 const RoleEditorPage = lazy(() => import('@/features/roles/pages/RoleEditorPage'))
+const NoticesListPage = lazy(() => import('@/features/notices/pages/NoticesListPage'))
+const NoticePage = lazy(() => import('@/features/notices/pages/NoticePage'))
+const TicketsListPage = lazy(() => import('@/features/support/pages/TicketsListPage'))
+const TicketDetailPage = lazy(() => import('@/features/support/pages/TicketDetailPage'))
+const MessagesPage = lazy(() => import('@/features/communication/pages/MessagesPage'))
+const AppointmentsPage = lazy(() => import('@/features/communication/pages/AppointmentsPage'))
+const EventsListPage = lazy(() => import('@/features/events/pages/EventsListPage'))
+const EventDetailPage = lazy(() => import('@/features/events/pages/EventDetailPage'))
+const EventCategoriesPage = lazy(() => import('@/features/events/pages/CategoriesPage'))
+const PointRulesPage = lazy(() => import('@/features/events/pages/PointRulesPage'))
+const AwardsPage = lazy(() => import('@/features/events/pages/AwardsPage'))
+const LeaderboardPage = lazy(() => import('@/features/events/pages/LeaderboardPage'))
+const WeekPage = lazy(() => import('@/features/timetable/pages/WeekPage'))
+const DayPage = lazy(() => import('@/features/timetable/pages/DayPage'))
+const LessonChangesPage = lazy(() => import('@/features/timetable/pages/LessonChangesPage'))
+const BellSchedulesPage = lazy(() => import('@/features/timetable/pages/BellSchedulesPage'))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
 const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -84,6 +103,7 @@ const academicsRoutes: RouteObject = {
     { path: 'subjects', handle: crumb('Subjects'), element: page(SubjectsPage) },
     { path: 'curriculum', handle: crumb('Curriculum'), element: page(CurriculumPage) },
     { path: 'classes', handle: crumb('Classes'), element: page(ClassesPage) },
+    { path: 'teaching', handle: crumb('Teaching'), element: page(TeachingPage) },
     { path: 'academic-years', handle: crumb('Academic years'), element: page(AcademicYearsPage) },
     { path: 'terms', handle: crumb('Terms'), element: page(TermsPage) },
     { path: 'rooms', handle: crumb('Rooms'), element: page(RoomsPage) },
@@ -157,6 +177,74 @@ const rolesRoutes: RouteObject = {
   ],
 }
 
+// Every member may read notices; writing needs notices.manage.
+const noticesRoutes: RouteObject = {
+  path: 'notices',
+  handle: crumb('Notices'),
+  children: [
+    { index: true, element: page(NoticesListPage) },
+    { path: 'new', handle: crumb('Write a notice'), element: page(NoticePage, PERMS.notices.manage) },
+    { path: ':id', handle: crumb('Notice'), element: page(NoticePage) },
+  ],
+}
+
+// Anyone may raise a ticket and follow their own; support.manage sees the office queue.
+const supportRoutes: RouteObject = {
+  path: 'support',
+  handle: crumb('Support'),
+  children: [
+    { index: true, element: <Navigate to="tickets" replace /> },
+    { path: 'tickets', element: page(TicketsListPage) },
+    { path: 'tickets/:id', handle: crumb('Ticket'), element: page(TicketDetailPage) },
+  ],
+}
+
+// Everyone has conversations; who may start one or publish slots is checked in place.
+const messagesRoutes: RouteObject = {
+  path: 'messages',
+  handle: crumb('Messages'),
+  children: [
+    { index: true, element: page(MessagesPage) },
+    { path: 'appointments', handle: crumb('Appointments'), element: page(AppointmentsPage) },
+    { path: ':threadId', handle: crumb('Conversation'), element: page(MessagesPage) },
+  ],
+}
+
+const eventsRoutes: RouteObject = {
+  path: 'events',
+  handle: crumb('Events'),
+  element: <PermissionRoute permission={PERMS.events.view} />,
+  children: [
+    {
+      element: <EventsLayout />,
+      children: [
+        { index: true, element: page(EventsListPage) },
+        { path: 'leaderboard', handle: crumb('Leaderboard'), element: page(LeaderboardPage) },
+        { path: 'awards', handle: crumb('Awards'), element: page(AwardsPage) },
+        { path: 'point-rules', handle: crumb('Point rules'), element: page(PointRulesPage) },
+        { path: 'categories', handle: crumb('Categories'), element: page(EventCategoriesPage) },
+      ],
+    },
+    { path: ':id', handle: crumb('Event'), element: page(EventDetailPage) },
+  ],
+}
+
+const timetableRoutes: RouteObject = {
+  path: 'timetable',
+  handle: crumb('Timetable'),
+  element: (
+    <PermissionRoute permission={PERMS.timetable.view}>
+      <TimetableLayout />
+    </PermissionRoute>
+  ),
+  children: [
+    { index: true, element: page(WeekPage) },
+    { path: 'day', handle: crumb('Day'), element: page(DayPage) },
+    { path: 'lesson-changes', handle: crumb('Lesson changes'), element: page(LessonChangesPage) },
+    { path: 'bell-schedules', handle: crumb('Bell schedules'), element: page(BellSchedulesPage) },
+  ],
+}
+
 const settingsRoutes: RouteObject = {
   path: 'settings',
   handle: crumb('Settings'),
@@ -202,6 +290,11 @@ export const router = createBrowserRouter([
           staffRoutes,
           usersRoutes,
           rolesRoutes,
+          noticesRoutes,
+          supportRoutes,
+          messagesRoutes,
+          eventsRoutes,
+          timetableRoutes,
           academicsRoutes,
           settingsRoutes,
           ...plannedRoutes,
