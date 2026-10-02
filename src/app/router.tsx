@@ -35,6 +35,17 @@ const SetupWizardPage = lazy(() => import('@/features/settings/setup/pages/Setup
 const StudentsListPage = lazy(() => import('@/features/students/pages/StudentsListPage'))
 const StudentDetailPage = lazy(() => import('@/features/students/pages/StudentDetailPage'))
 const StudentFormPage = lazy(() => import('@/features/students/pages/StudentFormPage'))
+const AdmissionsListPage = lazy(() => import('@/features/admissions/pages/AdmissionsListPage'))
+const AdmissionDetailPage = lazy(() => import('@/features/admissions/pages/AdmissionDetailPage'))
+const ParentsListPage = lazy(() => import('@/features/parents/pages/ParentsListPage'))
+const ParentDetailPage = lazy(() => import('@/features/parents/pages/ParentDetailPage'))
+const StaffListPage = lazy(() => import('@/features/staff/pages/StaffListPage'))
+const StaffDetailPage = lazy(() => import('@/features/staff/pages/StaffDetailPage'))
+const StaffFormPage = lazy(() => import('@/features/staff/pages/StaffFormPage'))
+const UsersListPage = lazy(() => import('@/features/users/pages/UsersListPage'))
+const UserDetailPage = lazy(() => import('@/features/users/pages/UserDetailPage'))
+const RolesListPage = lazy(() => import('@/features/roles/pages/RolesListPage'))
+const RoleEditorPage = lazy(() => import('@/features/roles/pages/RoleEditorPage'))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
 const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -93,6 +104,59 @@ const studentsRoutes: RouteObject = {
   ],
 }
 
+const admissionsRoutes: RouteObject = {
+  path: 'admissions',
+  handle: crumb('Admissions'),
+  element: <PermissionRoute permission={PERMS.admissions.view} />,
+  children: [
+    { index: true, element: page(AdmissionsListPage) },
+    { path: ':id', handle: crumb('Application'), element: page(AdmissionDetailPage) },
+  ],
+}
+
+const parentsRoutes: RouteObject = {
+  path: 'parents',
+  handle: crumb('Parents'),
+  element: <PermissionRoute permission={PERMS.parents.view} />,
+  children: [
+    { index: true, element: page(ParentsListPage) },
+    { path: ':id', handle: crumb('Parent'), element: page(ParentDetailPage) },
+  ],
+}
+
+const staffRoutes: RouteObject = {
+  path: 'staff',
+  handle: crumb('Staff'),
+  element: <PermissionRoute permission={PERMS.staff.view} />,
+  children: [
+    { index: true, element: page(StaffListPage) },
+    { path: 'new', handle: crumb('Add staff member'), element: page(StaffFormPage, PERMS.staff.create) },
+    { path: ':id', handle: crumb('Staff member'), element: page(StaffDetailPage) },
+    { path: ':id/edit', handle: crumb('Edit'), element: page(StaffFormPage, PERMS.staff.update) },
+  ],
+}
+
+const usersRoutes: RouteObject = {
+  path: 'users',
+  handle: crumb('Users'),
+  element: <PermissionRoute permission={PERMS.users.view} />,
+  children: [
+    { index: true, element: page(UsersListPage) },
+    { path: ':id', handle: crumb('User'), element: page(UserDetailPage) },
+  ],
+}
+
+const rolesRoutes: RouteObject = {
+  path: 'roles',
+  handle: crumb('Roles'),
+  element: <PermissionRoute permission={PERMS.roles.view} />,
+  children: [
+    { index: true, element: page(RolesListPage) },
+    { path: 'new', handle: crumb('New role'), element: page(RoleEditorPage, PERMS.roles.create) },
+    { path: ':id', handle: crumb('Role'), element: page(RoleEditorPage) },
+  ],
+}
+
 const settingsRoutes: RouteObject = {
   path: 'settings',
   handle: crumb('Settings'),
@@ -133,6 +197,11 @@ export const router = createBrowserRouter([
           { path: 'me', handle: crumb('My profile'), element: page(ProfilePage) },
           { path: 'notifications', handle: crumb('Notifications'), element: page(NotificationsPage) },
           studentsRoutes,
+          admissionsRoutes,
+          parentsRoutes,
+          staffRoutes,
+          usersRoutes,
+          rolesRoutes,
           academicsRoutes,
           settingsRoutes,
           ...plannedRoutes,

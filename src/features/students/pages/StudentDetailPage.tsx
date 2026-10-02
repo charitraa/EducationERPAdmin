@@ -15,6 +15,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { formatDate } from '@/lib/dates'
 import { enumLabel } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
+import { StudentParentsPanel } from '@/features/parents/components/StudentParentsPanel'
 import { currentEnrollment, isEnrolled, type Student, type StudentStatus } from '../api/students.api'
 import { EnrollmentHistory, isUpcoming } from '../components/EnrollmentHistory'
 import { PlaceStudentDialog } from '../components/PlaceStudentDialog'
@@ -194,6 +195,9 @@ export default function StudentDetailPage() {
                   <Field label="Portal login">{s.user ? 'Linked' : 'No login account'}</Field>
                 </dl>
               </Panel>
+              <div className="mt-6 border-t pt-5">
+                <StudentParentsPanel studentId={s.id} />
+              </div>
             </div>
           </div>
         </TabsContent>

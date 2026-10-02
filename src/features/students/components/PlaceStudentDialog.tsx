@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Controller, useWatch, type Control, type FieldErrors } from 'react-hook-form'
+import { Controller, useController, useWatch, type Control, type FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { DatePicker } from '@/components/forms/DatePicker'
 import { FormDialog } from '@/components/forms/FormDialog'
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAcademicYearOptions, useCurrentAcademicYear } from '@/features/academics/academic-years/hooks/useAcademicYears'
 import { useClasses } from '@/features/academics/classes/hooks/useClasses'
 import { toast } from '@/hooks/useToast'
+import { pluralize } from '@/lib/formatters'
 import { optionalIsoDate, requiredId } from '@/lib/validation'
 import { toApiError } from '@/shared/api/errors'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
@@ -28,13 +29,20 @@ type PlaceForm = z.infer<typeof schema>
 
 function ClassPicker({ control, errors, campus, currentSection }: { control: Control<PlaceForm>; errors: FieldErrors<PlaceForm>; campus: number; currentSection: number | null }) {
   const years = useAcademicYearOptions()
+  const current = useCurrentAcademicYear()
   const year = useWatch({ control, name: 'academic_year' })
+  const { field: yearField } = useController({ control, name: 'academic_year' })
+  // Years still loading when the dialog opened: fill in the same default once they arrive.
+  const fallbackYear = current.data?.id ?? years.data?.[0]?.id
+  useEffect(() => {
+    if (!year && fallbackYear) yearField.onChange(String(fallbackYear))
+  }, [year, fallbackYear, yearField])
   const classes = useClasses({ ...PICKER_PARAMS, campus, academic_year: year || undefined, ordering: 'level' }, { enabled: Boolean(year) })
   const options = (classes.data?.results ?? [])
     .filter((c) => c.id !== currentSection)
     .map((c) => {
       const full = c.capacity != null && c.student_count >= c.capacity
-      const seats = c.capacity != null ? ` · ${c.student_count}/${c.capacity}${full ? ' full' : ''}` : ` · ${c.student_count} students`
+      const seats = c.capacity != null ? ` · ${c.student_count}/${c.capacity}${full ? ' full' : ''}` : ` · ${pluralize(c.student_count, 'student')}`
       return { value: String(c.id), label: `${c.display_name}${seats}` }
     })
 
@@ -57,7 +65,13 @@ function ClassPicker({ control, errors, campus, currentSection }: { control: Con
           />
         )}
       </FormField>
-      <FormField label="Class" required error={errors.section?.message} description={year && classes.data && options.length === 0 ? 'No other classes at this branch in that year.' : undefined}>
+      <FormField label="Class" required error={errors.section?.message} description={
+          years.data?.length === 0
+            ? 'No academic years yet. Add one under Academics first.'
+            : year && classes.data && options.length === 0
+              ? 'No other classes at this branch in that year.'
+              : undefined
+        }>
         {(p) => (
           <Controller
             control={control}
@@ -76,7 +90,10 @@ function ClassPicker({ control, errors, campus, currentSection }: { control: Con
  */
 export function PlaceStudentDialog({ student, open, onOpenChange }: { student: Student; open: boolean; onOpenChange: (o: boolean) => void }) {
   const place = usePlaceStudent()
+  // Loaded with the page so the dialog opens with the year already chosen.
+  const years = useAcademicYearOptions()
   const current = useCurrentAcademicYear()
+  const defaultYear = current.data?.id ?? years.data?.[0]?.id
   const [overCapacity, setOverCapacity] = useState(false)
   const enrollment = currentEnrollment(student)
   const isMove = enrollment?.section != null
@@ -98,7 +115,7 @@ export function PlaceStudentDialog({ student, open, onOpenChange }: { student: S
       }
       submitLabel={isMove ? 'Move' : 'Place'}
       schema={schema}
-      defaultValues={{ academic_year: current.data ? String(current.data.id) : '', section: '', on_date: '', reason: '', allow_over_capacity: false }}
+      defaultValues={{ academic_year: defaultYear ? String(defaultYear) : '', section: '', on_date: '', reason: '', allow_over_capacity: false }}
       onSubmit={async (v) => {
         try {
           await place.mutateAsync({

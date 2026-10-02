@@ -27,7 +27,8 @@ export function StatusTimeline({ steps, current, labels = {}, terminal = [], cla
     <ol className={cn('flex flex-wrap items-center gap-y-2 text-sm', className)} aria-label="Progress">
       {shown.map((step, i) => {
         const isCurrent = step === current
-        const done = offPath ? i === 0 : i < currentIndex
+        // Reaching the last step finishes the workflow: show it ticked, not in progress.
+        const done = offPath ? i === 0 : i < currentIndex || (isCurrent && i === steps.length - 1)
         const failed = offPath && isCurrent
         return (
           <li key={step} className="flex items-center" aria-current={isCurrent ? 'step' : undefined}>
@@ -36,7 +37,7 @@ export function StatusTimeline({ steps, current, labels = {}, terminal = [], cla
               className={cn(
                 'flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-semibold',
                 done && 'border-primary bg-primary text-primary-foreground',
-                isCurrent && !failed && 'border-primary bg-accent text-accent-foreground ring-2 ring-primary/20',
+                isCurrent && !failed && !done && 'border-primary bg-accent text-accent-foreground ring-2 ring-primary/20',
                 failed && 'border-danger bg-danger text-white',
                 !done && !isCurrent && 'border-border text-muted-foreground',
               )}
@@ -46,7 +47,7 @@ export function StatusTimeline({ steps, current, labels = {}, terminal = [], cla
             </span>
             <span className={cn('ml-1.5', isCurrent ? 'font-medium' : 'text-muted-foreground')}>
               {label(step)}
-              <span className="sr-only">{done ? ' (done)' : isCurrent ? ' (current)' : ' (next)'}</span>
+              <span className="sr-only">{isCurrent ? (done ? ' (done, current)' : ' (current)') : done ? ' (done)' : ' (next)'}</span>
             </span>
           </li>
         )

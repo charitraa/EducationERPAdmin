@@ -30,3 +30,11 @@ describe('ApiError', () => {
     expect(e.generalErrors).toEqual(['A', 'B'])
   })
 })
+
+describe('ApiError general errors', () => {
+  it('treats __all__ like non_field_errors', () => {
+    const e = new ApiError({ code: 'invalid', message: 'Invalid input.', details: { __all__: ['Clash.'], name: ['Required.'] } }, 400)
+    expect(e.generalErrors).toEqual(['Clash.'])
+    expect(e.fieldErrors).toEqual({ name: 'Required.' })
+  })
+})

@@ -14,6 +14,9 @@ export function flattenMessages(value: unknown): string[] {
   return [String(value)]
 }
 
+/** DRF's keys for errors that belong to no single field (`__all__` comes from model validation). */
+const GENERAL_KEYS = ['non_field_errors', '__all__']
+
 /** One normalized error for everything the API (or the network) can throw. */
 export class ApiError extends Error {
   readonly code: string
@@ -34,7 +37,7 @@ export class ApiError extends Error {
     if (!d || Array.isArray(d)) return {}
     const out: Record<string, string> = {}
     for (const [field, value] of Object.entries(d)) {
-      if (field === 'non_field_errors') continue
+      if (GENERAL_KEYS.includes(field)) continue
       const messages = flattenMessages(value)
       if (messages.length) out[field] = messages.join(' ')
     }
@@ -46,7 +49,7 @@ export class ApiError extends Error {
     const d = this.details
     if (!d) return []
     if (Array.isArray(d)) return flattenMessages(d)
-    return flattenMessages(d.non_field_errors)
+    return GENERAL_KEYS.flatMap((k) => flattenMessages(d[k]))
   }
 }
 

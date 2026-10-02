@@ -23,10 +23,20 @@ export const PERMS = {
     /** Place in a class, promote, move between classes. */
     place: 'students.place',
   },
-  staff: { view: 'staff.view' },
-  admissions: { view: 'admissions.view' },
-  parents: { view: 'parents.view' },
-  users: { view: 'users.view' },
+  staff: { view: 'staff.view', create: 'staff.create', update: 'staff.update', delete: 'staff.delete' },
+  admissions: {
+    view: 'admissions.view',
+    create: 'admissions.create',
+    /** Edit a pending application, and withdraw one. */
+    update: 'admissions.update',
+    delete: 'admissions.delete',
+    /** Approve or reject. */
+    review: 'admissions.review',
+    enroll: 'admissions.enroll',
+  },
+  parents: { view: 'parents.view', create: 'parents.create', update: 'parents.update', delete: 'parents.delete' },
+  users: { view: 'users.view', create: 'users.create', update: 'users.update', delete: 'users.delete', manageRoles: 'users.manage_roles' },
+  roles: { view: 'roles.view', create: 'roles.create', update: 'roles.update', delete: 'roles.delete' },
   finance: { view: 'finance.view' },
   attendance: { view: 'attendance.view', mark: 'attendance.mark' },
   exams: { view: 'exams.view', mark: 'exams.mark' },

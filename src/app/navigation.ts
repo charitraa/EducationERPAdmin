@@ -66,9 +66,9 @@ export const navigation: NavSection[] = [
     label: 'nav.section.academic',
     items: [
       { label: 'nav.students', path: '/students', icon: GraduationCap, permission: 'students.view' },
-      { label: 'nav.admissions', path: '/admissions', icon: ClipboardList, permission: 'admissions.view', status: 'planned' },
-      { label: 'nav.parents', path: '/parents', icon: UsersRound, permission: 'parents.view', status: 'planned' },
-      { label: 'nav.staff', path: '/staff', icon: UserRound, permission: 'staff.view', status: 'planned' },
+      { label: 'nav.admissions', path: '/admissions', icon: ClipboardList, permission: 'admissions.view' },
+      { label: 'nav.parents', path: '/parents', icon: UsersRound, permission: 'parents.view' },
+      { label: 'nav.staff', path: '/staff', icon: UserRound, permission: 'staff.view' },
       { label: 'nav.academics', path: '/academics', icon: BookOpen, permission: 'academics.view' },
       { label: 'nav.timetable', path: '/timetable', icon: CalendarClock, permission: 'timetable.view', status: 'planned' },
       { label: 'nav.attendance', path: '/attendance', icon: CalendarCheck, permission: { any: ['attendance.view', 'attendance.mark'] }, status: 'planned' },
@@ -115,8 +115,8 @@ export const navigation: NavSection[] = [
   {
     label: 'nav.section.administration',
     items: [
-      { label: 'nav.users', path: '/users', icon: Users, permission: 'users.view', status: 'planned' },
-      { label: 'nav.roles', path: '/roles', icon: ShieldCheck, permission: 'roles.view', status: 'planned' },
+      { label: 'nav.users', path: '/users', icon: Users, permission: 'users.view' },
+      { label: 'nav.roles', path: '/roles', icon: ShieldCheck, permission: 'roles.view' },
       { label: 'nav.apiKeys', path: '/settings/api-keys', icon: KeyRound, permission: 'api_keys.manage', status: 'planned' },
       { label: 'nav.audit', path: '/audit', icon: ScrollText, permission: 'audit.view', status: 'planned' },
     ],
