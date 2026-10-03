@@ -11,6 +11,7 @@ import { TableSkeleton } from '@/components/data-display/LoadingState'
 import { StatusBadge } from '@/components/data-display/StatusBadge'
 import { FormDialog } from '@/components/forms/FormDialog'
 import { FormField } from '@/components/forms/FormField'
+import { RowErrors } from '@/components/forms/RowErrors'
 import { SelectControl } from '@/components/forms/SelectControl'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -184,6 +185,8 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
             </p>
           )}
           {watch('start') === 'own' && <BandsEditor control={control} register={register} errors={errors as never} locked={locked} />}
+          <RowErrors errors={errors.bands} label="Band" />
+          <RowErrors errors={errors.divisions} label="Division" />
         </>
       )}
     </FormDialog>

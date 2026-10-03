@@ -16,6 +16,8 @@ interface DatePickerProps {
   className?: string
   'aria-invalid'?: boolean
   'aria-describedby'?: string
+  /** For a date with no visible label, such as one cell in a row of inputs. */
+  'aria-label'?: string
 }
 
 /**

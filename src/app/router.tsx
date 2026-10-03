@@ -8,6 +8,8 @@ import { AcademicsLayout } from '@/features/academics/AcademicsLayout'
 import { AttendanceLayout } from '@/features/attendance/AttendanceLayout'
 import { EventsLayout } from '@/features/events/EventsLayout'
 import { ExamsIndexGate, ExamsLayout } from '@/features/examinations/ExamsLayout'
+import { FinanceLayout } from '@/features/finance/FinanceLayout'
+import { LibraryLayout } from '@/features/library/LibraryLayout'
 import { TimetableLayout } from '@/features/timetable/TimetableLayout'
 import ServerError from '@/pages/ServerError'
 import { allNavItems } from './navigation'
@@ -84,6 +86,22 @@ const ReportCardsPage = lazy(() => import('@/features/examinations/pages/ReportC
 const TranscriptsPage = lazy(() => import('@/features/examinations/pages/TranscriptsPage'))
 const GradeScalesPage = lazy(() => import('@/features/examinations/pages/GradeScalesPage'))
 const ExamTypesPage = lazy(() => import('@/features/examinations/pages/ExamTypesPage'))
+const FinanceOverviewPage = lazy(() => import('@/features/finance/pages/OverviewPage'))
+const InvoicesPage = lazy(() => import('@/features/finance/pages/InvoicesPage'))
+const InvoiceDetailPage = lazy(() => import('@/features/finance/pages/InvoiceDetailPage'))
+const PaymentsPage = lazy(() => import('@/features/finance/pages/PaymentsPage'))
+const ReceiptPage = lazy(() => import('@/features/finance/pages/ReceiptPage'))
+const FeeStructuresPage = lazy(() => import('@/features/finance/pages/FeeStructuresPage'))
+const ScholarshipsPage = lazy(() => import('@/features/finance/pages/ScholarshipsPage'))
+const FinanceReportsPage = lazy(() => import('@/features/finance/pages/FinanceReportsPage'))
+const LibraryDeskPage = lazy(() => import('@/features/library/pages/DeskPage'))
+const LibraryBooksPage = lazy(() => import('@/features/library/pages/BooksPage'))
+const LibraryBookPage = lazy(() => import('@/features/library/pages/BookDetailPage'))
+const LibraryMembersPage = lazy(() => import('@/features/library/pages/MembersPage'))
+const LibraryLoansPage = lazy(() => import('@/features/library/pages/CirculationPages').then((m) => ({ default: m.LoansPage })))
+const LibraryReservationsPage = lazy(() => import('@/features/library/pages/CirculationPages').then((m) => ({ default: m.ReservationsPage })))
+const LibraryFinesPage = lazy(() => import('@/features/library/pages/CirculationPages').then((m) => ({ default: m.FinesPage })))
+const LibrarySetupPage = lazy(() => import('@/features/library/pages/CatalogSetupPage'))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
 const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -309,6 +327,51 @@ const examinationsRoutes: RouteObject = {
   ],
 }
 
+// Every finance list needs finance.view; a cashier also needs it to find invoices to take payments on.
+const financeRoutes: RouteObject = {
+  path: 'finance',
+  handle: crumb('Finance'),
+  element: <PermissionRoute permission={PERMS.finance.view} />,
+  children: [
+    {
+      element: <FinanceLayout />,
+      children: [
+        { index: true, element: page(FinanceOverviewPage) },
+        { path: 'invoices', handle: crumb('Invoices'), element: page(InvoicesPage) },
+        { path: 'payments', handle: crumb('Payments'), element: page(PaymentsPage) },
+        { path: 'fees', handle: crumb('Fee structures'), element: page(FeeStructuresPage) },
+        { path: 'scholarships', handle: crumb('Scholarships'), element: page(ScholarshipsPage) },
+        { path: 'reports', handle: crumb('Reports'), element: page(FinanceReportsPage) },
+      ],
+    },
+    { path: 'invoices/:id', handle: crumb('Invoice'), element: page(InvoiceDetailPage) },
+    { path: 'payments/:id', handle: crumb('Receipt'), element: page(ReceiptPage) },
+  ],
+}
+
+// Browsing the catalog is open to staff; the desk and memberships need library permissions.
+// Loans, reservations and fines lists are scoped by the backend (staff see their branch, members their own).
+const libraryRoutes: RouteObject = {
+  path: 'library',
+  handle: crumb('Library'),
+  element: <PermissionRoute permission={{ any: [PERMS.library.circulate, PERMS.library.manage] }} />,
+  children: [
+    {
+      element: <LibraryLayout />,
+      children: [
+        { index: true, element: page(LibraryDeskPage) },
+        { path: 'books', handle: crumb('Books'), element: page(LibraryBooksPage) },
+        { path: 'members', handle: crumb('Members'), element: page(LibraryMembersPage, PERMS.library.manage) },
+        { path: 'loans', handle: crumb('Loans'), element: page(LibraryLoansPage) },
+        { path: 'reservations', handle: crumb('Reservations'), element: page(LibraryReservationsPage) },
+        { path: 'fines', handle: crumb('Fines'), element: page(LibraryFinesPage) },
+        { path: 'setup', handle: crumb('Catalog setup'), element: page(LibrarySetupPage, PERMS.library.manage) },
+      ],
+    },
+    { path: 'books/:id', handle: crumb('Book'), element: page(LibraryBookPage) },
+  ],
+}
+
 const settingsRoutes: RouteObject = {
   path: 'settings',
   handle: crumb('Settings'),
@@ -361,6 +424,8 @@ export const router = createBrowserRouter([
           timetableRoutes,
           attendanceRoutes,
           examinationsRoutes,
+          financeRoutes,
+          libraryRoutes,
           academicsRoutes,
           settingsRoutes,
           ...plannedRoutes,

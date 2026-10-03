@@ -113,8 +113,8 @@ export function TranscriptView({ t }: { t: Transcript }) {
         <p className="text-sm text-muted-foreground">No published result is marked for the transcript yet.</p>
       ) : (
         <div className="grid gap-5">
-          {t.records.map((r, i) => (
-            <section key={i} className="print:break-inside-avoid">
+          {t.records.map((r) => (
+            <section key={r.result_id} className="print:break-inside-avoid">
               <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-semibold">
                   {r.title} <span className="text-sm font-normal text-muted-foreground">· {r.academic_year} · {r.level_label}</span>

@@ -10,6 +10,7 @@ import { TableSkeleton } from '@/components/data-display/LoadingState'
 import { DatePicker } from '@/components/forms/DatePicker'
 import { FormDialog } from '@/components/forms/FormDialog'
 import { FormField } from '@/components/forms/FormField'
+import { RowErrors } from '@/components/forms/RowErrors'
 import { SelectControl } from '@/components/forms/SelectControl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -127,6 +128,7 @@ function PaperDialog({ exam, open, record, onOpenChange }: { exam: Exam; open: b
             </FormField>
           </div>
           <ComponentsEditor control={control} register={register} error={errors.components?.message ?? errors.components?.root?.message} />
+          <RowErrors errors={errors.components} label="Component" />
         </>
       )}
     </FormDialog>

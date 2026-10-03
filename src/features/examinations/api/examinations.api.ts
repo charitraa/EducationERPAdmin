@@ -125,7 +125,8 @@ export interface ReportLine {
 }
 
 export interface ReportCard {
-  /** The result's status (pass, fail…): the backend's dict sets `result` twice (id, then status) and the status wins. */
+  result_id: Id
+  /** The result's status: pass, fail… */
   result: Result['status']
   kind: 'exam' | 'term'
   title: string
@@ -157,7 +158,8 @@ export interface ReportCard {
 export interface Transcript {
   student: ReportCard['student']
   records: Array<{
-    /** The result's status (pass, fail…): the backend's dict sets `result` twice and the status wins. */
+    result_id: Id
+    /** The result's status: pass, fail… */
     result: Result['status']
     kind: 'exam' | 'term'
     title: string

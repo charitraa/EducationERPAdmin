@@ -83,7 +83,7 @@ export default function ReportCardsPage() {
       ) : (
         <div className="grid gap-6">
           {cards.data.map((c) => (
-            <ReportCardView key={`${c.student.id}-${c.title}`} card={c} />
+            <ReportCardView key={c.result_id} card={c} />
           ))}
         </div>
       )}

@@ -37,7 +37,13 @@ export const PERMS = {
   parents: { view: 'parents.view', create: 'parents.create', update: 'parents.update', delete: 'parents.delete' },
   users: { view: 'users.view', create: 'users.create', update: 'users.update', delete: 'users.delete', manageRoles: 'users.manage_roles' },
   roles: { view: 'roles.view', create: 'roles.create', update: 'roles.update', delete: 'roles.delete' },
-  finance: { view: 'finance.view' },
+  finance: {
+    view: 'finance.view',
+    /** The cashier: record payments and issue receipts. */
+    collect: 'finance.collect',
+    /** The finance office: fee setup, scholarships, invoices, cancelling, adjustments, refunds. */
+    manage: 'finance.manage',
+  },
   attendance: {
     view: 'attendance.view',
     /** Take attendance for your own classes (the backend checks it's yours that day). */
@@ -45,6 +51,12 @@ export const PERMS = {
     /** The office: any class, corrections after submission, reopening, staff attendance. */
     manage: 'attendance.manage',
     devices: 'attendance.devices',
+  },
+  library: {
+    /** Catalog, copies, shelves and memberships. Browsing needs no permission. */
+    manage: 'library.manage',
+    /** The desk: issue, return, reservations and fines. */
+    circulate: 'library.circulate',
   },
   exams: {
     view: 'exams.view',

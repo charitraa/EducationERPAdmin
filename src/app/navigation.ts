@@ -78,9 +78,9 @@ export const navigation: NavSection[] = [
   {
     label: 'nav.section.finance',
     items: [
-      { label: 'nav.fees', path: '/finance', icon: Wallet, permission: { any: ['finance.view', 'finance.collect'] }, status: 'planned' },
-      { label: 'nav.payments', path: '/finance/payments', icon: Receipt, permission: { any: ['finance.view', 'finance.collect'] }, status: 'planned' },
-      { label: 'nav.scholarships', path: '/finance/scholarships', icon: HandCoins, permission: 'finance.view', status: 'planned' },
+      { label: 'nav.fees', path: '/finance', icon: Wallet, permission: 'finance.view' },
+      { label: 'nav.payments', path: '/finance/payments', icon: Receipt, permission: 'finance.view' },
+      { label: 'nav.scholarships', path: '/finance/scholarships', icon: HandCoins, permission: 'finance.view' },
     ],
   },
   {
@@ -90,7 +90,7 @@ export const navigation: NavSection[] = [
       { label: 'nav.notices', path: '/notices', icon: Megaphone },
       { label: 'nav.messages', path: '/messages', icon: MessagesSquare },
       { label: 'nav.support', path: '/support', icon: LifeBuoy },
-      { label: 'nav.library', path: '/library', icon: BookOpen, permission: { any: ['library.circulate', 'library.manage'] }, status: 'planned' },
+      { label: 'nav.library', path: '/library', icon: BookOpen, permission: { any: ['library.circulate', 'library.manage'] } },
       { label: 'nav.inventory', path: '/inventory', icon: Boxes, permission: 'inventory.view', status: 'planned' },
     ],
   },

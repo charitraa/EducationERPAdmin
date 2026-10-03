@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/data-display/StatusBadge'
 import { FillWhenEmpty } from '@/components/forms/FillWhenEmpty'
 import { FormDialog } from '@/components/forms/FormDialog'
 import { FormField } from '@/components/forms/FormField'
+import { RowErrors } from '@/components/forms/RowErrors'
 import { SelectControl } from '@/components/forms/SelectControl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -96,6 +97,7 @@ function PlanDialog({ open, record, onOpenChange }: { open: boolean; record: Res
             )}
           </div>
           <ItemsEditor control={control} register={register} program={watch('program')} year={watch('academic_year')} campus={watch('campus')} error={errors.items?.message ?? errors.items?.root?.message} />
+          <RowErrors errors={errors.items} label="Exam" />
           <Controller
             control={control}
             name="on_transcript"
