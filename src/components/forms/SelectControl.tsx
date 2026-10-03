@@ -18,6 +18,8 @@ interface SelectControlProps extends Partial<FieldControlProps> {
   emptyLabel?: string
   disabled?: boolean
   loading?: boolean
+  /** For a select with no visible label, such as one cell in a row of inputs. */
+  'aria-label'?: string
 }
 
 /** Radix Select for forms: string values, '' meaning "nothing chosen". */

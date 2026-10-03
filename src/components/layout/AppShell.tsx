@@ -31,7 +31,7 @@ export function AppShell() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 lg:block print:hidden">
         <Sidebar />
       </aside>
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
@@ -40,7 +40,7 @@ export function AppShell() {
           <Sidebar onNavigate={() => setMenuOpen(false)} />
         </SheetContent>
       </Sheet>
-      <div className="lg:pl-60">
+      <div className="lg:pl-60 print:pl-0">
         <Header onOpenMenu={() => setMenuOpen(true)} onOpenSearch={() => setSearchOpen(true)} />
         <main id="main" className="mx-auto max-w-[1600px] px-3 pb-24 pt-5 sm:px-5 md:pb-10">
           <Outlet />

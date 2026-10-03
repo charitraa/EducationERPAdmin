@@ -60,7 +60,7 @@ export function useWaitingForMe() {
       ? [{ key: 'marks', label: 'Mark sheets to fill', count: markSheets.data, loading: markSheets.isLoading, error: markSheets.isError, to: '/examinations/mark-sheets' }]
       : []),
     ...(canRollCall
-      ? [{ key: 'rollcall', label: "Today's roll calls", count: rollCalls.data, loading: rollCalls.isLoading, error: rollCalls.isError, to: '/attendance/sessions' }]
+      ? [{ key: 'rollcall', label: "Today's roll calls", count: rollCalls.data, loading: rollCalls.isLoading, error: rollCalls.isError, to: '/attendance' }]
       : []),
     { key: 'notifications', label: 'Unread notifications', count: notifications.data, loading: notifications.isLoading, error: notifications.isError, to: '/notifications' },
   ]

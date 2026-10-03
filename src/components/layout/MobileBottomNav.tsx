@@ -16,7 +16,7 @@ export function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const tab = 'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px]'
 
   return (
-    <nav aria-label="Quick" className="pb-safe fixed inset-x-0 bottom-0 z-30 flex border-t bg-background md:hidden">
+    <nav aria-label="Quick" className="pb-safe print:hidden fixed inset-x-0 bottom-0 z-30 flex border-t bg-background md:hidden">
       <NavLink to="/" end className={({ isActive }) => cn(tab, isActive ? 'text-primary' : 'text-muted-foreground')}>
         <LayoutDashboard className="h-5 w-5" aria-hidden />
         {t('nav.dashboard')}

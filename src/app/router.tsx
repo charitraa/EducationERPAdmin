@@ -5,7 +5,9 @@ import type { PermissionRequirement } from '@/lib/permissions'
 import { en } from '@/locales/en'
 import { PERMS } from '@/shared/constants/permissions'
 import { AcademicsLayout } from '@/features/academics/AcademicsLayout'
+import { AttendanceLayout } from '@/features/attendance/AttendanceLayout'
 import { EventsLayout } from '@/features/events/EventsLayout'
+import { ExamsIndexGate, ExamsLayout } from '@/features/examinations/ExamsLayout'
 import { TimetableLayout } from '@/features/timetable/TimetableLayout'
 import ServerError from '@/pages/ServerError'
 import { allNavItems } from './navigation'
@@ -65,6 +67,23 @@ const WeekPage = lazy(() => import('@/features/timetable/pages/WeekPage'))
 const DayPage = lazy(() => import('@/features/timetable/pages/DayPage'))
 const LessonChangesPage = lazy(() => import('@/features/timetable/pages/LessonChangesPage'))
 const BellSchedulesPage = lazy(() => import('@/features/timetable/pages/BellSchedulesPage'))
+const AttendanceTodayPage = lazy(() => import('@/features/attendance/pages/TodayPage'))
+const AttendanceSessionsPage = lazy(() => import('@/features/attendance/pages/SessionsPage'))
+const RollCallPage = lazy(() => import('@/features/attendance/pages/RollCallPage'))
+const AttendanceReportsPage = lazy(() => import('@/features/attendance/pages/ReportsPage'))
+const StaffAttendancePage = lazy(() => import('@/features/attendance/pages/StaffAttendancePage'))
+const WorkSchedulesPage = lazy(() => import('@/features/attendance/pages/WorkSchedulesPage'))
+const AttendanceDevicesPage = lazy(() => import('@/features/attendance/pages/DevicesPage'))
+const ExamsListPage = lazy(() => import('@/features/examinations/pages/ExamsListPage'))
+const ExamDetailPage = lazy(() => import('@/features/examinations/pages/ExamDetailPage'))
+const MarkSheetsPage = lazy(() => import('@/features/examinations/pages/MarkSheetsPage'))
+const MarkEntryPage = lazy(() => import('@/features/examinations/pages/MarkEntryPage'))
+const ResultsPage = lazy(() => import('@/features/examinations/pages/ResultsPage'))
+const TermResultsPage = lazy(() => import('@/features/examinations/pages/TermResultsPage'))
+const ReportCardsPage = lazy(() => import('@/features/examinations/pages/ReportCardsPage'))
+const TranscriptsPage = lazy(() => import('@/features/examinations/pages/TranscriptsPage'))
+const GradeScalesPage = lazy(() => import('@/features/examinations/pages/GradeScalesPage'))
+const ExamTypesPage = lazy(() => import('@/features/examinations/pages/ExamTypesPage'))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
 const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -245,6 +264,51 @@ const timetableRoutes: RouteObject = {
   ],
 }
 
+// Teachers with only attendance.mark get Today and the roll call; the rest is the office's.
+const attendanceRoutes: RouteObject = {
+  path: 'attendance',
+  handle: crumb('Attendance'),
+  element: <PermissionRoute permission={{ any: [PERMS.attendance.view, PERMS.attendance.mark] }} />,
+  children: [
+    {
+      element: <AttendanceLayout />,
+      children: [
+        { index: true, element: page(AttendanceTodayPage) },
+        { path: 'sessions', handle: crumb('Sessions'), element: page(AttendanceSessionsPage, PERMS.attendance.view) },
+        { path: 'reports', handle: crumb('Reports'), element: page(AttendanceReportsPage, PERMS.attendance.view) },
+        { path: 'staff', handle: crumb('Staff'), element: page(StaffAttendancePage, PERMS.attendance.view) },
+        { path: 'schedules', handle: crumb('Work schedules'), element: page(WorkSchedulesPage, PERMS.attendance.view) },
+        { path: 'devices', handle: crumb('Devices'), element: page(AttendanceDevicesPage, PERMS.attendance.devices) },
+      ],
+    },
+    { path: 'sessions/:id', handle: crumb('Roll call'), element: page(RollCallPage) },
+  ],
+}
+
+// Teachers with only exams.mark get their mark sheets; the rest is the exam office's.
+const examinationsRoutes: RouteObject = {
+  path: 'examinations',
+  handle: crumb('Examinations'),
+  element: <PermissionRoute permission={{ any: [PERMS.exams.view, PERMS.exams.mark] }} />,
+  children: [
+    {
+      element: <ExamsLayout />,
+      children: [
+        { index: true, element: <ExamsIndexGate>{page(ExamsListPage)}</ExamsIndexGate> },
+        { path: 'mark-sheets', handle: crumb('Mark sheets'), element: page(MarkSheetsPage) },
+        { path: 'results', handle: crumb('Results'), element: page(ResultsPage, PERMS.exams.view) },
+        { path: 'term-results', handle: crumb('Term results'), element: page(TermResultsPage, PERMS.exams.view) },
+        { path: 'report-cards', handle: crumb('Report cards'), element: page(ReportCardsPage, PERMS.exams.view) },
+        { path: 'transcripts', handle: crumb('Transcripts'), element: page(TranscriptsPage, PERMS.exams.view) },
+        { path: 'grades', handle: crumb('Grade scales'), element: page(GradeScalesPage, PERMS.grades.view) },
+        { path: 'types', handle: crumb('Exam types'), element: page(ExamTypesPage, PERMS.exams.view) },
+      ],
+    },
+    { path: 'mark-sheets/:id', handle: crumb('Marks'), element: page(MarkEntryPage) },
+    { path: ':id', handle: crumb('Exam'), element: page(ExamDetailPage, PERMS.exams.view) },
+  ],
+}
+
 const settingsRoutes: RouteObject = {
   path: 'settings',
   handle: crumb('Settings'),
@@ -295,6 +359,8 @@ export const router = createBrowserRouter([
           messagesRoutes,
           eventsRoutes,
           timetableRoutes,
+          attendanceRoutes,
+          examinationsRoutes,
           academicsRoutes,
           settingsRoutes,
           ...plannedRoutes,

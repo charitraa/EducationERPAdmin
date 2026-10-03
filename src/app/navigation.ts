@@ -71,8 +71,8 @@ export const navigation: NavSection[] = [
       { label: 'nav.staff', path: '/staff', icon: UserRound, permission: 'staff.view' },
       { label: 'nav.academics', path: '/academics', icon: BookOpen, permission: 'academics.view' },
       { label: 'nav.timetable', path: '/timetable', icon: CalendarClock, permission: 'timetable.view' },
-      { label: 'nav.attendance', path: '/attendance', icon: CalendarCheck, permission: { any: ['attendance.view', 'attendance.mark'] }, status: 'planned' },
-      { label: 'nav.examinations', path: '/examinations', icon: ClipboardCheck, permission: { any: ['exams.view', 'exams.mark'] }, status: 'planned' },
+      { label: 'nav.attendance', path: '/attendance', icon: CalendarCheck, permission: { any: ['attendance.view', 'attendance.mark'] } },
+      { label: 'nav.examinations', path: '/examinations', icon: ClipboardCheck, permission: { any: ['exams.view', 'exams.mark'] } },
     ],
   },
   {

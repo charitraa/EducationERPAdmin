@@ -38,8 +38,23 @@ export const PERMS = {
   users: { view: 'users.view', create: 'users.create', update: 'users.update', delete: 'users.delete', manageRoles: 'users.manage_roles' },
   roles: { view: 'roles.view', create: 'roles.create', update: 'roles.update', delete: 'roles.delete' },
   finance: { view: 'finance.view' },
-  attendance: { view: 'attendance.view', mark: 'attendance.mark' },
-  exams: { view: 'exams.view', mark: 'exams.mark' },
+  attendance: {
+    view: 'attendance.view',
+    /** Take attendance for your own classes (the backend checks it's yours that day). */
+    mark: 'attendance.mark',
+    /** The office: any class, corrections after submission, reopening, staff attendance. */
+    manage: 'attendance.manage',
+    devices: 'attendance.devices',
+  },
+  exams: {
+    view: 'exams.view',
+    /** Enter marks for the subjects you teach (the backend checks the teaching assignment). */
+    mark: 'exams.mark',
+    /** The exam office: setup, seating, admit cards, verifying and correcting marks. */
+    manage: 'exams.manage',
+    publish: 'exams.publish',
+  },
+  grades: { view: 'grades.view', manage: 'grades.manage' },
   applications: { view: 'applications.view' },
   hr: { view: 'hr.view', approveLeave: 'hr.approve_leave' },
   support: { manage: 'support.manage' },
