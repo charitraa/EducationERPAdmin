@@ -21,7 +21,7 @@ import { enumLabel } from '@/lib/formatters'
 import { optionalWholeNumber } from '@/lib/validation'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
-import type { PayslipLine, PayslipRow } from '../api/payroll.api'
+import type { Payslip, PayslipLine, PayslipRow } from '../api/payroll.api'
 import { usePayslip, usePayslips, useRuns, useSetOvertime } from '../hooks/usePayroll'
 import { RunStatus } from './RunPages'
 
@@ -98,60 +98,17 @@ function Lines({ title, lines, total }: { title: string; lines: PayslipLine[]; t
 
 const hours = (minutes: number) => `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`
 
-/** One payslip, laid out to print, with the days behind it. */
-export function PayslipPage() {
-  const id = Number(useParams().id)
-  const navigate = useNavigate()
-  const slip = usePayslip(Number.isFinite(id) ? id : null)
-  const setOvertime = useSetOvertime()
+/** The payslip itself (printable), then the days off behind it. Shared with the staff member's own view. */
+export function PayslipDocument({ p, staffHref }: { p: Payslip; staffHref?: string }) {
   const { user } = useAuth()
-  const { can } = usePermissions()
-  const [editingOvertime, setEditingOvertime] = useState(false)
-  if (slip.isPending) return <PageLoader />
-  if (slip.isError) return <ErrorState error={slip.error} onRetry={() => void slip.refetch()} />
-  const p = slip.data
   const lines = p.lines ?? []
   const earnings = lines.filter((l) => l.kind === 'earning')
   // Unpaid days and tax are deductions too; the backend counts tax inside total_deductions.
   const deductions = lines.filter((l) => l.kind === 'deduction')
-  const draft = p.run_status === 'draft'
   const overtime = p.overtime_minutes_override ?? p.overtime_minutes ?? 0
-  const warnings = p.details?.warnings ?? []
   const days = (p.details?.days ?? []).filter((d) => d.leave || d.attendance)
-
   return (
-    <div className="mx-auto max-w-3xl">
-      <PageHeader
-        className="print:hidden"
-        backTo={`/payroll/runs/${p.run}`}
-        title={`Payslip ${p.number}`}
-        description={
-          <span className="inline-flex items-center gap-2">
-            {p.run_name} <RunStatus status={p.run_status} />
-          </span>
-        }
-        actions={
-          <>
-            {draft && can(PERMS.payroll.manage) && (
-              <Button variant="outline" onClick={() => setEditingOvertime(true)}>
-                <Clock aria-hidden /> Overtime
-              </Button>
-            )}
-            <Button variant="outline" onClick={() => window.print()}>
-              <Printer aria-hidden /> Print
-            </Button>
-          </>
-        }
-      />
-      {warnings.length > 0 && (
-        <div className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm print:hidden">
-          {warnings.map((w) => (
-            <p key={w} className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {w}
-            </p>
-          ))}
-        </div>
-      )}
+    <>
       <article className="rounded-lg border bg-card p-6 print:border-0 print:p-0">
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b pb-3">
           <div>
@@ -163,9 +120,13 @@ export function PayslipPage() {
           <div className="text-right text-sm">
             <p className="font-mono font-medium">{p.number}</p>
             <p>
-              <Link to={`/staff/${p.staff}`} className="font-medium hover:underline print:no-underline">
-                {p.staff_name}
-              </Link>
+              {staffHref ? (
+                <Link to={staffHref} className="font-medium hover:underline print:no-underline">
+                  {p.staff_name}
+                </Link>
+              ) : (
+                <span className="font-medium">{p.staff_name}</span>
+              )}
             </p>
             <p className="font-mono text-xs text-muted-foreground">{p.employee_number}</p>
           </div>
@@ -222,6 +183,58 @@ export function PayslipPage() {
           </ul>
         </section>
       )}
+    </>
+  )
+}
+
+/** One payslip, laid out to print, with the days behind it. */
+export function PayslipPage() {
+  const id = Number(useParams().id)
+  const navigate = useNavigate()
+  const slip = usePayslip(Number.isFinite(id) ? id : null)
+  const setOvertime = useSetOvertime()
+  const { can } = usePermissions()
+  const [editingOvertime, setEditingOvertime] = useState(false)
+  if (slip.isPending) return <PageLoader />
+  if (slip.isError) return <ErrorState error={slip.error} onRetry={() => void slip.refetch()} />
+  const p = slip.data
+  const draft = p.run_status === 'draft'
+  const warnings = p.details?.warnings ?? []
+
+  return (
+    <div className="mx-auto max-w-3xl">
+      <PageHeader
+        className="print:hidden"
+        backTo={`/payroll/runs/${p.run}`}
+        title={`Payslip ${p.number}`}
+        description={
+          <span className="inline-flex items-center gap-2">
+            {p.run_name} <RunStatus status={p.run_status} />
+          </span>
+        }
+        actions={
+          <>
+            {draft && can(PERMS.payroll.manage) && (
+              <Button variant="outline" onClick={() => setEditingOvertime(true)}>
+                <Clock aria-hidden /> Overtime
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer aria-hidden /> Print
+            </Button>
+          </>
+        }
+      />
+      {warnings.length > 0 && (
+        <div className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm print:hidden">
+          {warnings.map((w) => (
+            <p key={w} className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {w}
+            </p>
+          ))}
+        </div>
+      )}
+      <PayslipDocument p={p} staffHref={`/staff/${p.staff}`} />
       <FormDialog
         open={editingOvertime}
         onOpenChange={setEditingOvertime}

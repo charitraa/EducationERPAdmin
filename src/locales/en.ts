@@ -44,6 +44,7 @@ export const en = {
   'nav.section.administration': 'Administration',
   'nav.section.settings': 'Settings',
   'nav.dashboard': 'Dashboard',
+  'nav.me': 'My account',
   'nav.students': 'Students',
   'nav.admissions': 'Admissions',
   'nav.parents': 'Parents',

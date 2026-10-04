@@ -29,6 +29,7 @@ export const ne: Partial<Record<MessageKey, string>> = {
   'nav.section.administration': 'प्रशासन',
   'nav.section.settings': 'सेटिङ',
   'nav.dashboard': 'ड्यासबोर्ड',
+  'nav.me': 'मेरो खाता',
   'nav.students': 'विद्यार्थी',
   'nav.admissions': 'भर्ना',
   'nav.parents': 'अभिभावक',

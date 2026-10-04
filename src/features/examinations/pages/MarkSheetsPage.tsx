@@ -19,7 +19,7 @@ import type { MarkSheet, MyPaper } from '../api/examinations.api'
 import { SheetBadge } from '../components/ExamMarksPanel'
 import { useExamOptions, useMyPapers, useOpenSheet, useSheets } from '../hooks/useExaminations'
 
-function MyPapers() {
+export function MyPapers() {
   const navigate = useNavigate()
   const mine = useMyPapers()
   const open = useOpenSheet()

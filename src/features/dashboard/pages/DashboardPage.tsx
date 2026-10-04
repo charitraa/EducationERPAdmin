@@ -6,6 +6,7 @@ import { todayIso, toBsDate } from '@/lib/dates'
 import { t, useLocale } from '@/lib/i18n'
 import { PERMS } from '@/shared/constants/permissions'
 import { useCurrentAcademicYear } from '@/features/academics/academic-years/hooks/useAcademicYears'
+import { MySummary } from '@/features/self/components/MySummary'
 import { SetupChecklist } from '@/features/settings/setup/components/SetupChecklist'
 import { DashboardStats } from '../components/DashboardStats'
 import { WaitingForMe } from '../components/WaitingForMe'
@@ -49,7 +50,10 @@ export default function DashboardPage() {
       </PermissionGate>
 
       <div className="grid items-start gap-5 xl:grid-cols-[1fr_340px]">
-        <DashboardStats />
+        <div className="grid gap-5">
+          <DashboardStats />
+          <MySummary />
+        </div>
         <WaitingForMe />
       </div>
     </div>

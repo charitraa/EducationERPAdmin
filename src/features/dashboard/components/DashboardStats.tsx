@@ -22,7 +22,7 @@ export function DashboardStats() {
   const missing = useMissingAttendance(canAttendance)
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 empty:hidden lg:grid-cols-4">
       <CountCard label="Active students" icon={GraduationCap} resource="students" path="/students/" params={{ status: 'active' }} enabled={hasPermission(PERMS.students.view)} to="/students" />
       <CountCard label="Active staff" icon={UserRound} resource="staff" path="/staff/" params={{ status: 'active' }} enabled={hasPermission(PERMS.staff.view)} to="/staff" />
       {canAttendance && (

@@ -139,6 +139,37 @@ export function CertificatesPage() {
 const s = (v: unknown) => (v == null || v === '' ? null : String(v))
 
 /** A certificate laid out to print, from the facts frozen when it was issued. */
+/** The certificate as printed; shared with the student's own view. */
+export function CertificateDocument({ c }: { c: Certificate }) {
+  const k = c.contents
+  const enrolled = [s(k.program), s(k.level) && `level ${k.level}`, s(k.section) && `section ${k.section}`].filter(Boolean).join(', ')
+  return (
+      <article className="relative rounded-lg border bg-card px-8 py-10 font-serif print:border-0 sm:px-14">
+        {!c.is_valid && <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-6xl font-bold uppercase tracking-widest text-danger/15">Revoked</span>}
+        <header className="text-center">
+          <p className="text-xl font-semibold">{s(k.organization)}</p>
+          {s(k.campus) && <p className="text-sm text-muted-foreground">{s(k.campus)}</p>}
+          <h1 className="mt-6 text-2xl font-bold uppercase tracking-wide">{c.title}</h1>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">
+            No. {c.number} · {formatDate(c.issued_on)} ({toBsDate(c.issued_on)} BS)
+          </p>
+        </header>
+        <p className="mt-8 text-justify leading-8">
+          This is to certify that <strong>{s(k.student_name)}</strong>
+          {s(k.student_number) && <> (student no. {s(k.student_number)})</>}
+          {s(k.date_of_birth) && <>, born on {formatDate(String(k.date_of_birth))} ({toBsDate(String(k.date_of_birth))} BS)</>}
+          {s(k.admitted_on) && <>, was admitted to this institution on {formatDate(String(k.admitted_on))}</>}
+          {enrolled && <> and is enrolled in {enrolled}{s(k.academic_year) && <> for the academic year {s(k.academic_year)}</>}</>}
+          {s(k.status) && k.status !== 'active' && <>; current status: {enumLabel('StudentStatusEnum', String(k.status))}</>}.
+        </p>
+        {c.purpose && <p className="mt-4 leading-8">This certificate is issued {/^for\b/i.test(c.purpose) ? c.purpose : `for ${c.purpose}`}.</p>}
+        <footer className="mt-20 flex justify-end">
+          <div className="w-56 border-t pt-2 text-center text-sm">Authorised signature</div>
+        </footer>
+      </article>
+  )
+}
+
 export function CertificatePage() {
   const id = Number(useParams().id)
   const cert = useCertificate(Number.isFinite(id) ? id : null)
@@ -147,8 +178,6 @@ export function CertificatePage() {
   if (cert.isPending) return <PageLoader />
   if (cert.isError) return <ErrorState error={cert.error} onRetry={() => void cert.refetch()} />
   const c = cert.data
-  const k = c.contents
-  const enrolled = [s(k.program), s(k.level) && `level ${k.level}`, s(k.section) && `section ${k.section}`].filter(Boolean).join(', ')
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader
@@ -178,29 +207,7 @@ export function CertificatePage() {
           Revoked {formatDateTime(c.revoked_at)}: {c.revoked_reason}
         </p>
       )}
-      <article className="relative rounded-lg border bg-card px-8 py-10 font-serif print:border-0 sm:px-14">
-        {!c.is_valid && <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-6xl font-bold uppercase tracking-widest text-danger/15">Revoked</span>}
-        <header className="text-center">
-          <p className="text-xl font-semibold">{s(k.organization)}</p>
-          {s(k.campus) && <p className="text-sm text-muted-foreground">{s(k.campus)}</p>}
-          <h1 className="mt-6 text-2xl font-bold uppercase tracking-wide">{c.title}</h1>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            No. {c.number} · {formatDate(c.issued_on)} ({toBsDate(c.issued_on)} BS)
-          </p>
-        </header>
-        <p className="mt-8 text-justify leading-8">
-          This is to certify that <strong>{s(k.student_name)}</strong>
-          {s(k.student_number) && <> (student no. {s(k.student_number)})</>}
-          {s(k.date_of_birth) && <>, born on {formatDate(String(k.date_of_birth))} ({toBsDate(String(k.date_of_birth))} BS)</>}
-          {s(k.admitted_on) && <>, was admitted to this institution on {formatDate(String(k.admitted_on))}</>}
-          {enrolled && <> and is enrolled in {enrolled}{s(k.academic_year) && <> for the academic year {s(k.academic_year)}</>}</>}
-          {s(k.status) && k.status !== 'active' && <>; current status: {enumLabel('StudentStatusEnum', String(k.status))}</>}.
-        </p>
-        {c.purpose && <p className="mt-4 leading-8">This certificate is issued {/^for\b/i.test(c.purpose) ? c.purpose : `for ${c.purpose}`}.</p>}
-        <footer className="mt-20 flex justify-end">
-          <div className="w-56 border-t pt-2 text-center text-sm">Authorised signature</div>
-        </footer>
-      </article>
+      <CertificateDocument c={c} />
       <RevokeDialog certificate={revoking ? c : null} onOpenChange={(o) => !o && setRevoking(false)} />
     </div>
   )

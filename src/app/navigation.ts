@@ -10,6 +10,7 @@ import {
   CalendarCheck,
   CalendarClock,
   ClipboardCheck,
+  CircleUserRound,
   ClipboardList,
   FileBadge,
   FileStack,
@@ -60,7 +61,10 @@ export interface NavSection {
 export const navigation: NavSection[] = [
   {
     label: 'nav.section.main',
-    items: [{ label: 'nav.dashboard', path: '/', icon: LayoutDashboard }],
+    items: [
+      { label: 'nav.dashboard', path: '/', icon: LayoutDashboard },
+      { label: 'nav.me', path: '/me', icon: CircleUserRound },
+    ],
   },
   {
     label: 'nav.section.academic',

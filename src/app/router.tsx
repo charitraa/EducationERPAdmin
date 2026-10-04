@@ -19,6 +19,7 @@ import { PayrollLayout } from '@/features/payroll/PayrollLayout'
 import { TransportLayout } from '@/features/transport/TransportLayout'
 import { LibraryLayout } from '@/features/library/LibraryLayout'
 import { TimetableLayout } from '@/features/timetable/TimetableLayout'
+import { SelfLayout } from '@/features/self/SelfLayout'
 import ServerError from '@/pages/ServerError'
 import { allNavItems } from './navigation'
 import { PermissionRoute } from './PermissionRoute'
@@ -32,6 +33,29 @@ const ResetPasswordPage = lazy(() => import('@/features/authentication/pages/Res
 const SignupPage = lazy(() => import('@/features/authentication/pages/SignupPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
+const SelfMyTimetablePage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyTimetablePage })))
+const SelfMyAttendancePage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyAttendancePage })))
+const SelfMyTransportPage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyTransportPage })))
+const SelfMyHostelPage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyHostelPage })))
+const SelfMyLibraryPage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyLibraryPage })))
+const SelfMyApplicationsPage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyApplicationsPage })))
+const SelfMyLeavePage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyLeavePage })))
+const SelfMyPayslipsPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyPayslipsPage })))
+const SelfMyPayslipPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyPayslipPage })))
+const SelfMyEmploymentPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyEmploymentPage })))
+const SelfMyAssetsPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyAssetsPage })))
+const SelfMyMarkingPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyMarkingPage })))
+const SelfMyInterviewsPage = lazy(() => import('@/features/self/pages/StaffPages').then((m) => ({ default: m.MyInterviewsPage })))
+const SelfMyJobsPage = lazy(() => import('@/features/self/pages/CommunityPages').then((m) => ({ default: m.MyJobsPage })))
+const SelfMyExamsPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyExamsPage })))
+const SelfMyAdmitCardPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyAdmitCardPage })))
+const SelfMyResultsPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyResultsPage })))
+const SelfMyFeesPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyFeesPage })))
+const SelfMyEventsPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyEventsPage })))
+const SelfMyCertificatesPage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyCertificatesPage })))
+const SelfMyCertificatePage = lazy(() => import('@/features/self/pages/StudentPages').then((m) => ({ default: m.MyCertificatePage })))
+const SelfMyMentoringPage = lazy(() => import('@/features/self/pages/CommunityPages').then((m) => ({ default: m.MyMentoringPage })))
+const SelfMyAlumniEventsPage = lazy(() => import('@/features/self/pages/CommunityPages').then((m) => ({ default: m.MyAlumniEventsPage })))
 const NotificationsPage = lazy(() => import('@/features/notifications/pages/NotificationsPage'))
 const ProgramsPage = lazy(() => import('@/features/academics/programs/pages/ProgramsPage'))
 const SubjectsPage = lazy(() => import('@/features/academics/subjects/pages/SubjectsPage'))
@@ -507,6 +531,48 @@ const payrollRoutes: RouteObject = {
 }
 
 // Anyone may apply, follow their own, and decide the steps their role holds.
+// Self-service: everyone may open these; each endpoint returns only the caller's own records.
+const selfRoutes: RouteObject = {
+  path: 'me',
+  handle: crumb('My account'),
+  children: [
+    {
+      element: <SelfLayout />,
+      children: [
+        { index: true, element: page(ProfilePage) },
+        { path: 'timetable', handle: crumb('Timetable'), element: page(SelfMyTimetablePage) },
+        { path: 'attendance', handle: crumb('Attendance'), element: page(SelfMyAttendancePage) },
+        { path: 'mark-sheets', handle: crumb('Marking'), element: page(SelfMyMarkingPage, PERMS.exams.mark) },
+        { path: 'leave', handle: crumb('Leave'), element: page(SelfMyLeavePage) },
+        { path: 'payslips', handle: crumb('Payslips'), element: page(SelfMyPayslipsPage) },
+        { path: 'employment', handle: crumb('Employment'), element: page(SelfMyEmploymentPage) },
+        { path: 'contracts', element: <Navigate to="/me/employment" replace /> },
+        { path: 'assets', handle: crumb('Assets'), element: page(SelfMyAssetsPage) },
+        { path: 'transport', handle: crumb('Transport'), element: page(SelfMyTransportPage) },
+        { path: 'hostel', handle: crumb('Hostel'), element: page(SelfMyHostelPage) },
+        { path: 'library', handle: crumb('Library'), element: page(SelfMyLibraryPage) },
+        { path: 'interviews', handle: crumb('Interviews'), element: page(SelfMyInterviewsPage) },
+        { path: 'jobs', handle: crumb('Jobs'), element: page(SelfMyJobsPage) },
+        { path: 'exams', handle: crumb('Exams'), element: page(SelfMyExamsPage) },
+        { path: 'results', handle: crumb('Results'), element: page(SelfMyResultsPage) },
+        { path: 'report-card', element: <Navigate to="/me/results" replace /> },
+        { path: 'transcript', element: <Navigate to="/me/results" replace /> },
+        { path: 'fees', handle: crumb('Fees'), element: page(SelfMyFeesPage) },
+        { path: 'events', handle: crumb('Events'), element: page(SelfMyEventsPage) },
+        { path: 'certificates', handle: crumb('Certificates'), element: page(SelfMyCertificatesPage) },
+        { path: 'mentoring', handle: crumb('Mentoring'), element: page(SelfMyMentoringPage) },
+        { path: 'alumni-events', handle: crumb('Alumni events'), element: page(SelfMyAlumniEventsPage) },
+        { path: 'applications', handle: crumb('Applications'), element: page(SelfMyApplicationsPage) },
+        { path: 'profile', element: <Navigate to="/me" replace /> },
+        // Printable documents; the tabs and header don't print.
+        { path: 'payslips/:id', handle: crumb('Payslip'), element: page(SelfMyPayslipPage) },
+        { path: 'exams/:examId/admit-card', handle: crumb('Admit card'), element: page(SelfMyAdmitCardPage) },
+        { path: 'certificates/:id', handle: crumb('Certificate'), element: page(SelfMyCertificatePage) },
+      ],
+    },
+  ],
+}
+
 const applicationsRoutes: RouteObject = {
   path: 'applications',
   handle: crumb('Applications'),
@@ -660,7 +726,7 @@ export const router = createBrowserRouter([
         handle: crumb('Dashboard'),
         children: [
           { index: true, element: page(DashboardPage) },
-          { path: 'me', handle: crumb('My profile'), element: page(ProfilePage) },
+          selfRoutes,
           { path: 'notifications', handle: crumb('Notifications'), element: page(NotificationsPage) },
           { path: 'audit', handle: crumb('Audit log'), element: page(AuditLogPage, PERMS.audit.view) },
           studentsRoutes,
