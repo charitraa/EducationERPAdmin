@@ -169,7 +169,10 @@ const VehiclesPage = lazy(() => import('@/features/transport/pages/FleetPages').
 const VehicleDetailPage = lazy(() => import('@/features/transport/pages/FleetPages').then((m) => ({ default: m.VehicleDetailPage })))
 const CrewPage = lazy(() => import('@/features/transport/pages/FleetPages').then((m) => ({ default: m.CrewPage })))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
-const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
+const PublicAdmissionPage = lazy(() => import('@/features/public/pages/AdmissionPages').then((m) => ({ default: m.AdmissionPage })))
+const PublicStatusPage = lazy(() => import('@/features/public/pages/AdmissionPages').then((m) => ({ default: m.StatusCheckPage })))
+const PublicCareersPage = lazy(() => import('@/features/public/pages/CareersPages').then((m) => ({ default: m.PublicCareersPage })))
+const PublicVacancyPage = lazy(() => import('@/features/public/pages/CareersPages').then((m) => ({ default: m.PublicVacancyPage })))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 function page(Component: ComponentType, permission?: PermissionRequirement): ReactNode {
@@ -638,11 +641,12 @@ export const router = createBrowserRouter([
   {
     path: '/public/:organizationCode',
     children: [
-      { path: 'admission', element: page(PublicPlaceholder) },
-      { path: 'admission/status', element: page(PublicPlaceholder) },
-      { path: 'careers', element: page(PublicPlaceholder) },
-      { path: 'careers/:id', element: page(PublicPlaceholder) },
-      { path: 'application/status', element: page(PublicPlaceholder) },
+      { index: true, element: <Navigate to="admission" replace /> },
+      { path: 'admission', element: page(PublicAdmissionPage) },
+      { path: 'admission/status', element: page(PublicStatusPage) },
+      { path: 'careers', element: page(PublicCareersPage) },
+      { path: 'careers/:id', element: page(PublicVacancyPage) },
+      { path: 'application/status', element: page(PublicStatusPage) },
     ],
   },
   {

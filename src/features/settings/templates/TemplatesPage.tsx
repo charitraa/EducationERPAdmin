@@ -95,7 +95,7 @@ const FORMS = [
     code: 'leave',
     name: 'Staff leave',
     kind: 'leave' as const,
-    detail: 'Staff apply; head of department, then HR decide.',
+    detail: 'Staff apply; whoever approves leave for their branch decides.',
     steps: [{ name: 'Head of department', permission: 'hr.approve_leave' }],
   },
   {
