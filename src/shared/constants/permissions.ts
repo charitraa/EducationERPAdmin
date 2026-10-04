@@ -76,7 +76,13 @@ export const PERMS = {
     publish: 'exams.publish',
   },
   grades: { view: 'grades.view', manage: 'grades.manage' },
-  applications: { view: 'applications.view' },
+  applications: {
+    view: 'applications.view',
+    /** Set up forms and approval chains; apply or withdraw on someone's behalf. */
+    manage: 'applications.manage',
+    /** Issue and revoke certificates. */
+    certify: 'applications.certify',
+  },
   hr: {
     view: 'hr.view',
     /** The HR office: positions, contracts, profiles, documents, leave setup and balances. */
@@ -91,6 +97,24 @@ export const PERMS = {
     /** Approve a computed run, locking its payslips. */
     approve: 'payroll.approve',
   },
+  careers: {
+    view: 'careers.view',
+    /** Vacancies, screening, interviews. */
+    manage: 'careers.manage',
+    /** Make and withdraw offers; decide a job form's last step. */
+    hire: 'careers.hire',
+    /** Moderate the job board. */
+    board: 'careers.board',
+  },
+  alumni: {
+    view: 'alumni.view',
+    /** Alumni records, graduating classes, events and campaigns. */
+    manage: 'alumni.manage',
+    /** Record donations and refunds. */
+    donations: 'alumni.donations',
+  },
+  apiKeys: { manage: 'api_keys.manage' },
+  audit: { view: 'audit.view' },
   support: { manage: 'support.manage' },
   notices: { manage: 'notices.manage' },
   timetable: { view: 'timetable.view', manage: 'timetable.manage' },

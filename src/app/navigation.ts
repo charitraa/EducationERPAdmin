@@ -101,15 +101,15 @@ export const navigation: NavSection[] = [
       { label: 'nav.payroll', path: '/payroll', icon: BarChart3, permission: 'payroll.view' },
       { label: 'nav.hostel', path: '/hostel', icon: BedDouble, permission: 'hostel.view' },
       { label: 'nav.transport', path: '/transport', icon: Bus, permission: 'transport.view' },
-      { label: 'nav.applications', path: '/applications', icon: FileStack, permission: 'applications.view', status: 'planned' },
-      { label: 'nav.certificates', path: '/certificates', icon: FileBadge, permission: { any: ['applications.view', 'applications.certify'] }, status: 'planned' },
+      { label: 'nav.applications', path: '/applications', icon: FileStack },
+      { label: 'nav.certificates', path: '/certificates', icon: FileBadge, permission: { any: ['applications.view', 'applications.certify'] } },
     ],
   },
   {
     label: 'nav.section.community',
     items: [
-      { label: 'nav.alumni', path: '/alumni', icon: Award, permission: 'alumni.view', status: 'planned' },
-      { label: 'nav.careers', path: '/careers', icon: Sparkles, permission: 'careers.view', status: 'planned' },
+      { label: 'nav.alumni', path: '/alumni', icon: Award, permission: 'alumni.view' },
+      { label: 'nav.careers', path: '/careers', icon: Sparkles, permission: 'careers.view' },
     ],
   },
   {
@@ -117,8 +117,8 @@ export const navigation: NavSection[] = [
     items: [
       { label: 'nav.users', path: '/users', icon: Users, permission: 'users.view' },
       { label: 'nav.roles', path: '/roles', icon: ShieldCheck, permission: 'roles.view' },
-      { label: 'nav.apiKeys', path: '/settings/api-keys', icon: KeyRound, permission: 'api_keys.manage', status: 'planned' },
-      { label: 'nav.audit', path: '/audit', icon: ScrollText, permission: 'audit.view', status: 'planned' },
+      { label: 'nav.apiKeys', path: '/settings/api-keys', icon: KeyRound, permission: 'api_keys.manage' },
+      { label: 'nav.audit', path: '/audit', icon: ScrollText, permission: 'audit.view' },
     ],
   },
   {
@@ -131,7 +131,6 @@ export const navigation: NavSection[] = [
         path: '/settings/templates',
         icon: UserCog,
         permission: { any: ['grades.manage', 'finance.manage', 'hr.manage', 'applications.manage'] },
-        status: 'planned',
       },
       { label: 'nav.setup', path: '/settings/setup', icon: Wand2, permission: 'organizations.update' },
     ],

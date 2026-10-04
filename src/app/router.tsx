@@ -11,6 +11,9 @@ import { ExamsIndexGate, ExamsLayout } from '@/features/examinations/ExamsLayout
 import { FinanceLayout } from '@/features/finance/FinanceLayout'
 import { HostelLayout } from '@/features/hostel/HostelLayout'
 import { InventoryLayout } from '@/features/inventory/InventoryLayout'
+import { ApplicationsLayout } from '@/features/applications/ApplicationsLayout'
+import { AlumniLayout } from '@/features/alumni/AlumniLayout'
+import { CareersLayout } from '@/features/careers/CareersLayout'
 import { HrLayout } from '@/features/hr/HrLayout'
 import { PayrollLayout } from '@/features/payroll/PayrollLayout'
 import { TransportLayout } from '@/features/transport/TransportLayout'
@@ -134,6 +137,29 @@ const PayslipPage = lazy(() => import('@/features/payroll/pages/PayslipPages').t
 const SalariesPage = lazy(() => import('@/features/payroll/pages/SalaryPages').then((m) => ({ default: m.SalariesPage })))
 const PayrollAdjustmentsPage = lazy(() => import('@/features/payroll/pages/SalaryPages').then((m) => ({ default: m.AdjustmentsPage })))
 const PayrollSetupPage = lazy(() => import('@/features/payroll/pages/PayrollSetupPage').then((m) => ({ default: m.PayrollSetupPage })))
+const PendingApplicationsPage = lazy(() => import('@/features/applications/pages/ApplicationPages').then((m) => ({ default: m.PendingApplicationsPage })))
+const AllApplicationsPage = lazy(() => import('@/features/applications/pages/ApplicationPages').then((m) => ({ default: m.AllApplicationsPage })))
+const MyApplicationsPage = lazy(() => import('@/features/applications/pages/ApplicationPages').then((m) => ({ default: m.MyApplicationsPage })))
+const ApplicationDetailPage = lazy(() => import('@/features/applications/pages/ApplicationPages').then((m) => ({ default: m.ApplicationDetailPage })))
+const ApplicationTypesPage = lazy(() => import('@/features/applications/pages/TypesPage').then((m) => ({ default: m.TypesPage })))
+const CertificatesPage = lazy(() => import('@/features/applications/pages/CertificatePages').then((m) => ({ default: m.CertificatesPage })))
+const CertificatePage = lazy(() => import('@/features/applications/pages/CertificatePages').then((m) => ({ default: m.CertificatePage })))
+const VacanciesPage = lazy(() => import('@/features/careers/pages/VacancyPages').then((m) => ({ default: m.VacanciesPage })))
+const VacancyDetailPage = lazy(() => import('@/features/careers/pages/VacancyPages').then((m) => ({ default: m.VacancyDetailPage })))
+const CandidatesPage = lazy(() => import('@/features/careers/pages/CandidatePages').then((m) => ({ default: m.CandidatesPage })))
+const CandidatePage = lazy(() => import('@/features/careers/pages/CandidatePages').then((m) => ({ default: m.CandidatePage })))
+const InterviewsPage = lazy(() => import('@/features/careers/pages/CandidatePages').then((m) => ({ default: m.InterviewsPage })))
+const OffersPage = lazy(() => import('@/features/careers/pages/CandidatePages').then((m) => ({ default: m.OffersPage })))
+const JobBoardPage = lazy(() => import('@/features/careers/pages/BoardPage').then((m) => ({ default: m.BoardPage })))
+const AlumniListPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.AlumniListPage })))
+const AlumnusPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.AlumnusPage })))
+const MentorsPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.MentorsPage })))
+const AlumniEventsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.AlumniEventsPage })))
+const CampaignsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.CampaignsPage })))
+const DonationsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.DonationsPage })))
+const ApiKeysPage = lazy(() => import('@/features/settings/api-keys/ApiKeysPage'))
+const AuditLogPage = lazy(() => import('@/features/audit/AuditLogPage'))
+const TemplatesPage = lazy(() => import('@/features/settings/templates/TemplatesPage'))
 const TripsPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripsPage })))
 const TripPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripPage })))
 const RoutesPage = lazy(() => import('@/features/transport/pages/RoutePages').then((m) => ({ default: m.RoutesPage })))
@@ -477,6 +503,78 @@ const payrollRoutes: RouteObject = {
   ],
 }
 
+// Anyone may apply, follow their own, and decide the steps their role holds.
+const applicationsRoutes: RouteObject = {
+  path: 'applications',
+  handle: crumb('Applications'),
+  children: [
+    {
+      element: <ApplicationsLayout />,
+      children: [
+        { index: true, element: page(PendingApplicationsPage) },
+        { path: 'pending', element: <Navigate to="/applications" replace /> },
+        { path: 'all', handle: crumb('All'), element: page(AllApplicationsPage, PERMS.applications.view) },
+        { path: 'mine', handle: crumb('Mine'), element: page(MyApplicationsPage) },
+        { path: 'types', handle: crumb('Forms'), element: page(ApplicationTypesPage, PERMS.applications.view) },
+      ],
+    },
+    { path: ':id', handle: crumb('Application'), element: page(ApplicationDetailPage) },
+  ],
+}
+
+const certificatesRoutes: RouteObject = {
+  path: 'certificates',
+  handle: crumb('Certificates'),
+  element: <PermissionRoute permission={{ any: [PERMS.applications.view, PERMS.applications.certify] }} />,
+  children: [
+    { index: true, element: page(CertificatesPage) },
+    { path: 'templates', element: <Navigate to="/applications/types?kind=certificate" replace /> },
+    { path: 'requests', element: <Navigate to="/applications/all?application_type__kind=certificate" replace /> },
+    { path: ':id', handle: crumb('Certificate'), element: page(CertificatePage) },
+  ],
+}
+
+const careersRoutes: RouteObject = {
+  path: 'careers',
+  handle: crumb('Careers'),
+  element: <PermissionRoute permission={PERMS.careers.view} />,
+  children: [
+    {
+      element: <CareersLayout />,
+      children: [
+        { index: true, element: page(VacanciesPage) },
+        { path: 'applications', handle: crumb('Candidates'), element: page(CandidatesPage) },
+        { path: 'interviews', handle: crumb('Interviews'), element: page(InterviewsPage) },
+        { path: 'offers', handle: crumb('Offers'), element: page(OffersPage) },
+        { path: 'board', handle: crumb('Job board'), element: page(JobBoardPage) },
+      ],
+    },
+    { path: 'vacancies', element: <Navigate to="/careers" replace /> },
+    { path: 'vacancies/:id', handle: crumb('Vacancy'), element: page(VacancyDetailPage) },
+    { path: 'applications/:id', handle: crumb('Candidate'), element: page(CandidatePage) },
+  ],
+}
+
+const alumniRoutes: RouteObject = {
+  path: 'alumni',
+  handle: crumb('Alumni'),
+  element: <PermissionRoute permission={PERMS.alumni.view} />,
+  children: [
+    {
+      element: <AlumniLayout />,
+      children: [
+        { index: true, element: page(AlumniListPage) },
+        { path: 'directory', element: <Navigate to="/alumni?directory_visible=true" replace /> },
+        { path: 'mentors', handle: crumb('Mentors'), element: page(MentorsPage) },
+        { path: 'events', handle: crumb('Events'), element: page(AlumniEventsPage) },
+        { path: 'campaigns', handle: crumb('Campaigns'), element: page(CampaignsPage) },
+        { path: 'donations', handle: crumb('Donations'), element: page(DonationsPage) },
+      ],
+    },
+    { path: ':id', handle: crumb('Alumnus'), element: page(AlumnusPage) },
+  ],
+}
+
 const hostelRoutes: RouteObject = {
   path: 'hostel',
   handle: crumb('Hostel'),
@@ -527,6 +625,8 @@ const settingsRoutes: RouteObject = {
     { path: 'organization', handle: crumb('Organization'), element: page(OrganizationSettingsPage, PERMS.organizations.view) },
     { path: 'branches', handle: crumb('Branches'), element: page(BranchesPage, PERMS.campuses.view) },
     { path: 'setup', handle: crumb('Setup'), element: page(SetupWizardPage, PERMS.organizations.update) },
+    { path: 'api-keys', handle: crumb('API keys'), element: page(ApiKeysPage, PERMS.apiKeys.manage) },
+    { path: 'templates', handle: crumb('Templates'), element: page(TemplatesPage, { any: [PERMS.grades.manage, PERMS.finance.manage, PERMS.hr.manage, PERMS.applications.manage] }) },
   ],
 }
 
@@ -558,6 +658,7 @@ export const router = createBrowserRouter([
           { index: true, element: page(DashboardPage) },
           { path: 'me', handle: crumb('My profile'), element: page(ProfilePage) },
           { path: 'notifications', handle: crumb('Notifications'), element: page(NotificationsPage) },
+          { path: 'audit', handle: crumb('Audit log'), element: page(AuditLogPage, PERMS.audit.view) },
           studentsRoutes,
           admissionsRoutes,
           parentsRoutes,
@@ -576,6 +677,10 @@ export const router = createBrowserRouter([
           inventoryRoutes,
           hrRoutes,
           payrollRoutes,
+          applicationsRoutes,
+          certificatesRoutes,
+          careersRoutes,
+          alumniRoutes,
           hostelRoutes,
           transportRoutes,
           academicsRoutes,
