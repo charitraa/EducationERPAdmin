@@ -5,7 +5,7 @@ import { tokens } from '@/lib/auth'
 import { createPermissionSet } from '@/lib/permissions'
 import { authApi, authKeys } from '@/features/authentication/api/auth.api'
 import { isSessionRejected, refreshSession, setSessionExpiredHandler } from '@/shared/api/client'
-import type { LoginRequest } from '@/shared/types/auth'
+import type { LoginRequest, LoginResponse } from '@/shared/types/auth'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient()
@@ -52,9 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 5 * 60_000,
   })
 
-  const login = useCallback(
-    async (body: LoginRequest) => {
-      const res = await authApi.login(body)
+  const signIn = useCallback(
+    (res: LoginResponse) => {
       tokens.set(res)
       queryClient.setQueryData(authKeys.me, res.user)
       setSessionExpired(false)
@@ -63,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [queryClient],
   )
+
+  const login = useCallback(async (body: LoginRequest) => signIn(await authApi.login(body)), [signIn])
 
   const logout = useCallback(async () => {
     const refresh = tokens.getRefresh()
@@ -86,11 +87,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       permissions: createPermissionSet(user),
       sessionExpired,
       login,
+      signIn,
       logout,
       retry,
       bootError,
     }),
-    [status, user, me.isError, sessionExpired, login, logout, retry, bootError],
+    [status, user, me.isError, sessionExpired, login, signIn, logout, retry, bootError],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

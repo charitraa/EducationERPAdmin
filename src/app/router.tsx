@@ -31,6 +31,7 @@ const LoginPage = lazy(() => import('@/features/authentication/pages/LoginPage')
 const ForgotPasswordPage = lazy(() => import('@/features/authentication/pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('@/features/authentication/pages/ResetPasswordPage'))
 const SignupPage = lazy(() => import('@/features/authentication/pages/SignupPage'))
+const SignupVerifyPage = lazy(() => import('@/features/authentication/pages/SignupVerifyPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const SelfMyTimetablePage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyTimetablePage })))
@@ -183,6 +184,7 @@ const CampaignsPage = lazy(() => import('@/features/alumni/pages/GivingPages').t
 const DonationsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.DonationsPage })))
 const ApiKeysPage = lazy(() => import('@/features/settings/api-keys/ApiKeysPage'))
 const AuditLogPage = lazy(() => import('@/features/audit/AuditLogPage'))
+const SignupRequestsPage = lazy(() => import('@/features/platform/SignupRequestsPage'))
 const TemplatesPage = lazy(() => import('@/features/settings/templates/TemplatesPage'))
 const TripsPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripsPage })))
 const TripPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripPage })))
@@ -704,6 +706,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: page(ForgotPasswordPage) },
   { path: '/reset-password', element: page(ResetPasswordPage) },
   { path: '/signup', element: page(SignupPage) },
+  { path: '/signup/verify', element: page(SignupVerifyPage) },
   {
     path: '/public/:organizationCode',
     children: [
@@ -729,6 +732,7 @@ export const router = createBrowserRouter([
           selfRoutes,
           { path: 'notifications', handle: crumb('Notifications'), element: page(NotificationsPage) },
           { path: 'audit', handle: crumb('Audit log'), element: page(AuditLogPage, PERMS.audit.view) },
+          { path: 'platform/signup-requests', handle: crumb('Signup requests'), element: page(SignupRequestsPage, PERMS.platform.admin) },
           studentsRoutes,
           admissionsRoutes,
           parentsRoutes,

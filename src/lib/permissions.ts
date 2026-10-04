@@ -13,12 +13,19 @@ export interface PermissionSet {
   has(code: string): boolean
 }
 
-export function createPermissionSet(user: Pick<CurrentUser, 'permissions' | 'is_superuser'> | null): PermissionSet {
+/**
+ * Not a backend permission: screens only the platform's own admins may open
+ * (a superuser with no organization, the backend's `IsPlatformAdmin`).
+ */
+export const PLATFORM_ADMIN = '@platform'
+
+export function createPermissionSet(user: Pick<CurrentUser, 'permissions' | 'is_superuser' | 'organization'> | null): PermissionSet {
   if (!user) return { has: () => false }
-  // Platform superusers pass every backend permission check.
-  if (user.is_superuser) return { has: () => true }
+  const platform = user.is_superuser && !user.organization
+  // Superusers pass every backend permission check.
+  if (user.is_superuser) return { has: (code) => code !== PLATFORM_ADMIN || platform }
   const codes = new Set(user.permissions)
-  return { has: (code) => codes.has(code) }
+  return { has: (code) => code !== PLATFORM_ADMIN && codes.has(code) }
 }
 
 export function satisfies(set: PermissionSet, req: PermissionRequirement | undefined): boolean {

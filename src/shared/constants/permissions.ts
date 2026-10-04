@@ -115,6 +115,8 @@ export const PERMS = {
   },
   apiKeys: { manage: 'api_keys.manage' },
   audit: { view: 'audit.view' },
+  /** Platform admins only; see lib/permissions PLATFORM_ADMIN. */
+  platform: { admin: '@platform' },
   support: { manage: 'support.manage' },
   notices: { manage: 'notices.manage' },
   timetable: { view: 'timetable.view', manage: 'timetable.manage' },

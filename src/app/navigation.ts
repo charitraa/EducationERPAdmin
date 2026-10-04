@@ -6,6 +6,7 @@ import {
   Boxes,
   Briefcase,
   Building2,
+  Building,
   Bus,
   CalendarCheck,
   CalendarClock,
@@ -35,7 +36,7 @@ import {
   Wallet,
   Wand2,
 } from 'lucide-react'
-import type { PermissionRequirement } from '@/lib/permissions'
+import { PLATFORM_ADMIN, type PermissionRequirement } from '@/lib/permissions'
 import type { MessageKey } from '@/locales/en'
 
 export interface NavItem {
@@ -124,6 +125,10 @@ export const navigation: NavSection[] = [
       { label: 'nav.apiKeys', path: '/settings/api-keys', icon: KeyRound, permission: 'api_keys.manage' },
       { label: 'nav.audit', path: '/audit', icon: ScrollText, permission: 'audit.view' },
     ],
+  },
+  {
+    label: 'nav.section.platform',
+    items: [{ label: 'nav.signupRequests', path: '/platform/signup-requests', icon: Building, permission: PLATFORM_ADMIN }],
   },
   {
     label: 'nav.section.settings',

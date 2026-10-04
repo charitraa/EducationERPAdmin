@@ -1,15 +1,6 @@
-import axios from 'axios'
-import { env } from '@/lib/env'
-import { toApiError } from '@/shared/api/errors'
+import { publicClient as client } from '@/shared/api/publicClient'
 import type { Id } from '@/shared/types/api'
 import type { FieldDefinition } from '@/features/applications/api/applications.api'
-
-/**
- * No token, no refresh: these pages are for people without an account, and an
- * admin who happens to be signed in in the same browser shouldn't be sent along.
- */
-const client = axios.create({ baseURL: env.apiBaseUrl })
-client.interceptors.response.use(undefined, (error) => Promise.reject(toApiError(error)))
 
 const base = (code: string) => `/public/organizations/${encodeURIComponent(code)}`
 
