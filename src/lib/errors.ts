@@ -8,7 +8,9 @@ export function errorMessage(err: unknown): string {
   const e = toApiError(err)
   switch (e.status) {
     case 403:
-      return t('errors.forbidden')
+      // A bare "no permission" gets our wording; a business rule with its own
+      // code ("too_far", "qr_expired", "not_in_class"…) says what's wrong.
+      return e.code && e.code !== 'permission_denied' && e.message ? e.message : t('errors.forbidden')
     case 404:
       return t('errors.notFound')
     case 429:

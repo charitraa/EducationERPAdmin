@@ -1,5 +1,5 @@
-import { Clock, Plus, Undo2 } from 'lucide-react'
-import { useId, useState } from 'react'
+import { Clock, Plus, QrCode, Undo2 } from 'lucide-react'
+import { useCallback, useId, useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
@@ -28,7 +28,8 @@ import { cn } from '@/lib/utils'
 import { isoDate } from '@/lib/validation'
 import { PERMS } from '@/shared/constants/permissions'
 import type { StatusTone } from '@/shared/constants/statuses'
-import type { Punch, StaffDay, StaffDayStatus } from '../api/attendance.api'
+import { punchesApi, type Punch, type QrOptions, type StaffDay, type StaffDayStatus } from '../api/attendance.api'
+import { QrPresenter } from '../components/QrPresenter'
 import { useClearStaffDay, useManualPunch, usePunches, useSetStaffDay, useStaffDays, useStaffReport } from '../hooks/useAttendance'
 
 const VIEWS = [
@@ -327,25 +328,59 @@ function Punches() {
   )
 }
 
+/** The code staff scan at the gate or staff room to check in and out. */
+function CheckInQr({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+  const { branches, isMultiBranch, defaultBranchId, selectedBranchId, branchName } = useBranches()
+  const [campus, setCampus] = useState('')
+  const chosen = campus ? Number(campus) : (selectedBranchId ?? defaultBranchId)
+  const issue = useCallback((options: QrOptions) => punchesApi.qr({ ...options, campus: chosen! }), [chosen])
+  return (
+    <QrPresenter
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isMultiBranch && chosen ? `Staff check-in · ${branchName(chosen)}` : 'Staff check-in'}
+      description="Staff scan this with their phone's camera when they arrive and leave. Each scan is a check-in; the day works out in and out from the first and last."
+      path="/scan/staff"
+      issue={issue}
+      settings={
+        isMultiBranch && (
+          <FormField label="Branch" required>
+            {(p) => <SelectControl {...p} value={chosen ? String(chosen) : ''} onChange={setCampus} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
+          </FormField>
+        )
+      }
+    />
+  )
+}
+
 /** Staff attendance: the period summary, each day, and the raw check-ins behind them. */
 export default function StaffAttendancePage() {
   const [params, setParams] = useSearchParams()
   const view = VIEWS.find((v) => v.value === params.get('view'))?.value ?? 'summary'
+  const [showingQr, setShowingQr] = useState(false)
   return (
     <>
-      <div className="mb-4 inline-flex rounded-md border p-0.5" role="tablist" aria-label="Staff attendance">
-        {VIEWS.map((v) => (
-          <button
-            key={v.value}
-            type="button"
-            role="tab"
-            aria-selected={view === v.value}
-            onClick={() => setParams(v.value === 'summary' ? {} : { view: v.value }, { replace: true })}
-            className={cn('rounded px-3 py-1.5 text-sm', view === v.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
-          >
-            {v.label}
-          </button>
-        ))}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="inline-flex rounded-md border p-0.5" role="tablist" aria-label="Staff attendance">
+          {VIEWS.map((v) => (
+            <button
+              key={v.value}
+              type="button"
+              role="tab"
+              aria-selected={view === v.value}
+              onClick={() => setParams(v.value === 'summary' ? {} : { view: v.value }, { replace: true })}
+              className={cn('rounded px-3 py-1.5 text-sm', view === v.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+        <PermissionGate permission={PERMS.attendance.manage}>
+          <Button variant="outline" onClick={() => setShowingQr(true)}>
+            <QrCode aria-hidden /> Check-in QR code
+          </Button>
+          <CheckInQr open={showingQr} onOpenChange={setShowingQr} />
+        </PermissionGate>
       </div>
       {view === 'summary' ? <Summary /> : view === 'days' ? <Days /> : <Punches />}
     </>

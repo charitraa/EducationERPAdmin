@@ -1,5 +1,5 @@
-import { CheckCheck, Loader2, MoreHorizontal, Pencil, RotateCcw, Save, Search, Send } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { CheckCheck, Loader2, MoreHorizontal, Pencil, QrCode, RotateCcw, Save, Search, Send } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 import { z } from 'zod'
@@ -28,7 +28,8 @@ import { PERMS } from '@/shared/constants/permissions'
 import { TONE_CLASSES } from '@/shared/constants/statuses'
 import type { Id } from '@/shared/types/api'
 import { hhmm } from '@/features/timetable/api/timetable.api'
-import { STATUS_SHORT, STATUS_TONE, STATUSES, type AttendanceStatus, type RosterStudent } from '../api/attendance.api'
+import { sessionsApi, STATUS_SHORT, STATUS_TONE, STATUSES, type AttendanceStatus, type QrOptions, type RosterStudent } from '../api/attendance.api'
+import { QrPresenter } from '../components/QrPresenter'
 import { useCorrectRecord, useMarkSession, useReopenSession, useRoster, useSubmitSession } from '../hooks/useAttendance'
 
 /** The three a teacher taps most; the rest live in the ⋯ menu. */
@@ -170,7 +171,9 @@ function StudentRow({
 /** One roll call: mark everyone (P / A / L in one tap), save as you go, then submit. */
 export default function RollCallPage() {
   const id = Number(useParams().id)
-  const roster = useRoster(Number.isFinite(id) ? id : null)
+  const [showingQr, setShowingQr] = useState(false)
+  const [lateAfter, setLateAfter] = useState('')
+  const roster = useRoster(Number.isFinite(id) ? id : null, showingQr)
   const mark = useMarkSession()
   const submit = useSubmitSession()
   const reopen = useReopenSession()
@@ -182,6 +185,12 @@ export default function RollCallPage() {
   const [reopening, setReopening] = useState(false)
   const [correcting, setCorrecting] = useState<RosterStudent | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  const issueQr = useCallback(
+    (options: QrOptions, startedAt: Date) =>
+      sessionsApi.qr(id, { ...options, late_after: lateAfter ? new Date(startedAt.getTime() + Number(lateAfter) * 60_000).toISOString() : undefined }),
+    [id, lateAfter],
+  )
 
   const students = roster.data?.students ?? []
   const session = roster.data?.session
@@ -248,11 +257,19 @@ export default function RollCallPage() {
           </span>
         }
         actions={
-          submitted &&
-          can(PERMS.attendance.manage) && (
-            <Button variant="outline" onClick={() => setReopening(true)}>
-              <RotateCcw aria-hidden /> Reopen
-            </Button>
+          submitted ? (
+            can(PERMS.attendance.manage) && (
+              <Button variant="outline" onClick={() => setReopening(true)}>
+                <RotateCcw aria-hidden /> Reopen
+              </Button>
+            )
+          ) : (
+            students.length > 0 &&
+            can(PERMS.attendance.mark) && (
+              <Button variant="outline" onClick={() => setShowingQr(true)}>
+                <QrCode aria-hidden /> Show QR code
+              </Button>
+            )
           )
         }
       />
@@ -350,6 +367,33 @@ export default function RollCallPage() {
           await reopen.mutateAsync(id)
           toast.success('Reopened.')
         }}
+      />
+      <QrPresenter
+        open={showingQr}
+        onOpenChange={setShowingQr}
+        title={title}
+        description="Students scan this with their phone's camera and sign in with their own account. Each one is marked as they scan; you can still change anyone before submitting."
+        path="/scan/class"
+        issue={issueQr}
+        settings={
+          <FormField label="Mark late" description="Counted from when the code first goes up.">
+            {(p) => (
+              <SelectControl
+                {...p}
+                value={lateAfter}
+                onChange={setLateAfter}
+                allowEmpty
+                emptyLabel="Never: every scan is present"
+                options={[5, 10, 15, 20].map((m) => ({ value: String(m), label: `Scans after ${m} minutes` }))}
+              />
+            )}
+          </FormField>
+        }
+        live={
+          <p className="text-sm font-medium" aria-live="polite">
+            {students.filter((s) => s.source === 'qr').length} scanned · {students.length - unmarked.length} of {students.length} marked
+          </p>
+        }
       />
       <CorrectDialog student={correcting} onClose={() => setCorrecting(null)} />
       <UnsavedChangesDialog blocker={blocker} />

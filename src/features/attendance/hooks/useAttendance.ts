@@ -41,8 +41,9 @@ export function useMyClasses(date: string, enabled = true) {
   return useQuery({ queryKey: [...sessionKeys.all, 'mine', date], queryFn: () => sessionsApi.mine(date), enabled, retry: false })
 }
 
-export function useRoster(id: Id | null) {
-  return useQuery({ queryKey: [...sessionKeys.all, 'roster', id], queryFn: () => sessionsApi.roster(id!), enabled: id != null })
+/** `live`: poll while a QR code is up, so scans show as they come in. */
+export function useRoster(id: Id | null, live = false) {
+  return useQuery({ queryKey: [...sessionKeys.all, 'roster', id], queryFn: () => sessionsApi.roster(id!), enabled: id != null, refetchInterval: live ? 5000 : false })
 }
 
 export function useOpenSession() {

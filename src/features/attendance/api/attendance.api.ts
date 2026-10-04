@@ -133,6 +133,26 @@ export interface StaffReportRow {
   average_worked_minutes: number | null
 }
 
+/** `expires_at` is Unix seconds (a float), not an ISO date. */
+export interface QrToken {
+  token: string
+  expires_at: number
+}
+
+/** Seconds each code works (15–300). With all three location fields, scans from further than `radius` metres are refused. */
+export interface QrOptions {
+  ttl?: number
+  latitude?: number
+  longitude?: number
+  radius?: number
+}
+
+export interface ScanInput {
+  token: string
+  latitude?: number
+  longitude?: number
+}
+
 export interface Span {
   from?: string
   to?: string
@@ -149,6 +169,11 @@ export const sessionsApi = {
   mark: (id: Id, input: MarkInput) => apiClient.post<AttendanceRecord[]>(`/attendance/sessions/${id}/mark/`, input).then((r) => r.data),
   submit: (id: Id, rest?: AttendanceStatus) => apiClient.post<Session>(`/attendance/sessions/${id}/submit/`, rest ? { rest } : {}).then((r) => r.data),
   reopen: (id: Id) => apiClient.post<Session>(`/attendance/sessions/${id}/reopen/`).then((r) => r.data),
+  /** A short-lived code for students to scan; ask again before `expires_at`. */
+  qr: (id: Id, input: QrOptions & { late_after?: string }) => apiClient.post<QrToken & { session: Id }>(`/attendance/sessions/${id}/qr/`, input).then((r) => r.data),
+  /** The signed-in student scans a class's code. 201 when marked now, 200 with `already_marked`. */
+  scan: (input: ScanInput & { device_id?: string }) =>
+    apiClient.post<{ already_marked: boolean; status: AttendanceStatus; session: Id }>('/attendance/sessions/scan/', input).then((r) => r.data),
 }
 export const sessionKeys = createQueryKeys('attendance-sessions')
 
@@ -185,6 +210,10 @@ const punchesBase = createResourceApi<Punch, never>('/attendance/punches/')
 export const punchesApi = {
   list: punchesBase.list,
   create: (input: { staff: Id; punched_at: string; direction: 'in' | 'out' | 'unknown'; note: string }) => apiClient.post<Punch>('/attendance/punches/', input).then((r) => r.data),
+  /** A short-lived code shown at a campus for staff to check in with. */
+  qr: (input: QrOptions & { campus: Id }) => apiClient.post<QrToken>('/attendance/punches/qr/', input).then((r) => r.data),
+  /** The signed-in staff member scans the campus code. */
+  checkIn: (input: ScanInput) => apiClient.post<Punch>('/attendance/punches/check-in/', input).then((r) => r.data),
 }
 export const punchKeys = createQueryKeys('attendance-punches')
 

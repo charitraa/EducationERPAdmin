@@ -20,6 +20,8 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: Location } | null)?.from
+  // Keep the query too: deep links such as `/scan/class?t=…` carry what they need in it.
+  const back = from ? `${from.pathname}${from.search}${from.hash}` : '/'
   const [needsOtp, setNeedsOtp] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '', otp: '' } })
@@ -28,7 +30,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = form
 
-  if (status === 'authenticated') return <Navigate to={from?.pathname ?? '/'} replace />
+  if (status === 'authenticated') return <Navigate to={back} replace />
 
   const submit = form.handleSubmit(async ({ email, password, otp }) => {
     setServerError(null)
@@ -38,7 +40,7 @@ export default function LoginPage() {
     }
     try {
       await login(needsOtp ? { email, password, otp } : { email, password })
-      navigate(from ? `${from.pathname}${from.search}` : '/', { replace: true })
+      navigate(back, { replace: true })
     } catch (err) {
       const e = toApiError(err)
       if (e.code === 'otp_required') {

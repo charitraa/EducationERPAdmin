@@ -107,6 +107,7 @@ const AttendanceSessionsPage = lazy(() => import('@/features/attendance/pages/Se
 const RollCallPage = lazy(() => import('@/features/attendance/pages/RollCallPage'))
 const AttendanceReportsPage = lazy(() => import('@/features/attendance/pages/ReportsPage'))
 const StaffAttendancePage = lazy(() => import('@/features/attendance/pages/StaffAttendancePage'))
+const ScanPage = lazy(() => import('@/features/attendance/pages/ScanPage'))
 const WorkSchedulesPage = lazy(() => import('@/features/attendance/pages/WorkSchedulesPage'))
 const AttendanceDevicesPage = lazy(() => import('@/features/attendance/pages/DevicesPage'))
 const ExamsListPage = lazy(() => import('@/features/examinations/pages/ExamsListPage'))
@@ -722,6 +723,8 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     errorElement: <ServerError />,
     children: [
+      // Opened by a phone's camera from an attendance QR code: no sidebar, just the result.
+      { path: '/scan/:kind', element: page(ScanPage) },
       {
         path: '/',
         element: <ProtectedLayout />,
