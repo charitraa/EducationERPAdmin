@@ -10,7 +10,9 @@ import { StatusBadge } from '@/components/data-display/StatusBadge'
 import { BsDateDisplay } from '@/components/forms/BsDateDisplay'
 import { Button } from '@/components/ui/button'
 import { WorkflowActions } from '@/components/workflow/WorkflowActions'
+import { StaffHr } from '@/features/hr/components/StaffHr'
 import { StaffAssets } from '@/features/inventory/components/StaffAssets'
+import { StaffPayroll } from '@/features/payroll/components/StaffPayroll'
 import { usePermissions } from '@/hooks/usePermissions'
 import { enumLabel } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
@@ -115,6 +117,8 @@ export default function StaffDetailPage() {
             <Field label="Portal login">{m.user ? 'Linked' : 'No login account'}</Field>
           </dl>
         </section>
+        {can(PERMS.hr.view) && <StaffHr staffId={m.id} />}
+        {can(PERMS.payroll.view) && <StaffPayroll staffId={m.id} />}
         {can(PERMS.inventory.view) && <StaffAssets staffId={m.id} />}
       </div>
 

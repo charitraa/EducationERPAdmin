@@ -11,6 +11,7 @@ import { RowActions } from '@/components/common/RowActions'
 import { SectionHeader } from '@/components/common/SectionHeader'
 import { DataTable, type Column } from '@/components/data-display/DataTable'
 import { ErrorState } from '@/components/data-display/ErrorState'
+import { daysUntil, Expiry } from '@/components/data-display/Expiry'
 import { PageLoader } from '@/components/data-display/LoadingState'
 import { StatusBadge } from '@/components/data-display/StatusBadge'
 import { DatePicker } from '@/components/forms/DatePicker'
@@ -26,9 +27,8 @@ import { useCrudState } from '@/hooks/useCrudState'
 import { usePermissions } from '@/hooks/usePermissions'
 import { useListState } from '@/hooks/usePagination'
 import { toast } from '@/hooks/useToast'
-import { formatDate, parseIsoDate, todayIso } from '@/lib/dates'
+import { formatDate, todayIso } from '@/lib/dates'
 import { enumLabel, enumOptions } from '@/lib/formatters'
-import { cn } from '@/lib/utils'
 import { isoDate, optionalIsoDate, optionalWholeNumber, wholeNumber } from '@/lib/validation'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
@@ -51,25 +51,6 @@ import {
   useVehicleMaintenance,
   useVehicles,
 } from '../hooks/useTransport'
-
-/** Days until a date; negative once it has passed. */
-const daysUntil = (iso: string | null | undefined) => {
-  const d = parseIsoDate(iso ?? null)
-  const today = parseIsoDate(todayIso())!
-  return d ? Math.round((d.getTime() - today.getTime()) / 86400000) : null
-}
-
-/** Expired in red, within 30 days in amber. */
-export function Expiry({ on }: { on: string | null | undefined }) {
-  const days = daysUntil(on)
-  if (days == null) return <span className="text-muted-foreground">—</span>
-  return (
-    <span className={cn('tabular-nums', days < 0 ? 'font-medium text-danger' : days <= 30 ? 'font-medium text-warning' : undefined)}>
-      {formatDate(on)}
-      {days < 0 ? ' · expired' : days <= 30 ? ` · ${days} days` : ''}
-    </span>
-  )
-}
 
 const vehicleSchema = z.object({ campus: z.string().min(1, 'Choose a branch.'), registration_number: z.string().trim().min(1, 'Required.').max(30), name: z.string().trim().min(1, 'Required.').max(100), kind: z.string(), capacity: wholeNumber(), make: z.string().max(60), model: z.string().max(60), year: optionalWholeNumber, note: z.string().max(255), is_active: z.boolean() })
 

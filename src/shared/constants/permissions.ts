@@ -77,7 +77,20 @@ export const PERMS = {
   },
   grades: { view: 'grades.view', manage: 'grades.manage' },
   applications: { view: 'applications.view' },
-  hr: { view: 'hr.view', approveLeave: 'hr.approve_leave' },
+  hr: {
+    view: 'hr.view',
+    /** The HR office: positions, contracts, profiles, documents, leave setup and balances. */
+    manage: 'hr.manage',
+    /** Approve or reject leave (a head of department can hold this alone). */
+    approveLeave: 'hr.approve_leave',
+  },
+  payroll: {
+    view: 'payroll.view',
+    /** Salaries, components, tax; create, compute and pay runs. */
+    manage: 'payroll.manage',
+    /** Approve a computed run, locking its payslips. */
+    approve: 'payroll.approve',
+  },
   support: { manage: 'support.manage' },
   notices: { manage: 'notices.manage' },
   timetable: { view: 'timetable.view', manage: 'timetable.manage' },

@@ -11,6 +11,8 @@ import { ExamsIndexGate, ExamsLayout } from '@/features/examinations/ExamsLayout
 import { FinanceLayout } from '@/features/finance/FinanceLayout'
 import { HostelLayout } from '@/features/hostel/HostelLayout'
 import { InventoryLayout } from '@/features/inventory/InventoryLayout'
+import { HrLayout } from '@/features/hr/HrLayout'
+import { PayrollLayout } from '@/features/payroll/PayrollLayout'
 import { TransportLayout } from '@/features/transport/TransportLayout'
 import { LibraryLayout } from '@/features/library/LibraryLayout'
 import { TimetableLayout } from '@/features/timetable/TimetableLayout'
@@ -119,6 +121,19 @@ const HostelAllocationsPage = lazy(() => import('@/features/hostel/pages/Allocat
 const HostelRoomsPage = lazy(() => import('@/features/hostel/pages/StructurePages').then((m) => ({ default: m.RoomsPage })))
 const HostelBuildingsPage = lazy(() => import('@/features/hostel/pages/StructurePages').then((m) => ({ default: m.BuildingsPage })))
 const HostelComplaintsPage = lazy(() => import('@/features/hostel/pages/ComplaintsPage'))
+const LeaveRequestsPage = lazy(() => import('@/features/hr/pages/LeavePages').then((m) => ({ default: m.LeaveRequestsPage })))
+const LeaveBalancesPage = lazy(() => import('@/features/hr/pages/LeavePages').then((m) => ({ default: m.LeaveBalancesPage })))
+const ContractsPage = lazy(() => import('@/features/hr/pages/PeoplePages').then((m) => ({ default: m.ContractsPage })))
+const HrProfilesPage = lazy(() => import('@/features/hr/pages/PeoplePages').then((m) => ({ default: m.ProfilesPage })))
+const HrDocumentsPage = lazy(() => import('@/features/hr/pages/PeoplePages').then((m) => ({ default: m.DocumentsPage })))
+const HrSetupPage = lazy(() => import('@/features/hr/pages/HrSetupPage').then((m) => ({ default: m.HrSetupPage })))
+const PayrollRunsPage = lazy(() => import('@/features/payroll/pages/RunPages').then((m) => ({ default: m.RunsPage })))
+const PayrollRunPage = lazy(() => import('@/features/payroll/pages/RunPages').then((m) => ({ default: m.RunDetailPage })))
+const PayslipsPage = lazy(() => import('@/features/payroll/pages/PayslipPages').then((m) => ({ default: m.PayslipsPage })))
+const PayslipPage = lazy(() => import('@/features/payroll/pages/PayslipPages').then((m) => ({ default: m.PayslipPage })))
+const SalariesPage = lazy(() => import('@/features/payroll/pages/SalaryPages').then((m) => ({ default: m.SalariesPage })))
+const PayrollAdjustmentsPage = lazy(() => import('@/features/payroll/pages/SalaryPages').then((m) => ({ default: m.AdjustmentsPage })))
+const PayrollSetupPage = lazy(() => import('@/features/payroll/pages/PayrollSetupPage').then((m) => ({ default: m.PayrollSetupPage })))
 const TripsPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripsPage })))
 const TripPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripPage })))
 const RoutesPage = lazy(() => import('@/features/transport/pages/RoutePages').then((m) => ({ default: m.RoutesPage })))
@@ -419,6 +434,49 @@ const inventoryRoutes: RouteObject = {
   ],
 }
 
+// Someone holding only hr.approve_leave (a head of department) gets the leave queue.
+const hrRoutes: RouteObject = {
+  path: 'hr',
+  handle: crumb('HR'),
+  element: (
+    <PermissionRoute permission={{ any: [PERMS.hr.view, PERMS.hr.approveLeave] }}>
+      <HrLayout />
+    </PermissionRoute>
+  ),
+  children: [
+    { index: true, element: page(LeaveRequestsPage) },
+    { path: 'leave-requests', element: <Navigate to="/hr" replace /> },
+    { path: 'leave', handle: crumb('Leave balances'), element: page(LeaveBalancesPage, PERMS.hr.view) },
+    { path: 'contracts', handle: crumb('Contracts'), element: page(ContractsPage, PERMS.hr.view) },
+    { path: 'profiles', handle: crumb('HR profiles'), element: page(HrProfilesPage, PERMS.hr.view) },
+    { path: 'documents', handle: crumb('Documents'), element: page(HrDocumentsPage, PERMS.hr.view) },
+    { path: 'setup', handle: crumb('Setup'), element: page(HrSetupPage, PERMS.hr.view) },
+    // Staff attendance lives with the rest of attendance.
+    { path: 'attendance', element: <Navigate to="/attendance/staff" replace /> },
+  ],
+}
+
+const payrollRoutes: RouteObject = {
+  path: 'payroll',
+  handle: crumb('Payroll'),
+  element: <PermissionRoute permission={PERMS.payroll.view} />,
+  children: [
+    {
+      element: <PayrollLayout />,
+      children: [
+        { index: true, element: page(PayrollRunsPage) },
+        { path: 'payslips', handle: crumb('Payslips'), element: page(PayslipsPage) },
+        { path: 'salaries', handle: crumb('Salaries'), element: page(SalariesPage) },
+        { path: 'adjustments', handle: crumb('Adjustments'), element: page(PayrollAdjustmentsPage) },
+        { path: 'setup', handle: crumb('Setup'), element: page(PayrollSetupPage) },
+      ],
+    },
+    { path: 'runs', element: <Navigate to="/payroll" replace /> },
+    { path: 'runs/:id', handle: crumb('Run'), element: page(PayrollRunPage) },
+    { path: 'payslips/:id', handle: crumb('Payslip'), element: page(PayslipPage) },
+  ],
+}
+
 const hostelRoutes: RouteObject = {
   path: 'hostel',
   handle: crumb('Hostel'),
@@ -516,6 +574,8 @@ export const router = createBrowserRouter([
           financeRoutes,
           libraryRoutes,
           inventoryRoutes,
+          hrRoutes,
+          payrollRoutes,
           hostelRoutes,
           transportRoutes,
           academicsRoutes,

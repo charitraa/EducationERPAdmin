@@ -97,8 +97,8 @@ export const navigation: NavSection[] = [
   {
     label: 'nav.section.operations',
     items: [
-      { label: 'nav.hr', path: '/hr', icon: Briefcase, permission: 'hr.view', status: 'planned' },
-      { label: 'nav.payroll', path: '/payroll', icon: BarChart3, permission: 'payroll.view', status: 'planned' },
+      { label: 'nav.hr', path: '/hr', icon: Briefcase, permission: { any: ['hr.view', 'hr.approve_leave'] } },
+      { label: 'nav.payroll', path: '/payroll', icon: BarChart3, permission: 'payroll.view' },
       { label: 'nav.hostel', path: '/hostel', icon: BedDouble, permission: 'hostel.view' },
       { label: 'nav.transport', path: '/transport', icon: Bus, permission: 'transport.view' },
       { label: 'nav.applications', path: '/applications', icon: FileStack, permission: 'applications.view', status: 'planned' },
