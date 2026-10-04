@@ -9,6 +9,9 @@ import { AttendanceLayout } from '@/features/attendance/AttendanceLayout'
 import { EventsLayout } from '@/features/events/EventsLayout'
 import { ExamsIndexGate, ExamsLayout } from '@/features/examinations/ExamsLayout'
 import { FinanceLayout } from '@/features/finance/FinanceLayout'
+import { HostelLayout } from '@/features/hostel/HostelLayout'
+import { InventoryLayout } from '@/features/inventory/InventoryLayout'
+import { TransportLayout } from '@/features/transport/TransportLayout'
 import { LibraryLayout } from '@/features/library/LibraryLayout'
 import { TimetableLayout } from '@/features/timetable/TimetableLayout'
 import ServerError from '@/pages/ServerError'
@@ -102,6 +105,28 @@ const LibraryLoansPage = lazy(() => import('@/features/library/pages/Circulation
 const LibraryReservationsPage = lazy(() => import('@/features/library/pages/CirculationPages').then((m) => ({ default: m.ReservationsPage })))
 const LibraryFinesPage = lazy(() => import('@/features/library/pages/CirculationPages').then((m) => ({ default: m.FinesPage })))
 const LibrarySetupPage = lazy(() => import('@/features/library/pages/CatalogSetupPage'))
+const InventoryStockPage = lazy(() => import('@/features/inventory/pages/StockPage'))
+const InventoryItemsPage = lazy(() => import('@/features/inventory/pages/ItemsPage'))
+const PurchasesPage = lazy(() => import('@/features/inventory/pages/PurchasesPage'))
+const PurchaseDetailPage = lazy(() => import('@/features/inventory/pages/PurchasesPage').then((m) => ({ default: m.PurchaseDetailPage })))
+const AssetsPage = lazy(() => import('@/features/inventory/pages/AssetsPage'))
+const AssetDetailPage = lazy(() => import('@/features/inventory/pages/AssetsPage').then((m) => ({ default: m.AssetDetailPage })))
+const AssignmentsPage = lazy(() => import('@/features/inventory/pages/AssetActivityPages').then((m) => ({ default: m.AssignmentsPage })))
+const MaintenancePage = lazy(() => import('@/features/inventory/pages/AssetActivityPages').then((m) => ({ default: m.MaintenancePage })))
+const InventorySetupPage = lazy(() => import('@/features/inventory/pages/InventorySetupPage'))
+const HostelBoardPage = lazy(() => import('@/features/hostel/pages/AllocationPages').then((m) => ({ default: m.BoardPage })))
+const HostelAllocationsPage = lazy(() => import('@/features/hostel/pages/AllocationPages').then((m) => ({ default: m.AllocationsPage })))
+const HostelRoomsPage = lazy(() => import('@/features/hostel/pages/StructurePages').then((m) => ({ default: m.RoomsPage })))
+const HostelBuildingsPage = lazy(() => import('@/features/hostel/pages/StructurePages').then((m) => ({ default: m.BuildingsPage })))
+const HostelComplaintsPage = lazy(() => import('@/features/hostel/pages/ComplaintsPage'))
+const TripsPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripsPage })))
+const TripPage = lazy(() => import('@/features/transport/pages/TripPages').then((m) => ({ default: m.TripPage })))
+const RoutesPage = lazy(() => import('@/features/transport/pages/RoutePages').then((m) => ({ default: m.RoutesPage })))
+const RouteDetailPage = lazy(() => import('@/features/transport/pages/RoutePages').then((m) => ({ default: m.RouteDetailPage })))
+const RidersPage = lazy(() => import('@/features/transport/pages/RoutePages').then((m) => ({ default: m.RidersPage })))
+const VehiclesPage = lazy(() => import('@/features/transport/pages/FleetPages').then((m) => ({ default: m.VehiclesPage })))
+const VehicleDetailPage = lazy(() => import('@/features/transport/pages/FleetPages').then((m) => ({ default: m.VehicleDetailPage })))
+const CrewPage = lazy(() => import('@/features/transport/pages/FleetPages').then((m) => ({ default: m.CrewPage })))
 const PlannedModulePage = lazy(() => import('@/pages/PlannedModulePage'))
 const PublicPlaceholder = lazy(() => import('@/pages/PublicPlaceholder'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -372,6 +397,70 @@ const libraryRoutes: RouteObject = {
   ],
 }
 
+const inventoryRoutes: RouteObject = {
+  path: 'inventory',
+  handle: crumb('Inventory'),
+  element: <PermissionRoute permission={PERMS.inventory.view} />,
+  children: [
+    {
+      element: <InventoryLayout />,
+      children: [
+        { index: true, element: page(InventoryStockPage) },
+        { path: 'items', handle: crumb('Items'), element: page(InventoryItemsPage) },
+        { path: 'purchases', handle: crumb('Purchases'), element: page(PurchasesPage) },
+        { path: 'assets', handle: crumb('Assets'), element: page(AssetsPage) },
+        { path: 'assignments', handle: crumb('Assignments'), element: page(AssignmentsPage) },
+        { path: 'maintenance', handle: crumb('Maintenance'), element: page(MaintenancePage) },
+        { path: 'categories', handle: crumb('Categories & stores'), element: page(InventorySetupPage) },
+      ],
+    },
+    { path: 'purchases/:id', handle: crumb('Order'), element: page(PurchaseDetailPage) },
+    { path: 'assets/:id', handle: crumb('Asset'), element: page(AssetDetailPage) },
+  ],
+}
+
+const hostelRoutes: RouteObject = {
+  path: 'hostel',
+  handle: crumb('Hostel'),
+  element: (
+    <PermissionRoute permission={PERMS.hostel.view}>
+      <HostelLayout />
+    </PermissionRoute>
+  ),
+  children: [
+    { index: true, element: page(HostelBoardPage) },
+    { path: 'allocations', handle: crumb('Allocations'), element: page(HostelAllocationsPage) },
+    { path: 'rooms', handle: crumb('Rooms & beds'), element: page(HostelRoomsPage) },
+    { path: 'beds', element: <Navigate to="/hostel" replace /> },
+    { path: 'buildings', handle: crumb('Buildings'), element: page(HostelBuildingsPage) },
+    { path: 'complaints', handle: crumb('Complaints'), element: page(HostelComplaintsPage) },
+  ],
+}
+
+// The crew can run their own route's trips without transport.view; those screens come with self-service.
+const transportRoutes: RouteObject = {
+  path: 'transport',
+  handle: crumb('Transport'),
+  element: <PermissionRoute permission={PERMS.transport.view} />,
+  children: [
+    {
+      element: <TransportLayout />,
+      children: [
+        { index: true, element: page(TripsPage) },
+        { path: 'routes', handle: crumb('Routes & stops'), element: page(RoutesPage) },
+        { path: 'stops', element: <Navigate to="/transport/routes" replace /> },
+        { path: 'assignments', handle: crumb('Riders'), element: page(RidersPage) },
+        { path: 'vehicles', handle: crumb('Vehicles'), element: page(VehiclesPage) },
+        { path: 'crew', handle: crumb('Crew'), element: page(CrewPage) },
+      ],
+    },
+    { path: 'trips', element: <Navigate to="/transport" replace /> },
+    { path: 'trips/:id', handle: crumb('Trip'), element: page(TripPage) },
+    { path: 'routes/:id', handle: crumb('Route'), element: page(RouteDetailPage) },
+    { path: 'vehicles/:id', handle: crumb('Vehicle'), element: page(VehicleDetailPage) },
+  ],
+}
+
 const settingsRoutes: RouteObject = {
   path: 'settings',
   handle: crumb('Settings'),
@@ -426,6 +515,9 @@ export const router = createBrowserRouter([
           examinationsRoutes,
           financeRoutes,
           libraryRoutes,
+          inventoryRoutes,
+          hostelRoutes,
+          transportRoutes,
           academicsRoutes,
           settingsRoutes,
           ...plannedRoutes,

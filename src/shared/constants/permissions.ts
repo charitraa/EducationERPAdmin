@@ -52,6 +52,15 @@ export const PERMS = {
     manage: 'attendance.manage',
     devices: 'attendance.devices',
   },
+  transport: { view: 'transport.view', manage: 'transport.manage' },
+  hostel: { view: 'hostel.view', manage: 'hostel.manage' },
+  inventory: {
+    view: 'inventory.view',
+    /** Catalog, suppliers, purchase orders, assets and disposals. */
+    manage: 'inventory.manage',
+    /** Receive, issue, transfer and adjust stock. */
+    stock: 'inventory.stock',
+  },
   library: {
     /** Catalog, copies, shelves and memberships. Browsing needs no permission. */
     manage: 'library.manage',

@@ -91,7 +91,7 @@ export const navigation: NavSection[] = [
       { label: 'nav.messages', path: '/messages', icon: MessagesSquare },
       { label: 'nav.support', path: '/support', icon: LifeBuoy },
       { label: 'nav.library', path: '/library', icon: BookOpen, permission: { any: ['library.circulate', 'library.manage'] } },
-      { label: 'nav.inventory', path: '/inventory', icon: Boxes, permission: 'inventory.view', status: 'planned' },
+      { label: 'nav.inventory', path: '/inventory', icon: Boxes, permission: 'inventory.view' },
     ],
   },
   {
@@ -99,8 +99,8 @@ export const navigation: NavSection[] = [
     items: [
       { label: 'nav.hr', path: '/hr', icon: Briefcase, permission: 'hr.view', status: 'planned' },
       { label: 'nav.payroll', path: '/payroll', icon: BarChart3, permission: 'payroll.view', status: 'planned' },
-      { label: 'nav.hostel', path: '/hostel', icon: BedDouble, permission: 'hostel.view', status: 'planned' },
-      { label: 'nav.transport', path: '/transport', icon: Bus, permission: 'transport.view', status: 'planned' },
+      { label: 'nav.hostel', path: '/hostel', icon: BedDouble, permission: 'hostel.view' },
+      { label: 'nav.transport', path: '/transport', icon: Bus, permission: 'transport.view' },
       { label: 'nav.applications', path: '/applications', icon: FileStack, permission: 'applications.view', status: 'planned' },
       { label: 'nav.certificates', path: '/certificates', icon: FileBadge, permission: { any: ['applications.view', 'applications.certify'] }, status: 'planned' },
     ],

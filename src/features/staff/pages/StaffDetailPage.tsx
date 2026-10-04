@@ -10,6 +10,8 @@ import { StatusBadge } from '@/components/data-display/StatusBadge'
 import { BsDateDisplay } from '@/components/forms/BsDateDisplay'
 import { Button } from '@/components/ui/button'
 import { WorkflowActions } from '@/components/workflow/WorkflowActions'
+import { StaffAssets } from '@/features/inventory/components/StaffAssets'
+import { usePermissions } from '@/hooks/usePermissions'
 import { enumLabel } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
 import { STAFF_STATUS_CHANGES, StaffStatusDialog } from '../components/StaffStatusDialog'
@@ -31,6 +33,7 @@ export default function StaffDetailPage() {
   const member = useStaffMember(id)
   const { isMultiBranch } = useBranches()
   const [change, setChange] = useState<string | null>(null)
+  const { can } = usePermissions()
 
   if (member.isPending) return <PageLoader />
   if (member.isError) return <ErrorState error={member.error} onRetry={() => void member.refetch()} />
@@ -112,6 +115,7 @@ export default function StaffDetailPage() {
             <Field label="Portal login">{m.user ? 'Linked' : 'No login account'}</Field>
           </dl>
         </section>
+        {can(PERMS.inventory.view) && <StaffAssets staffId={m.id} />}
       </div>
 
       <StaffStatusDialog member={m} change={change} onClose={() => setChange(null)} />
