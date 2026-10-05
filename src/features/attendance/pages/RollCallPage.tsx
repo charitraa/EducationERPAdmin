@@ -31,6 +31,7 @@ import { hhmm } from '@/features/timetable/api/timetable.api'
 import { sessionsApi, STATUS_SHORT, STATUS_TONE, STATUSES, type AttendanceStatus, type QrOptions, type RosterStudent } from '../api/attendance.api'
 import { QrPresenter } from '../components/QrPresenter'
 import { useCorrectRecord, useMarkSession, useReopenSession, useRoster, useSubmitSession } from '../hooks/useAttendance'
+import { tr } from '@/lib/i18n'
 
 /** The three a teacher taps most; the rest live in the ⋯ menu. */
 const QUICK: AttendanceStatus[] = ['present', 'absent', 'late']
@@ -52,7 +53,7 @@ export function AttendanceStatusBadge({ status }: { status: AttendanceStatus }) 
 
 type Draft = Record<Id, AttendanceStatus>
 
-const correctSchema = z.object({ status: z.string().min(1, 'Choose a status.'), reason: z.string().trim().min(1, 'Say why it’s changing.').max(255) })
+const correctSchema = z.object({ status: z.string().min(1, tr('Choose a status.')), reason: z.string().trim().min(1, tr('Say why it’s changing.')).max(255) })
 
 function CorrectDialog({ student, onClose }: { student: RosterStudent | null; onClose: () => void }) {
   const correct = useCorrectRecord()
@@ -60,23 +61,23 @@ function CorrectDialog({ student, onClose }: { student: RosterStudent | null; on
     <FormDialog
       open={student !== null}
       onOpenChange={(o) => !o && onClose()}
-      title={student ? `Correct ${student.student_name}` : 'Correct'}
-      description="This attendance is submitted, so the change is kept as a correction with your reason."
-      submitLabel="Save correction"
+      title={student ? tr('Correct {student_name}', { student_name: student.student_name }) : tr('Correct')}
+      description={tr('This attendance is submitted, so the change is kept as a correction with your reason.')}
+      submitLabel={tr('Save correction')}
       schema={correctSchema}
       defaultValues={{ status: student?.status ?? '', reason: '' }}
       onSubmit={async (v) => {
         await correct.mutateAsync({ id: student!.record!, status: v.status as AttendanceStatus, reason: v.reason })
-        toast.success('Corrected.')
+        toast.success(tr('Corrected.'))
       }}
     >
       {({ control, register, formState: { errors } }) => (
         <>
-          <FormField label="Status" required error={errors.status?.message}>
+          <FormField label={tr('Status')} required error={errors.status?.message}>
             {(p) => <Controller control={control} name="status" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('AttendanceStatusEnum')} />} />}
           </FormField>
-          <FormField label="Reason" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Medical note brought in, marked by mistake…" />
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Medical note brought in, marked by mistake…')} />
           </FormField>
         </>
       )}
@@ -113,7 +114,7 @@ function StudentRow({
         </p>
       </div>
       {editable ? (
-        <div className="flex items-center gap-1.5" role="group" aria-label={`Attendance for ${s.student_name}`}>
+        <div className="flex items-center gap-1.5" role="group" aria-label={tr('Attendance for {student_name}', { student_name: s.student_name })}>
           {QUICK.map((q) => (
             <button
               key={q}
@@ -134,7 +135,7 @@ function StudentRow({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                aria-label={`Other statuses for ${s.student_name}`}
+                aria-label={tr('Other statuses for {student_name}', { student_name: s.student_name })}
                 className={cn(
                   'inline-flex h-10 min-w-10 items-center justify-center rounded-md border px-2 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   other ? ACTIVE[status] : 'bg-background text-muted-foreground hover:bg-muted',
@@ -144,7 +145,7 @@ function StudentRow({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Mark as</DropdownMenuLabel>
+              <DropdownMenuLabel>{tr('Mark as')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {MORE.map((m) => (
                 <DropdownMenuItem key={m} onSelect={() => onSet(m)}>
@@ -156,9 +157,9 @@ function StudentRow({
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          {status ? <AttendanceStatusBadge status={status} /> : <span className="text-xs text-muted-foreground">Not marked</span>}
+          {status ? <AttendanceStatusBadge status={status} /> : <span className="text-xs text-muted-foreground">{tr('Not marked')}</span>}
           {canCorrect && s.record != null && (
-            <Button size="sm" variant="ghost" onClick={onCorrect} aria-label={`Correct ${s.student_name}`}>
+            <Button size="sm" variant="ghost" onClick={onCorrect} aria-label={tr('Correct {student_name}', { student_name: s.student_name })}>
               <Pencil aria-hidden />
             </Button>
           )}
@@ -230,7 +231,7 @@ export default function RollCallPage() {
   const onSave = async () => {
     try {
       await save()
-      toast.success('Saved. Submit when everyone is marked.')
+      toast.success(tr('Saved. Submit when everyone is marked.'))
     } catch (err) {
       setError(errorMessage(err))
     }
@@ -239,10 +240,10 @@ export default function RollCallPage() {
   const onSubmit = async () => {
     await save()
     await submit.mutateAsync({ id, rest: unmarked.length ? rest : undefined })
-    toast.success('Attendance submitted.')
+    toast.success(tr('Attendance submitted.'))
   }
 
-  const title = session.kind === 'lesson' ? `${session.subject_name ?? 'Lesson'} · ${session.section_name}` : `Roll call · ${session.section_name}`
+  const title = session.kind === 'lesson' ? `${session.subject_name ?? 'Lesson'} · ${session.section_name}` : tr('Roll call · {section_name}', { section_name: session.section_name })
   const when = [formatDate(session.date), session.start_time ? hhmm(session.start_time) : null, session.teacher_name].filter(Boolean).join(' · ')
 
   return (
@@ -253,21 +254,21 @@ export default function RollCallPage() {
         description={
           <span className="flex flex-wrap items-center gap-2">
             {when}
-            {submitted ? <StatusBadge status="submitted" label="Submitted" /> : <StatusBadge status="open" label="Open" />}
+            {submitted ? <StatusBadge status="submitted" label={tr('Submitted')} /> : <StatusBadge status="open" label={tr('Open')} />}
           </span>
         }
         actions={
           submitted ? (
             can(PERMS.attendance.manage) && (
               <Button variant="outline" onClick={() => setReopening(true)}>
-                <RotateCcw aria-hidden /> Reopen
+                <RotateCcw aria-hidden /> {tr('Reopen')}
               </Button>
             )
           ) : (
             students.length > 0 &&
             can(PERMS.attendance.mark) && (
               <Button variant="outline" onClick={() => setShowingQr(true)}>
-                <QrCode aria-hidden /> Show QR code
+                <QrCode aria-hidden /> {tr('Show QR code')}
               </Button>
             )
           )
@@ -276,8 +277,8 @@ export default function RollCallPage() {
 
       {submitted && (
         <p className="mb-4 rounded-lg border border-info/20 bg-info-soft p-3 text-sm">
-          Submitted {session.submitted_at ? formatDateTime(session.submitted_at) : ''}. Changes now are corrections and need a reason
-          {can(PERMS.attendance.manage) ? '; or reopen it to mark again.' : '.'}
+          {tr('Submitted {value}. Changes now are corrections and need a reason', { value: session.submitted_at ? formatDateTime(session.submitted_at) : '' })}
+          {can(PERMS.attendance.manage) ? '; ' + tr('or reopen it to mark again.') : '.'}
         </p>
       )}
 
@@ -287,22 +288,22 @@ export default function RollCallPage() {
             {enumLabel('AttendanceStatusEnum', st)} {counts[st]}
           </span>
         ))}
-        {unmarked.length > 0 && <span className="rounded-full border px-2 py-0.5 font-medium text-muted-foreground">Not marked {unmarked.length}</span>}
-        <span className="ml-auto text-muted-foreground">{students.length} students</span>
+        {unmarked.length > 0 && <span className="rounded-full border px-2 py-0.5 font-medium text-muted-foreground">{tr('Not marked {count}', { count: unmarked.length })}</span>}
+        <span className="ml-auto text-muted-foreground">{tr('{count} students', { count: students.length })}</span>
       </div>
 
       {students.length === 0 ? (
-        <EmptyState title="No students expected" description="Nobody was placed in this class on that date." />
+        <EmptyState title={tr('No students expected')} description={tr('Nobody was placed in this class on that date.')} />
       ) : (
         <div className="rounded-lg border bg-card">
           <div className="flex flex-wrap items-center gap-2 border-b p-2 sm:px-4">
             <div className="relative min-w-40 flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Find a student…" aria-label="Find a student" className="pl-8" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tr('Find a student…')} aria-label={tr('Find a student')} className="pl-8" />
             </div>
             {!submitted && unmarked.length > 0 && (
               <Button variant="outline" onClick={markRestPresent}>
-                <CheckCheck aria-hidden /> Mark the other {unmarked.length} present
+                <CheckCheck aria-hidden /> {tr('Mark the other {count} present', { count: unmarked.length })}
               </Button>
             )}
           </div>
@@ -319,7 +320,7 @@ export default function RollCallPage() {
                 onCorrect={() => setCorrecting(s)}
               />
             ))}
-            {shown.length === 0 && <li className="p-6 text-center text-sm text-muted-foreground">No student matches “{search}”.</li>}
+            {shown.length === 0 && <li className="p-6 text-center text-sm text-muted-foreground">{tr('No student matches “{search}”.', { search })}</li>}
           </ul>
         </div>
       )}
@@ -330,14 +331,14 @@ export default function RollCallPage() {
           <FormError message={error} className="mb-2" />
           <div className="flex flex-wrap items-center gap-2">
             <p className="mr-auto text-sm text-muted-foreground">
-              {changes.length ? `${changes.length} unsaved` : 'All saved'}
-              {unmarked.length ? ` · ${unmarked.length} not marked` : ''}
+              {changes.length ? tr('{count} unsaved', { count: changes.length }) : tr('All saved')}
+              {unmarked.length ? ' · ' + tr('{count} not marked', { count: unmarked.length }) : ''}
             </p>
             <Button variant="outline" onClick={() => void onSave()} disabled={busy || changes.length === 0}>
-              {mark.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Save aria-hidden />} Save
+              {mark.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Save aria-hidden />} {tr('Save')}
             </Button>
             <Button onClick={() => setSubmitting(true)} disabled={busy}>
-              <Send aria-hidden /> Submit
+              <Send aria-hidden /> {tr('Submit')}
             </Button>
           </div>
         </div>
@@ -346,13 +347,13 @@ export default function RollCallPage() {
       <ConfirmDialog
         open={submitting}
         onOpenChange={setSubmitting}
-        title="Submit attendance?"
-        description={`${counts.present ?? 0} present, ${counts.absent ?? 0} absent, ${counts.late ?? 0} late. Parents of absent students are notified. After this, changes need a reason.`}
-        confirmLabel="Submit"
+        title={tr('Submit attendance?')}
+        description={tr('{present} present, {absent} absent, {late} late. Parents of absent students are notified. After this, changes need a reason.', { present: counts.present ?? 0, absent: counts.absent ?? 0, late: counts.late ?? 0 })}
+        confirmLabel={tr('Submit')}
         onConfirm={onSubmit}
       >
         {unmarked.length > 0 && (
-          <FormField label={`Mark the ${unmarked.length} not marked as`}>
+          <FormField label={tr('Mark the {count} not marked as', { count: unmarked.length })}>
             {(p) => <SelectControl {...p} value={rest} onChange={(v) => setRest(v as AttendanceStatus)} options={enumOptions('AttendanceStatusEnum')} />}
           </FormField>
         )}
@@ -360,38 +361,38 @@ export default function RollCallPage() {
       <ConfirmDialog
         open={reopening}
         onOpenChange={setReopening}
-        title="Reopen this attendance?"
-        description="The teacher can mark it again and must submit it again. Records stay as they are."
-        confirmLabel="Reopen"
+        title={tr('Reopen this attendance?')}
+        description={tr('The teacher can mark it again and must submit it again. Records stay as they are.')}
+        confirmLabel={tr('Reopen')}
         onConfirm={async () => {
           await reopen.mutateAsync(id)
-          toast.success('Reopened.')
+          toast.success(tr('Reopened.'))
         }}
       />
       <QrPresenter
         open={showingQr}
         onOpenChange={setShowingQr}
         title={title}
-        description="Students scan this with their phone's camera and sign in with their own account. Each one is marked as they scan; you can still change anyone before submitting."
+        description={tr("Students scan this with their phone's camera and sign in with their own account. Each one is marked as they scan; you can still change anyone before submitting.")}
         path="/scan/class"
         issue={issueQr}
         settings={
-          <FormField label="Mark late" description="Counted from when the code first goes up.">
+          <FormField label={tr('Mark late')} description={tr('Counted from when the code first goes up.')}>
             {(p) => (
               <SelectControl
                 {...p}
                 value={lateAfter}
                 onChange={setLateAfter}
                 allowEmpty
-                emptyLabel="Never: every scan is present"
-                options={[5, 10, 15, 20].map((m) => ({ value: String(m), label: `Scans after ${m} minutes` }))}
+                emptyLabel={tr('Never: every scan is present')}
+                options={[5, 10, 15, 20].map((m) => ({ value: String(m), label: tr('Scans after {m} minutes', { m }) }))}
               />
             )}
           </FormField>
         }
         live={
           <p className="text-sm font-medium" aria-live="polite">
-            {students.filter((s) => s.source === 'qr').length} scanned · {students.length - unmarked.length} of {students.length} marked
+            {tr('{count} scanned · {value} of {count2} marked', { count: students.filter((s) => s.source === 'qr').length, value: students.length - unmarked.length, count2: students.length })}
           </p>
         }
       />

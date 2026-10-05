@@ -19,6 +19,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import { ADMISSION_ACTIONS_FROM, type Admission, type AdmissionStatus } from '../api/admissions.api'
 import { AdmissionFormDialog } from '../components/AdmissionFormDialog'
 import { useAdmissionCount, useAdmissions, useRemoveAdmission } from '../hooks/useAdmissions'
+import { tr, trc } from '@/lib/i18n'
 
 const can = (action: keyof typeof ADMISSION_ACTIONS_FROM, status: string) => (ADMISSION_ACTIONS_FROM[action] as readonly string[]).includes(status)
 
@@ -26,9 +27,9 @@ const can = (action: keyof typeof ADMISSION_ACTIONS_FROM, status: string) => (AD
 function Pipeline({ active }: { active?: string }) {
   const { selectedBranchId } = useBranches()
   const cards: Array<{ status: AdmissionStatus; label: string; hint: string; icon: typeof Clock }> = [
-    { status: 'pending', label: 'To review', hint: 'Waiting for a decision', icon: Clock },
-    { status: 'approved', label: 'To enroll', hint: 'Approved, no student record yet', icon: CheckCircle2 },
-    { status: 'enrolled', label: 'Enrolled', hint: 'Now students', icon: ShieldCheck },
+    { status: 'pending', label: tr('To review'), hint: tr('Waiting for a decision'), icon: Clock },
+    { status: 'approved', label: tr('To enroll'), hint: tr('Approved, no student record yet'), icon: CheckCircle2 },
+    { status: 'enrolled', label: tr('Enrolled'), hint: tr('Now students'), icon: ShieldCheck },
   ]
   return (
     <div className="mb-4 grid gap-3 sm:grid-cols-3">
@@ -64,20 +65,20 @@ export default function AdmissionsListPage() {
   const remove = useRemoveAdmission()
 
   const columns: Column<Admission>[] = [
-    { id: 'number', header: 'App. no.', sortField: 'application_number', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (a) => a.application_number },
-    { id: 'name', header: 'Applicant', mobile: 'title', cell: (a) => <span className="font-medium">{a.full_name}</span> },
-    { id: 'for', header: 'Applying for', cell: (a) => a.applying_for || <span className="text-muted-foreground">—</span> },
+    { id: 'number', header: tr('App. no.'), sortField: 'application_number', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (a) => a.application_number },
+    { id: 'name', header: tr('Applicant'), mobile: 'title', cell: (a) => <span className="font-medium">{a.full_name}</span> },
+    { id: 'for', header: tr('Applying for'), cell: (a) => a.applying_for || <span className="text-muted-foreground">—</span> },
     {
       id: 'contact',
-      header: 'Contact',
+      header: tr('Contact'),
       cell: (a) => {
         const phone = a.guardian_phone || a.phone
         return phone ? <span className="tabular-nums">{phone}</span> : <span className="text-muted-foreground">—</span>
       },
     },
-    { id: 'applied', header: 'Received', sortField: 'applied_on', className: 'tabular-nums', cell: (a) => formatDate(a.applied_on) },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (a) => a.campus_name },
-    { id: 'status', header: 'Status', cell: (a) => <StatusBadge status={a.status} label={enumLabel('AdmissionStatusEnum', a.status)} /> },
+    { id: 'applied', header: tr('Received'), sortField: 'applied_on', className: 'tabular-nums', cell: (a) => formatDate(a.applied_on) },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (a) => a.campus_name },
+    { id: 'status', header: tr('Status'), cell: (a) => <StatusBadge status={a.status} label={enumLabel('AdmissionStatusEnum', a.status)} /> },
   ]
 
   const addButton = (label: string) => (
@@ -90,33 +91,33 @@ export default function AdmissionsListPage() {
 
   return (
     <>
-      <PageHeader title="Admissions" description="Applications from first contact to enrollment." actions={addButton('Record application')} />
+      <PageHeader title={tr('Admissions')} description={tr('Applications from first contact to enrollment.')} actions={addButton(tr('Record application'))} />
       <Pipeline active={list.filters.status} />
       <DataTable
-        ariaLabel="Applications"
+        ariaLabel={tr('Applications')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(a) => a.id}
         onRowClick={(a) => navigate(`/admissions/${a.id}`)}
-        searchPlaceholder="Search by name, application no., phone or email…"
+        searchPlaceholder={tr('Search by name, application no., phone or email…')}
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('AdmissionStatusEnum') },
-          { name: 'campus', label: 'Branch', hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('AdmissionStatusEnum') },
+          { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
         ]}
         rowActions={(a) => (
           <RowActions
             actions={[
-              { label: 'Open', icon: Eye, onSelect: () => navigate(`/admissions/${a.id}`) },
-              { label: 'Edit', icon: Pencil, permission: PERMS.admissions.update, hidden: !can('edit', a.status), onSelect: () => crud.openEdit(a) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.admissions.delete, hidden: !can('delete', a.status), destructive: true, onSelect: () => crud.openDelete(a) },
+              { label: trc('verb', 'Open'), icon: Eye, onSelect: () => navigate(`/admissions/${a.id}`) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.admissions.update, hidden: !can('edit', a.status), onSelect: () => crud.openEdit(a) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.admissions.delete, hidden: !can('delete', a.status), destructive: true, onSelect: () => crud.openDelete(a) },
             ]}
           />
         )}
         empty={{
-          title: 'No applications yet',
-          description: 'Record applications received at the front desk. Online applications appear here too.',
-          action: addButton('Record the first application'),
+          title: tr('No applications yet'),
+          description: tr('Record applications received at the front desk. Online applications appear here too.'),
+          action: addButton(tr('Record the first application')),
         }}
       />
       <AdmissionFormDialog
@@ -129,11 +130,11 @@ export default function AdmissionsListPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`application ${crud.deleting.application_number}`}
-          description="For applications recorded by mistake. To close a real one, reject or withdraw it instead so it stays on record."
+          subject={tr('application {application_number}', { application_number: crud.deleting.application_number })}
+          description={tr('For applications recorded by mistake. To close a real one, reject or withdraw it instead so it stays on record.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Application deleted.')
+            toast.success(tr('Application deleted.'))
           }}
         />
       )}

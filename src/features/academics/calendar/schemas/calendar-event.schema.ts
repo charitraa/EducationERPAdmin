@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { isoDate, optionalId, toNullableInt } from '@/lib/validation'
 import type { CalendarEvent, CalendarEventInput } from '../api/calendar.api'
+import { tr } from '@/lib/i18n'
 
 export const calendarEventSchema = z
   .object({
     kind: z.enum(['holiday', 'closure', 'exam', 'event', 'makeup_day']),
-    title: z.string().trim().min(1, 'Required.').max(200),
+    title: z.string().trim().min(1, tr('Required.')).max(200),
     description: z.string(),
     start_date: isoDate,
     end_date: isoDate,
@@ -16,8 +17,8 @@ export const calendarEventSchema = z
     suspends_classes: z.enum(['default', 'yes', 'no']),
     runs_timetable_of: optionalId,
   })
-  .refine((v) => v.end_date >= v.start_date, { path: ['end_date'], message: "Can't end before it starts." })
-  .refine((v) => v.kind !== 'makeup_day' || v.runs_timetable_of !== '', { path: ['runs_timetable_of'], message: "Choose which weekday's timetable runs." })
+  .refine((v) => v.end_date >= v.start_date, { path: ['end_date'], message: tr("Can't end before it starts.") })
+  .refine((v) => v.kind !== 'makeup_day' || v.runs_timetable_of !== '', { path: ['runs_timetable_of'], message: tr("Choose which weekday's timetable runs.") })
 
 export type CalendarEventForm = z.infer<typeof calendarEventSchema>
 

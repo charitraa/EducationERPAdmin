@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { tr } from '@/lib/i18n'
 
 export interface FilterOption {
   value: string
@@ -39,7 +40,7 @@ function FilterSelect({ def, value, onChange }: { def: FilterDef; value?: string
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ANY}>All</SelectItem>
+          <SelectItem value={ANY}>{tr('All')}</SelectItem>
           {def.options.map((o) => (
             <SelectItem key={o.value} value={o.value}>
               {o.label}
@@ -70,7 +71,7 @@ export function FilterPanel({ filters, values, onChange, onClear, activeCount }:
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className={inline ? 'h-9 md:hidden' : 'h-9'}>
             <SlidersHorizontal aria-hidden />
-            Filters
+            {tr('Filters')}
             {activeCount > 0 && (
               <span className="rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                 {activeCount}
@@ -85,7 +86,7 @@ export function FilterPanel({ filters, values, onChange, onClear, activeCount }:
             ))}
             {activeCount > 0 && (
               <Button variant="ghost" size="sm" onClick={onClear} className="justify-self-start">
-                Clear filters
+                {tr('Clear filters')}
               </Button>
             )}
           </div>

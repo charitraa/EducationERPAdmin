@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { formatDateTime } from '@/lib/dates'
+import { tr } from '@/lib/i18n'
 
 export interface ActivityItem {
   id: string | number
@@ -10,7 +11,7 @@ export interface ActivityItem {
 }
 
 /** What happened, newest first: who did what, when, and any note. */
-export function ActivityTimeline({ items, empty = 'No activity yet.' }: { items: ActivityItem[]; empty?: string }) {
+export function ActivityTimeline({ items, empty = tr('No activity yet.') }: { items: ActivityItem[]; empty?: string }) {
   if (items.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>
   return (
     <ol className="relative space-y-4 border-l pl-5">

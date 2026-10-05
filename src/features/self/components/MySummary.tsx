@@ -11,6 +11,7 @@ import { pluralize } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import type { Id } from '@/shared/types/api'
 import { rememberSubject, useAlumniEvents, useMyExams, useMyMentorships, useMyPayslips, useMyStatement, useMyStudentAttendance, useMyTimetable, useWho } from '../hooks/useSelf'
+import { tr } from '@/lib/i18n'
 
 /** One line of the summary: a label, a figure, and where it leads. */
 function Line({ label, to, onClick, loading, children }: { label: string; to: string; onClick?: () => void; loading?: boolean; children: ReactNode }) {
@@ -27,11 +28,11 @@ function Line({ label, to, onClick, loading, children }: { label: string; to: st
 
 function Lessons({ lessons, teacher }: { lessons: Lesson[]; teacher: boolean }) {
   const live = lessons.filter((l) => !l.is_cancelled).sort((a, b) => a.start_time.localeCompare(b.start_time))
-  if (live.length === 0) return <>No lessons</>
+  if (live.length === 0) return <>{tr('No lessons')}</>
   const first = live[0]
   return (
     <>
-      {pluralize(live.length, 'lesson')} <span className="font-normal text-muted-foreground">· first {hhmm(first.start_time)} {first.subject_name}{teacher ? `, ${first.section_name}` : ''}</span>
+      {pluralize(live.length, 'lesson')} <span className="font-normal text-muted-foreground">{'· ' + tr('first {hhmm} {subject_name}{value}', { hhmm: hhmm(first.start_time), subject_name: first.subject_name, value: teacher ? `, ${first.section_name}` : '' })}</span>
     </>
   )
 }
@@ -59,23 +60,23 @@ function StudentCard({ child, name, subjectKey }: { child: Id | null; name: stri
     .sort((a, b) => (a.date! + (a.start_time ?? '')).localeCompare(b.date! + (b.start_time ?? '')))[0]
   const pctValue = att.data?.summary.overall.percentage
   return (
-    <Card title={child != null ? name : 'My day'}>
-      <Line label="Today" to="/me/timetable" onClick={pick} loading={tt.isPending}>
+    <Card title={child != null ? name : tr('My day')}>
+      <Line label={tr('Today')} to="/me/timetable" onClick={pick} loading={tt.isPending}>
         {tt.isError ? '—' : <Lessons lessons={(tt.data?.lessons ?? []) as Lesson[]} teacher={false} />}
       </Line>
-      <Line label="Attendance, last 30 days" to="/me/attendance" onClick={pick} loading={att.isPending}>
+      <Line label={tr('Attendance, last 30 days')} to="/me/attendance" onClick={pick} loading={att.isPending}>
         <span className={cn(pctValue != null && pctValue < 75 && 'text-danger')}>{pctValue == null ? '—' : `${Math.round(pctValue)}%`}</span>
       </Line>
-      <Line label="Fees owed" to="/me/fees" onClick={pick} loading={fees.isPending}>
+      <Line label={tr('Fees owed')} to="/me/fees" onClick={pick} loading={fees.isPending}>
         {fees.data ? <Money value={fees.data.balance} tone="none" className={cn(fees.data.balance > 0 && 'text-danger')} /> : '—'}
       </Line>
-      <Line label="Next exam paper" to="/me/exams" onClick={pick} loading={exams.isPending}>
+      <Line label={tr('Next exam paper')} to="/me/exams" onClick={pick} loading={exams.isPending}>
         {next ? (
           <>
             {next.subject_name} <span className="font-normal text-muted-foreground">· {formatDate(next.date)}</span>
           </>
         ) : (
-          'None scheduled'
+          tr('None scheduled')
         )}
       </Line>
     </Card>
@@ -94,21 +95,21 @@ function StaffCard() {
   const pending = (leave.data ?? []).filter((r) => r.status === 'pending').length
   const latest = slips.data?.[0]
   return (
-    <Card title="My day">
-      <Line label="Today" to="/me/timetable" onClick={pick} loading={tt.isPending}>
+    <Card title={tr('My day')}>
+      <Line label={tr('Today')} to="/me/timetable" onClick={pick} loading={tt.isPending}>
         {tt.isError ? '—' : <Lessons lessons={(tt.data?.lessons ?? []) as Lesson[]} teacher />}
       </Line>
-      <Line label="Leave left" to="/me/leave" onClick={pick} loading={balances.isPending}>
+      <Line label={tr('Leave left')} to="/me/leave" onClick={pick} loading={balances.isPending}>
         {balances.isError || rows.length === 0 ? '—' : left}
-        {pending > 0 && <span className="font-normal text-muted-foreground"> · {pending} pending</span>}
+        {pending > 0 && <span className="font-normal text-muted-foreground"> {'· ' + tr('{pending} pending', { pending })}</span>}
       </Line>
-      <Line label="Latest payslip" to={latest ? `/me/payslips/${latest.id}` : '/me/payslips'} onClick={pick} loading={slips.isPending}>
+      <Line label={tr('Latest payslip')} to={latest ? `/me/payslips/${latest.id}` : '/me/payslips'} onClick={pick} loading={slips.isPending}>
         {latest ? (
           <>
             <Money value={latest.net_pay} tone="none" /> <span className="font-normal text-muted-foreground">· {latest.run_name}</span>
           </>
         ) : (
-          'None yet'
+          tr('None yet')
         )}
       </Line>
     </Card>
@@ -124,22 +125,22 @@ function AlumniCard({ profileId }: { profileId: Id }) {
   const active = rows.filter((m) => m.status === 'accepted').length
   const RESPONSE = { going: 'going', maybe: 'maybe', declined: 'not going' } as const
   return (
-    <Card title="Alumni">
-      <Line label="Next event" to="/me/alumni-events" loading={events.isPending}>
+    <Card title={tr('Alumni')}>
+      <Line label={tr('Next event')} to="/me/alumni-events" loading={events.isPending}>
         {next ? (
           <>
             {next.title}{' '}
             <span className="font-normal text-muted-foreground">
               · {formatDateTime(next.starts_at)}
-              {next.my_response ? ` · ${RESPONSE[next.my_response]}` : ' · not answered'}
+              {next.my_response ? ` · ${RESPONSE[next.my_response]}` : ' · ' + tr('not answered')}
             </span>
           </>
         ) : (
-          'None coming up'
+          tr('None coming up')
         )}
       </Line>
-      <Line label="Mentoring" to="/me/mentoring" loading={mentoring.isPending}>
-        {asking > 0 ? <span className="text-primary">{pluralize(asking, 'request')} to answer</span> : active > 0 ? `${active} in progress` : 'Nothing open'}
+      <Line label={tr('Mentoring')} to="/me/mentoring" loading={mentoring.isPending}>
+        {asking > 0 ? <span className="text-primary">{pluralize(asking, 'request')} {tr('to answer')}</span> : active > 0 ? tr('{active} in progress', { active }) : tr('Nothing open')}
       </Line>
     </Card>
   )

@@ -1,5 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { FieldControlProps } from './FormField'
+import { tr } from '@/lib/i18n'
 
 const NONE = '__none__'
 
@@ -27,9 +28,9 @@ export function SelectControl({
   value,
   onChange,
   options,
-  placeholder = 'Choose…',
+  placeholder = tr('Choose…'),
   allowEmpty,
-  emptyLabel = 'None',
+  emptyLabel = tr('None'),
   disabled,
   loading,
   id,
@@ -39,7 +40,7 @@ export function SelectControl({
     // '' (not undefined) keeps Radix Select controlled while it shows the placeholder.
     <Select value={value === '' ? (allowEmpty ? NONE : '') : value} onValueChange={(v) => onChange(v === NONE ? '' : v)} disabled={disabled || loading}>
       <SelectTrigger id={id} {...aria}>
-        <SelectValue placeholder={loading ? 'Loading…' : placeholder} />
+        <SelectValue placeholder={loading ? tr('Loading…') : placeholder} />
       </SelectTrigger>
       <SelectContent>
         {allowEmpty && <SelectItem value={NONE}>{emptyLabel}</SelectItem>}

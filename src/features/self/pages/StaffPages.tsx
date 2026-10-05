@@ -28,13 +28,14 @@ import { enumLabel } from '@/lib/formatters'
 import { isoDate } from '@/lib/validation'
 import { Block, Figure, Loaded, MiniTable, Note } from '../components/SelfParts'
 import { useMyAssets, useMyContracts, useMyDocuments, useMyHrProfile, useMyInterviews, useMyPayslips } from '../hooks/useSelf'
+import { tr } from '@/lib/i18n'
 
 // ---------------------------------------------------------------------------
 // Leave
 // ---------------------------------------------------------------------------
 const applySchema = z
-  .object({ leave_type: z.string().min(1, 'Choose a type.'), start_date: isoDate, end_date: isoDate, half_day: z.boolean(), reason: z.string().max(2000) })
-  .refine((v) => v.half_day || v.end_date >= v.start_date, { path: ['end_date'], message: 'Must not be before the start.' })
+  .object({ leave_type: z.string().min(1, tr('Choose a type.')), start_date: isoDate, end_date: isoDate, half_day: z.boolean(), reason: z.string().max(2000) })
+  .refine((v) => v.half_day || v.end_date >= v.start_date, { path: ['end_date'], message: tr('Must not be before the start.') })
 
 function ApplyLeaveDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const { options } = useLeaveTypeOptions()
@@ -43,27 +44,27 @@ function ApplyLeaveDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Apply for leave"
-      description="Your approver is told; you’ll get a notification when it’s decided."
-      submitLabel="Apply"
+      title={tr('Apply for leave')}
+      description={tr('Your approver is told; you’ll get a notification when it’s decided.')}
+      submitLabel={tr('Apply')}
       schema={applySchema}
       defaultValues={{ leave_type: '', start_date: todayIso(), end_date: todayIso(), half_day: false, reason: '' }}
       onSubmit={async (v) => {
         await apply.mutateAsync({ leave_type: Number(v.leave_type), start_date: v.start_date, end_date: v.half_day ? v.start_date : v.end_date, half_day: v.half_day, reason: v.reason })
-        toast.success('Leave requested.')
+        toast.success(tr('Leave requested.'))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
         <>
-          <FormField label="Type" required error={errors.leave_type?.message}>
-            {(p) => <Controller control={control} name="leave_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={options} placeholder="Choose…" />} />}
+          <FormField label={tr('Type')} required error={errors.leave_type?.message}>
+            {(p) => <Controller control={control} name="leave_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={options} placeholder={tr('Choose…')} />} />}
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label={watch('half_day') ? 'Date' : 'From'} required error={errors.start_date?.message}>
+            <FormField label={watch('half_day') ? tr('Date') : tr('From')} required error={errors.start_date?.message}>
               {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
             {!watch('half_day') && (
-              <FormField label="To" required error={errors.end_date?.message}>
+              <FormField label={tr('To')} required error={errors.end_date?.message}>
                 {(p) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
             )}
@@ -73,11 +74,11 @@ function ApplyLeaveDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             name="half_day"
             render={({ field }) => (
               <label className="flex items-center gap-2 text-sm">
-                <Switch checked={field.value} onCheckedChange={field.onChange} /> Half a day
+                <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Half a day')}
               </label>
             )}
           />
-          <FormField label="Reason">
+          <FormField label={tr('Reason')}>
             <Textarea {...register('reason')} rows={3} />
           </FormField>
         </>
@@ -96,49 +97,49 @@ export function MyLeavePage() {
   return (
     <div className="grid gap-6">
       <Block
-        title="Balances"
-        description="This fiscal year: what you’re entitled to, what’s used, and what’s left."
+        title={tr('Balances')}
+        description={tr('This fiscal year: what you’re entitled to, what’s used, and what’s left.')}
         action={
           <Button size="sm" onClick={() => setApplying(true)}>
-            <CalendarPlus aria-hidden /> Apply for leave
+            <CalendarPlus aria-hidden /> {tr('Apply for leave')}
           </Button>
         }
       >
         <Loaded query={balances}>
           {(rows) =>
             rows.length === 0 ? (
-              <Note>No leave balances yet; HR opens them at the start of the fiscal year.</Note>
+              <Note>{tr('No leave balances yet; HR opens them at the start of the fiscal year.')}</Note>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {rows.map((b) => (
-                  <Figure key={b.id} label={b.leave_type_name} value={days(b.available)} hint={`of ${days(b.total)} · ${days(b.used)} used${Number(b.pending) ? ` · ${days(b.pending)} pending` : ''}`} />
+                  <Figure key={b.id} label={b.leave_type_name} value={days(b.available)} hint={tr('of {days} · {days2} used{value}', { days: days(b.total), days2: days(b.used), value: Number(b.pending) ? ' · ' + tr('{days} pending', { days: days(b.pending) }) : '' })} />
                 ))}
               </div>
             )
           }
         </Loaded>
       </Block>
-      <Block title="Requests">
+      <Block title={tr('Requests')}>
         <Loaded query={requests}>
           {(rows) => (
             <MiniTable
-              label="My leave requests"
+              label={tr('My leave requests')}
               rows={rows}
               rowKey={(r) => r.id}
-              empty={{ title: 'No leave requested yet' }}
+              empty={{ title: tr('No leave requested yet') }}
               columns={[
-                { header: 'Type', cell: (r) => r.leave_type_name },
-                { header: 'When', cell: (r) => leaveSpan(r) },
-                { header: 'Status', cell: (r) => <LeaveStatus status={r.status} /> },
-                { header: 'Reason', cell: (r) => r.reason || '—' },
-                { header: 'Decision', cell: (r) => r.decision_note || (r.decided_at ? formatDate(r.decided_at) : '—') },
+                { header: tr('Type'), cell: (r) => r.leave_type_name },
+                { header: tr('When'), cell: (r) => leaveSpan(r) },
+                { header: tr('Status'), cell: (r) => <LeaveStatus status={r.status} /> },
+                { header: tr('Reason'), cell: (r) => r.reason || '—' },
+                { header: tr('Decision'), cell: (r) => r.decision_note || (r.decided_at ? formatDate(r.decided_at) : '—') },
                 {
                   header: '',
                   className: 'text-right',
                   cell: (r) =>
                     r.status === 'pending' || (r.status === 'approved' && r.start_date > todayIso()) ? (
                       <Button size="sm" variant="ghost" onClick={() => setCancelling(r)}>
-                        <Ban aria-hidden /> Cancel
+                        <Ban aria-hidden /> {tr('Cancel')}
                       </Button>
                     ) : null,
                 },
@@ -151,13 +152,13 @@ export function MyLeavePage() {
       <ConfirmDialog
         open={cancelling !== null}
         onOpenChange={(o) => !o && setCancelling(null)}
-        title="Cancel this leave?"
-        description={cancelling ? `${cancelling.leave_type_name}, ${leaveSpan(cancelling)}. The days go back to your balance.` : undefined}
-        confirmLabel="Cancel leave"
+        title={tr('Cancel this leave?')}
+        description={cancelling ? tr('{leave_type_name}, {leaveSpan}. The days go back to your balance.', { leave_type_name: cancelling.leave_type_name, leaveSpan: leaveSpan(cancelling) }) : undefined}
+        confirmLabel={tr('Cancel leave')}
         tone="destructive"
         onConfirm={async () => {
           await cancel.mutateAsync(cancelling!.id)
-          toast.success('Leave cancelled.')
+          toast.success(tr('Leave cancelled.'))
           setCancelling(null)
         }}
       />
@@ -174,24 +175,24 @@ export function MyPayslipsPage() {
     <Loaded query={q}>
       {(rows) => (
         <MiniTable
-          label="My payslips"
+          label={tr('My payslips')}
           rows={rows}
           rowKey={(p) => p.id}
-          empty={{ title: 'No payslips yet', icon: Receipt, description: 'A payslip appears once its payroll run is approved.' }}
+          empty={{ title: tr('No payslips yet'), icon: Receipt, description: tr('A payslip appears once its payroll run is approved.') }}
           columns={[
             {
-              header: 'Period',
+              header: tr('Period'),
               cell: (p) => (
                 <Link to={`/me/payslips/${p.id}`} className="font-medium text-primary hover:underline">
                   {p.run_name}
                 </Link>
               ),
             },
-            { header: 'Number', cell: (p) => <span className="font-mono text-xs">{p.number}</span> },
-            { header: 'Gross', cell: (p) => <Money value={p.gross_pay} tone="none" />, className: 'text-right' },
-            { header: 'Deductions', cell: (p) => <Money value={p.total_deductions} tone="none" />, className: 'text-right' },
-            { header: 'Net pay', cell: (p) => <Money value={p.net_pay} tone="none" className="font-medium" />, className: 'text-right' },
-            { header: 'Status', cell: (p) => <StatusBadge status={p.run_status} label={enumLabel('PayrollRunStatusEnum', p.run_status)} /> },
+            { header: tr('Number'), cell: (p) => <span className="font-mono text-xs">{p.number}</span> },
+            { header: tr('Gross'), cell: (p) => <Money value={p.gross_pay} tone="none" />, className: 'text-right' },
+            { header: tr('Deductions'), cell: (p) => <Money value={p.total_deductions} tone="none" />, className: 'text-right' },
+            { header: tr('Net pay'), cell: (p) => <Money value={p.net_pay} tone="none" className="font-medium" />, className: 'text-right' },
+            { header: tr('Status'), cell: (p) => <StatusBadge status={p.run_status} label={enumLabel('PayrollRunStatusEnum', p.run_status)} /> },
           ]}
         />
       )}
@@ -207,17 +208,17 @@ export function MyPayslipPage() {
     <Loaded query={q}>
       {(rows) => {
         const p = rows.find((r) => r.id === id)
-        if (!p) return <EmptyState title="Payslip not found" description={<Link to="/me/payslips" className="text-primary hover:underline">Back to my payslips</Link>} />
+        if (!p) return <EmptyState title={tr('Payslip not found')} description={<Link to="/me/payslips" className="text-primary hover:underline">{tr('Back to my payslips')}</Link>} />
         return (
           <div className="mx-auto max-w-3xl">
             <PageHeader
               className="print:hidden"
               backTo="/me/payslips"
-              title={`Payslip ${p.number}`}
+              title={tr('Payslip {number}', { number: p.number })}
               description={p.run_name}
               actions={
                 <Button variant="outline" onClick={() => window.print()}>
-                  <Printer aria-hidden /> Print
+                  <Printer aria-hidden /> {tr('Print')}
                 </Button>
               }
             />
@@ -247,55 +248,55 @@ export function MyEmploymentPage() {
   const documents = useMyDocuments()
   return (
     <div className="grid gap-6">
-      <Block title="Contracts">
+      <Block title={tr('Contracts')}>
         <Loaded query={contracts}>
           {(rows) => (
             <MiniTable
-              label="My contracts"
+              label={tr('My contracts')}
               rows={rows}
               rowKey={(c) => c.id}
-              empty={{ title: 'No contract on file', icon: Briefcase }}
+              empty={{ title: tr('No contract on file'), icon: Briefcase }}
               columns={[
-                { header: 'Kind', cell: (c) => enumLabel('ContractKindEnum', c.kind) },
-                { header: 'Position', cell: (c) => [c.position_name, c.department_name].filter(Boolean).join(' · ') || '—' },
-                { header: 'From', cell: (c) => formatDate(c.start_date) },
-                { header: 'Until', cell: (c) => (c.end_date ? formatDate(c.end_date) : 'Open-ended') },
-                { header: 'Probation ends', cell: (c) => formatDate(c.probation_ends_on) },
-                { header: 'Notice', cell: (c) => (c.notice_period_days ? `${c.notice_period_days} days` : '—') },
+                { header: tr('Kind'), cell: (c) => enumLabel('ContractKindEnum', c.kind) },
+                { header: tr('Position'), cell: (c) => [c.position_name, c.department_name].filter(Boolean).join(' · ') || '—' },
+                { header: tr('From'), cell: (c) => formatDate(c.start_date) },
+                { header: tr('Until'), cell: (c) => (c.end_date ? formatDate(c.end_date) : tr('Open-ended')) },
+                { header: tr('Probation ends'), cell: (c) => formatDate(c.probation_ends_on) },
+                { header: tr('Notice'), cell: (c) => (c.notice_period_days ? tr('{notice_period_days} days', { notice_period_days: c.notice_period_days }) : '—') },
               ]}
             />
           )}
         </Loaded>
       </Block>
-      <Block title="HR details" description="What payroll uses. Ask HR to correct anything wrong.">
+      <Block title={tr('HR details')} description={tr('What payroll uses. Ask HR to correct anything wrong.')}>
         <Loaded query={profile}>
           {(p) =>
             p == null ? (
-              <Note>HR hasn’t set up your profile yet.</Note>
+              <Note>{tr('HR hasn’t set up your profile yet.')}</Note>
             ) : (
               <dl className="grid gap-4 rounded-lg border bg-card p-4 sm:grid-cols-3">
                 <Detail label="PAN" value={p.pan_number} />
-                <Detail label="Tax status" value={enumLabel('TaxStatusEnum', p.tax_status)} />
-                <Detail label="SSF number" value={p.ssf_number} />
-                <Detail label="Bank" value={[p.bank_name, p.bank_branch].filter(Boolean).join(', ')} />
-                <Detail label="Account" value={[p.bank_account_name, p.bank_account_number].filter(Boolean).join(' · ')} />
-                <Detail label="Emergency contact" value={p.emergency_contact_name ? `${p.emergency_contact_name} (${p.emergency_contact_relation || 'contact'}) · ${p.emergency_contact_phone ?? ''}` : null} />
+                <Detail label={tr('Tax status')} value={enumLabel('TaxStatusEnum', p.tax_status)} />
+                <Detail label={tr('SSF number')} value={p.ssf_number} />
+                <Detail label={tr('Bank')} value={[p.bank_name, p.bank_branch].filter(Boolean).join(', ')} />
+                <Detail label={tr('Account')} value={[p.bank_account_name, p.bank_account_number].filter(Boolean).join(' · ')} />
+                <Detail label={tr('Emergency contact')} value={p.emergency_contact_name ? `${p.emergency_contact_name} (${p.emergency_contact_relation || 'contact'}) · ${p.emergency_contact_phone ?? ''}` : null} />
               </dl>
             )
           }
         </Loaded>
       </Block>
-      <Block title="Documents on file">
+      <Block title={tr('Documents on file')}>
         <Loaded query={documents}>
           {(rows) => (
             <MiniTable
-              label="My documents"
+              label={tr('My documents')}
               rows={rows}
               rowKey={(d) => d.id}
-              empty={{ title: 'No documents on file', icon: FileText }}
+              empty={{ title: tr('No documents on file'), icon: FileText }}
               columns={[
                 {
-                  header: 'Document',
+                  header: tr('Document'),
                   cell: (d) =>
                     d.file_url ? (
                       <a href={d.file_url} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">
@@ -305,9 +306,9 @@ export function MyEmploymentPage() {
                       d.title
                     ),
                 },
-                { header: 'Kind', cell: (d) => enumLabel('StaffDocumentKindEnum', d.kind) },
-                { header: 'Number', cell: (d) => d.number || '—' },
-                { header: 'Expires', cell: (d) => formatDate(d.expires_on) },
+                { header: tr('Kind'), cell: (d) => enumLabel('StaffDocumentKindEnum', d.kind) },
+                { header: tr('Number'), cell: (d) => d.number || '—' },
+                { header: tr('Expires'), cell: (d) => formatDate(d.expires_on) },
               ]}
             />
           )}
@@ -320,20 +321,20 @@ export function MyEmploymentPage() {
 export function MyAssetsPage() {
   const q = useMyAssets()
   return (
-    <Block title="Assets with you" description="Equipment the school has handed to you. Tell the store if something’s wrong.">
+    <Block title={tr('Assets with you')} description={tr('Equipment the school has handed to you. Tell the store if something’s wrong.')}>
       <Loaded query={q}>
         {(rows) => (
           <MiniTable
-            label="My assets"
+            label={tr('My assets')}
             rows={rows}
             rowKey={(a) => a.id}
-            empty={{ title: 'No assets assigned to you', icon: Boxes }}
+            empty={{ title: tr('No assets assigned to you'), icon: Boxes }}
             columns={[
-              { header: 'Item', cell: (a) => a.item_name },
-              { header: 'Tag', cell: (a) => <span className="font-mono text-xs">{a.tag}</span> },
-              { header: 'Serial', cell: (a) => a.serial_number || '—' },
-              { header: 'Condition', cell: (a) => enumLabel('ConditionEnum', a.condition) },
-              { header: 'Warranty until', cell: (a) => formatDate(a.warranty_until) },
+              { header: tr('Item'), cell: (a) => a.item_name },
+              { header: tr('Tag'), cell: (a) => <span className="font-mono text-xs">{a.tag}</span> },
+              { header: tr('Serial'), cell: (a) => a.serial_number || '—' },
+              { header: tr('Condition'), cell: (a) => enumLabel('ConditionEnum', a.condition) },
+              { header: tr('Warranty until'), cell: (a) => formatDate(a.warranty_until) },
             ]}
           />
         )}
@@ -344,7 +345,7 @@ export function MyAssetsPage() {
 
 export function MyMarkingPage() {
   return (
-    <Block title="Papers to mark" description="Papers of scheduled exams, for the classes and subjects you teach.">
+    <Block title={tr('Papers to mark')} description={tr('Papers of scheduled exams, for the classes and subjects you teach.')}>
       <MyPapers />
     </Block>
   )
@@ -357,20 +358,20 @@ export function MyInterviewsPage() {
   const q = useMyInterviews()
   const [acting, setActing] = useState<Parameters<typeof InterviewDialogs>[0]['acting']>(null)
   return (
-    <Block title="Interviews" description="Interviews you sit on the panel for.">
+    <Block title={tr('Interviews')} description={tr('Interviews you sit on the panel for.')}>
       <Loaded query={q}>
         {(rows) => (
           <MiniTable
-            label="My interviews"
+            label={tr('My interviews')}
             rows={rows}
             rowKey={(i) => i.id}
-            empty={{ title: 'No interviews', icon: Users }}
+            empty={{ title: tr('No interviews'), icon: Users }}
             columns={[
-              { header: 'Candidate', cell: (i) => i.candidate },
-              { header: 'For', cell: (i) => `${i.vacancy_title} · round ${i.round}` },
-              { header: 'When', cell: (i) => formatDateTime(i.scheduled_at) },
-              { header: 'Where', cell: (i) => [enumLabel('InterviewModeEnum', i.mode), i.location].filter(Boolean).join(' · ') },
-              { header: 'Status', cell: (i) => <InterviewStatus i={i} /> },
+              { header: tr('Candidate'), cell: (i) => i.candidate },
+              { header: tr('For'), cell: (i) => tr('{vacancy_title} · round {round}', { vacancy_title: i.vacancy_title, round: i.round }) },
+              { header: tr('When'), cell: (i) => formatDateTime(i.scheduled_at) },
+              { header: tr('Where'), cell: (i) => [enumLabel('InterviewModeEnum', i.mode), i.location].filter(Boolean).join(' · ') },
+              { header: tr('Status'), cell: (i) => <InterviewStatus i={i} /> },
               { header: '', className: 'text-right', cell: (i) => <RowActions actions={interviewActions(i, setActing)} /> },
             ]}
           />

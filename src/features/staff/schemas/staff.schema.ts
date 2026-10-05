@@ -2,8 +2,9 @@ import { z } from 'zod'
 import { optionalIsoDate, requiredId } from '@/lib/validation'
 import type { Id, Schema } from '@/shared/types/api'
 import type { StaffMember, StaffMemberInput } from '../api/staff.api'
+import { tr } from '@/lib/i18n'
 
-const text = (max: number, required = false) => (required ? z.string().trim().min(1, 'Required.').max(max) : z.string().trim().max(max))
+const text = (max: number, required = false) => (required ? z.string().trim().min(1, tr('Required.')).max(max) : z.string().trim().max(max))
 
 /**
  * Profile and employment details. Status (on leave, left) changes from the
@@ -16,10 +17,10 @@ export const staffSchema = z.object({
   last_name: text(150, true),
   date_of_birth: optionalIsoDate,
   gender: z.enum(['', 'male', 'female', 'other', 'undisclosed']),
-  email: z.union([z.literal(''), z.string().trim().email('Enter a valid email address.')]),
+  email: z.union([z.literal(''), z.string().trim().email(tr('Enter a valid email address.'))]),
   phone: text(32),
   address: z.string(),
-  campus: requiredId('Choose a branch.'),
+  campus: requiredId(tr('Choose a branch.')),
   staff_type: z.enum(['teaching', 'non_teaching']),
   designation: text(100),
   joined_on: optionalIsoDate,

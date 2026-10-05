@@ -5,6 +5,7 @@ import { errorMessage } from '@/lib/errors'
 import { formatBytes } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { filesApi, type StoredFile } from '@/features/files/api/files.api'
+import { tr } from '@/lib/i18n'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const ACCEPT: Record<string, string> = {
@@ -38,7 +39,7 @@ export function FileUpload({ purpose, types = ['pdf', 'docx', 'image'], onChange
 
   const start = async (file: File) => {
     if (file.size > MAX_BYTES) {
-      setState({ kind: 'error', file, message: `${file.name} is ${formatBytes(file.size)}. The limit is 5 MB.` })
+      setState({ kind: 'error', file, message: tr('{name} is {bytes}. The limit is 5 MB.', { name: file.name, bytes: formatBytes(file.size) }) })
       return
     }
     setState({ kind: 'uploading', file, progress: 0 })
@@ -99,10 +100,10 @@ export function FileUpload({ purpose, types = ['pdf', 'docx', 'image'], onChange
         >
           <Upload className="h-5 w-5 text-muted-foreground" aria-hidden />
           <span>
-            <span className="font-medium text-primary">Choose a file</span> or drag it here
+            <span className="font-medium text-primary">{tr('Choose a file')}</span> {tr('or drag it here')}
           </span>
           <span className="text-xs text-muted-foreground">
-            {types.map((t) => (t === 'image' ? 'Images' : t.toUpperCase())).join(', ')} · up to 5 MB
+            {tr('{map} · up to 5 MB', { map: types.map((t) => (t === 'image' ? tr('Images') : t.toUpperCase())).join(', ') })}
           </span>
         </label>
       ) : (
@@ -112,7 +113,7 @@ export function FileUpload({ purpose, types = ['pdf', 'docx', 'image'], onChange
             <p className="truncate text-sm font-medium">{name}</p>
             <p className="text-xs text-muted-foreground">
               {formatBytes(size)}
-              {state.kind === 'uploading' && ` · uploading ${state.progress}%`}
+              {state.kind === 'uploading' && ' · ' + tr('uploading {progress}%', { progress: state.progress })}
             </p>
             {state.kind === 'uploading' && (
               <div className="mt-1 h-1 overflow-hidden rounded bg-muted" role="progressbar" aria-valuenow={state.progress} aria-valuemin={0} aria-valuemax={100}>
@@ -122,9 +123,9 @@ export function FileUpload({ purpose, types = ['pdf', 'docx', 'image'], onChange
             {state.kind === 'error' && <p className="text-xs font-medium text-danger" role="alert">{state.message}</p>}
           </div>
           {state.kind === 'uploading' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden />}
-          {state.kind === 'done' && <CheckCircle2 className="h-4 w-4 text-success" aria-label="Uploaded" />}
+          {state.kind === 'done' && <CheckCircle2 className="h-4 w-4 text-success" aria-label={tr('Uploaded')} />}
           {state.kind !== 'uploading' && (
-            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => void remove()} aria-label="Remove file">
+            <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => void remove()} aria-label={tr('Remove file')}>
               <X />
             </Button>
           )}

@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { code, optionalId, toNullableInt } from '@/lib/validation'
 import type { Department, DepartmentInput } from '../api/departments.api'
+import { tr } from '@/lib/i18n'
 
 export const departmentSchema = z.object({
   code,
-  name: z.string().trim().min(1, 'Required.').max(200),
+  name: z.string().trim().min(1, tr('Required.')).max(200),
   description: z.string(),
   head: optionalId,
 })

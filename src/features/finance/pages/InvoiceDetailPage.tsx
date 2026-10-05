@@ -22,6 +22,7 @@ import { AddItemDialog, CancelInvoiceDialog, InstallmentsDialog, RecordPaymentDi
 import { isPositive, Money, moneyInput } from '../components/money'
 import { useInvoice, usePayments, useRefund } from '../hooks/useFinance'
 import { InvoiceStanding } from './InvoicesPage'
+import { tr } from '@/lib/i18n'
 
 function RefundDialog({ payment, onClose }: { payment: Payment | null; onClose: () => void }) {
   const refund = useRefund()
@@ -29,25 +30,25 @@ function RefundDialog({ payment, onClose }: { payment: Payment | null; onClose: 
     <FormDialog
       open={payment != null}
       onOpenChange={(o) => !o && onClose()}
-      title="Refund a payment"
-      description={payment ? `Up to ${formatMoney(payment.refundable_amount)} of this ${formatMoney(payment.amount)} payment. The payment stays on record; the refund reverses it.` : undefined}
-      submitLabel="Refund"
+      title={tr('Refund a payment')}
+      description={payment ? tr('Up to {money} of this {money2} payment. The payment stays on record; the refund reverses it.', { money: formatMoney(payment.refundable_amount), money2: formatMoney(payment.amount) }) : undefined}
+      submitLabel={tr('Refund')}
       schema={z
-        .object({ amount: moneyInput, reason: z.string().trim().min(1, 'Say why.').max(255) })
-        .refine((v) => !payment || (toPaisa(v.amount) ?? 0n) <= (toPaisa(payment.refundable_amount) ?? 0n), { path: ['amount'], message: 'More than can be refunded.' })}
+        .object({ amount: moneyInput, reason: z.string().trim().min(1, tr('Say why.')).max(255) })
+        .refine((v) => !payment || (toPaisa(v.amount) ?? 0n) <= (toPaisa(payment.refundable_amount) ?? 0n), { path: ['amount'], message: tr('More than can be refunded.') })}
       defaultValues={{ amount: payment?.refundable_amount ?? '', reason: '' }}
       onSubmit={async (v) => {
         await refund.mutateAsync({ id: payment!.id, amount: v.amount, reason: v.reason })
-        toast.success(`${formatMoney(v.amount)} refunded.`)
+        toast.success(tr('{money} refunded.', { money: formatMoney(v.amount) }))
       }}
     >
       {({ register, formState: { errors } }) => (
         <>
-          <FormField label="Amount" required error={errors.amount?.message}>
+          <FormField label={tr('Amount')} required error={errors.amount?.message}>
             <Input {...register('amount')} inputMode="decimal" className="tabular-nums" />
           </FormField>
-          <FormField label="Reason" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Paid twice, overcharged…" />
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Paid twice, overcharged…')} />
           </FormField>
         </>
       )}
@@ -76,33 +77,33 @@ export default function InvoiceDetailPage() {
     <div>
       <PageHeader
         backTo="/finance/invoices"
-        title={`Invoice ${inv.invoice_number}`}
+        title={tr('Invoice {invoice_number}', { invoice_number: inv.invoice_number })}
         description={
           <span className="flex flex-wrap items-center gap-2">
             <Link to={`/finance/reports?view=statement&student=${inv.student}`} className="hover:underline">
               {inv.student_name}
             </Link>
-            <span className="font-mono text-xs">{inv.student_number}</span>· {inv.term_name ?? 'One-time'} · {enumLabel('InvoiceSourceEnum', inv.source)}
+            <span className="font-mono text-xs">{inv.student_number}</span>· {inv.term_name ?? tr('One-time')} · {enumLabel('InvoiceSourceEnum', inv.source)}
             <InvoiceStanding invoice={inv} />
           </span>
         }
         actions={
           <>
             <Button variant="outline" onClick={() => window.print()} className="print:hidden">
-              <Printer aria-hidden /> Print
+              <Printer aria-hidden /> {tr('Print')}
             </Button>
             {open && can(PERMS.finance.manage) && (
               <>
                 <Button variant="outline" onClick={() => setDialog('item')} className="print:hidden">
-                  <Plus aria-hidden /> Add line
+                  <Plus aria-hidden /> {tr('Add line')}
                 </Button>
                 {!hasPayments && (
                   <>
                     <Button variant="outline" onClick={() => setDialog('installments')} className="print:hidden">
-                      <CalendarRange aria-hidden /> Installments
+                      <CalendarRange aria-hidden /> {tr('Installments')}
                     </Button>
                     <Button variant="outline" onClick={() => setDialog('cancel')} className="print:hidden">
-                      <Ban aria-hidden /> Cancel
+                      <Ban aria-hidden /> {tr('Cancel')}
                     </Button>
                   </>
                 )}
@@ -110,7 +111,7 @@ export default function InvoiceDetailPage() {
             )}
             {open && !inv.is_paid && can(PERMS.finance.collect) && (
               <Button onClick={() => setDialog('pay')} className="print:hidden">
-                <Wallet aria-hidden /> Take payment
+                <Wallet aria-hidden /> {tr('Take payment')}
               </Button>
             )}
           </>
@@ -119,7 +120,7 @@ export default function InvoiceDetailPage() {
 
       {inv.status === 'cancelled' && (
         <p className="mb-4 rounded-lg border border-danger/20 bg-danger-soft p-3 text-sm">
-          Cancelled {inv.cancelled_at ? formatDateTime(inv.cancelled_at) : ''}: {inv.cancelled_reason}
+          {tr('Cancelled {value}: {cancelled_reason}', { value: inv.cancelled_at ? formatDateTime(inv.cancelled_at) : '', cancelled_reason: inv.cancelled_reason })}
         </p>
       )}
 
@@ -127,32 +128,32 @@ export default function InvoiceDetailPage() {
         <section className="rounded-lg border bg-card">
           <dl className="grid grid-cols-2 gap-3 border-b p-4 text-sm sm:grid-cols-4">
             <div>
-              <dt className="text-xs text-muted-foreground">Issued</dt>
+              <dt className="text-xs text-muted-foreground">{tr('Issued')}</dt>
               <dd className="tabular-nums">{formatDate(inv.issue_date)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Due</dt>
+              <dt className="text-xs text-muted-foreground">{tr('Due')}</dt>
               <dd className={inv.is_overdue ? 'font-medium text-danger tabular-nums' : 'tabular-nums'}>{formatDate(inv.due_date)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Paid</dt>
+              <dt className="text-xs text-muted-foreground">{tr('Paid')}</dt>
               <dd>
                 <Money value={inv.paid_amount} />
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Balance</dt>
+              <dt className="text-xs text-muted-foreground">{tr('Balance')}</dt>
               <dd className="text-lg font-semibold">
                 <Money value={inv.status === 'cancelled' ? '0' : inv.balance} tone="none" />
               </dd>
             </div>
           </dl>
-          <table className="w-full text-sm" aria-label="Invoice lines">
+          <table className="w-full text-sm" aria-label={tr('Invoice lines')}>
             <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
               <tr>
-                <th className="px-4 py-2">Description</th>
-                <th className="px-3 py-2">Kind</th>
-                <th className="px-4 py-2 text-right">Amount</th>
+                <th className="px-4 py-2">{tr('Description')}</th>
+                <th className="px-3 py-2">{tr('Kind')}</th>
+                <th className="px-4 py-2 text-right">{tr('Amount')}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -172,7 +173,7 @@ export default function InvoiceDetailPage() {
             <tfoot>
               <tr className="border-t font-semibold">
                 <td className="px-4 py-2" colSpan={2}>
-                  Total
+                  {tr('Total')}
                 </td>
                 <td className="px-4 py-2 text-right">
                   <Money value={inv.total} />
@@ -186,12 +187,12 @@ export default function InvoiceDetailPage() {
         <div className="grid content-start gap-6">
           {(inv.installments ?? []).length > 0 && (
             <section className="rounded-lg border bg-card">
-              <h2 className="border-b px-4 py-2 text-sm font-semibold">Installments</h2>
+              <h2 className="border-b px-4 py-2 text-sm font-semibold">{tr('Installments')}</h2>
               <ol className="divide-y text-sm">
                 {(inv.installments ?? []).map((i) => (
                   <li key={i.id} className="flex items-center gap-3 px-4 py-2">
                     <span className="w-6 tabular-nums text-muted-foreground">{i.sequence}.</span>
-                    <span className={i.is_overdue ? 'flex-1 tabular-nums text-danger' : 'flex-1 tabular-nums'}>Due {formatDate(i.due_date)}</span>
+                    <span className={i.is_overdue ? 'flex-1 tabular-nums text-danger' : 'flex-1 tabular-nums'}>{tr('Due {date}', { date: formatDate(i.due_date) })}</span>
                     <Money value={i.amount} />
                   </li>
                 ))}
@@ -199,9 +200,9 @@ export default function InvoiceDetailPage() {
             </section>
           )}
           <section className="rounded-lg border bg-card">
-            <h2 className="border-b px-4 py-2 text-sm font-semibold">Payments</h2>
+            <h2 className="border-b px-4 py-2 text-sm font-semibold">{tr('Payments')}</h2>
             {(payments.data?.results ?? []).length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">Nothing paid yet.</p>
+              <p className="p-4 text-sm text-muted-foreground">{tr('Nothing paid yet.')}</p>
             ) : (
               <ul className="divide-y text-sm">
                 {payments.data!.results.map((p) => {
@@ -216,13 +217,13 @@ export default function InvoiceDetailPage() {
                           {formatDateTime(p.paid_at)}
                           {p.reference ? ` · ${p.reference}` : ''}
                         </p>
-                        {refunded > 0n && <StatusBadge status="returned" label={`${formatMoney(fromPaisa(refunded))} refunded`} className="mt-1" />}
+                        {refunded > 0n && <StatusBadge status="returned" label={tr('{money} refunded', { money: formatMoney(fromPaisa(refunded)) })} className="mt-1" />}
                       </div>
-                      <Button size="sm" variant="ghost" onClick={() => navigate(`/finance/payments/${p.id}`)} aria-label="Receipt" className="print:hidden">
+                      <Button size="sm" variant="ghost" onClick={() => navigate(`/finance/payments/${p.id}`)} aria-label={tr('Receipt')} className="print:hidden">
                         <ReceiptIcon aria-hidden />
                       </Button>
                       {can(PERMS.finance.manage) && isPositive(p.refundable_amount) && (
-                        <Button size="sm" variant="ghost" onClick={() => setRefunding(p)} aria-label="Refund" className="print:hidden">
+                        <Button size="sm" variant="ghost" onClick={() => setRefunding(p)} aria-label={tr('Refund')} className="print:hidden">
                           <Undo2 aria-hidden />
                         </Button>
                       )}

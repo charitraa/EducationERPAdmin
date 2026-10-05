@@ -2,6 +2,7 @@ import { Inbox, SearchX, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 interface EmptyStateProps {
   title: string
@@ -22,16 +23,16 @@ export function EmptyState({ title, description, icon, action, filtered, onClear
       <div className="mb-3 rounded-full bg-muted p-3">
         <Icon className="h-6 w-6 text-muted-foreground" aria-hidden />
       </div>
-      <p className="font-medium">{filtered ? 'Nothing matches your filters' : title}</p>
+      <p className="font-medium">{filtered ? tr('Nothing matches your filters') : title}</p>
       {(filtered || description) && (
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          {filtered ? 'Try a different search, or clear the filters.' : description}
+          {filtered ? tr('Try a different search, or clear the filters.') : description}
         </p>
       )}
       <div className="mt-4">
         {filtered && onClearFilters ? (
           <Button variant="outline" size="sm" onClick={onClearFilters}>
-            Clear filters
+            {tr('Clear filters')}
           </Button>
         ) : (
           action

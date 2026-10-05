@@ -7,39 +7,40 @@ import { cn } from '@/lib/utils'
 import type { Payment, Refund } from '../api/finance.api'
 import { isPositive, Money } from '../components/money'
 import { usePayments, useRefunds } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 function Payments() {
   const navigate = useNavigate()
   const list = useListState({ filters: ['method'], defaultOrdering: '-paid_at' })
   const query = usePayments(list.query)
   const columns: Column<Payment>[] = [
-    { id: 'when', header: 'Received', sortField: 'paid_at', className: 'whitespace-nowrap tabular-nums', cell: (p) => formatDateTime(p.paid_at) },
-    { id: 'student', header: 'Student', mobile: 'title', cell: (p) => <span className="font-medium">{p.student_name}</span> },
-    { id: 'invoice', header: 'Invoice', className: 'font-mono text-xs', cell: (p) => p.invoice_number },
-    { id: 'method', header: 'Method', cell: (p) => `${enumLabel('PaymentMethodEnum', p.method)}${p.reference ? ` · ${p.reference}` : ''}` },
+    { id: 'when', header: tr('Received'), sortField: 'paid_at', className: 'whitespace-nowrap tabular-nums', cell: (p) => formatDateTime(p.paid_at) },
+    { id: 'student', header: tr('Student'), mobile: 'title', cell: (p) => <span className="font-medium">{p.student_name}</span> },
+    { id: 'invoice', header: tr('Invoice'), className: 'font-mono text-xs', cell: (p) => p.invoice_number },
+    { id: 'method', header: tr('Method'), cell: (p) => `${enumLabel('PaymentMethodEnum', p.method)}${p.reference ? ` · ${p.reference}` : ''}` },
     {
       id: 'amount',
-      header: 'Amount',
+      header: tr('Amount'),
       className: 'text-right',
       cell: (p) => (
         <span>
           <Money value={p.amount} className="font-medium" />
-          {p.refundable_amount !== p.amount && <span className="block text-xs text-muted-foreground">{isPositive(p.refundable_amount) ? 'part refunded' : 'refunded'}</span>}
+          {p.refundable_amount !== p.amount && <span className="block text-xs text-muted-foreground">{isPositive(p.refundable_amount) ? tr('part refunded') : 'refunded'}</span>}
         </span>
       ),
     },
   ]
   return (
     <DataTable
-      ariaLabel="Payments"
+      ariaLabel={tr('Payments')}
       columns={columns}
       query={query}
       list={list}
       getRowId={(p) => p.id}
       searchable={false}
       onRowClick={(p) => navigate(`/finance/payments/${p.id}`)}
-      filters={[{ name: 'method', label: 'Method', options: enumOptions('PaymentMethodEnum') }]}
-      empty={{ title: 'No payments yet', description: 'Take a payment from an invoice; each one gets a numbered receipt.' }}
+      filters={[{ name: 'method', label: tr('Method'), options: enumOptions('PaymentMethodEnum') }]}
+      empty={{ title: tr('No payments yet'), description: tr('Take a payment from an invoice; each one gets a numbered receipt.') }}
     />
   )
 }
@@ -49,21 +50,21 @@ function Refunds() {
   const list = useListState({ filters: [] })
   const query = useRefunds(list.query)
   const columns: Column<Refund>[] = [
-    { id: 'when', header: 'Refunded', className: 'whitespace-nowrap tabular-nums', cell: (r) => formatDateTime(r.refunded_at) },
-    { id: 'invoice', header: 'Invoice', mobile: 'title', className: 'font-mono text-xs', cell: (r) => r.invoice_number },
-    { id: 'reason', header: 'Reason', cell: (r) => r.reason },
-    { id: 'amount', header: 'Amount', className: 'text-right', cell: (r) => <Money value={r.amount} className="font-medium" /> },
+    { id: 'when', header: tr('Refunded'), className: 'whitespace-nowrap tabular-nums', cell: (r) => formatDateTime(r.refunded_at) },
+    { id: 'invoice', header: tr('Invoice'), mobile: 'title', className: 'font-mono text-xs', cell: (r) => r.invoice_number },
+    { id: 'reason', header: tr('Reason'), cell: (r) => r.reason },
+    { id: 'amount', header: tr('Amount'), className: 'text-right', cell: (r) => <Money value={r.amount} className="font-medium" /> },
   ]
   return (
     <DataTable
-      ariaLabel="Refunds"
+      ariaLabel={tr('Refunds')}
       columns={columns}
       query={query}
       list={list}
       getRowId={(r) => r.id}
       searchable={false}
       onRowClick={(r) => navigate(`/finance/payments/${r.payment}`)}
-      empty={{ title: 'No refunds', description: 'Refunds are made from a payment on its invoice.' }}
+      empty={{ title: tr('No refunds'), description: tr('Refunds are made from a payment on its invoice.') }}
     />
   )
 }
@@ -74,7 +75,7 @@ export default function PaymentsPage() {
   const view = params.get('view') === 'refunds' ? 'refunds' : 'payments'
   return (
     <>
-      <div className="mb-4 inline-flex rounded-md border p-0.5" role="tablist" aria-label="Payments">
+      <div className="mb-4 inline-flex rounded-md border p-0.5" role="tablist" aria-label={tr('Payments')}>
         {(['payments', 'refunds'] as const).map((v) => (
           <button
             key={v}
@@ -84,7 +85,7 @@ export default function PaymentsPage() {
             onClick={() => setParams(v === 'payments' ? {} : { view: v }, { replace: true })}
             className={cn('rounded px-3 py-1.5 text-sm capitalize', view === v ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
           >
-            {v}
+            {v === 'payments' ? tr('Payments') : tr('Refunds')}
           </button>
         ))}
       </div>

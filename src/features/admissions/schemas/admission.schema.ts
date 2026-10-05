@@ -2,16 +2,17 @@ import { z } from 'zod'
 import { optionalIsoDate, requiredId } from '@/lib/validation'
 import type { Id, Schema } from '@/shared/types/api'
 import type { Admission, AdmissionInput } from '../api/admissions.api'
+import { tr } from '@/lib/i18n'
 
-const text = (max: number, required = false) => (required ? z.string().trim().min(1, 'Required.').max(max) : z.string().trim().max(max))
-const optionalEmail = z.union([z.literal(''), z.string().trim().email('Enter a valid email address.')])
+const text = (max: number, required = false) => (required ? z.string().trim().min(1, tr('Required.')).max(max) : z.string().trim().max(max))
+const optionalEmail = z.union([z.literal(''), z.string().trim().email(tr('Enter a valid email address.'))])
 
 export const admissionSchema = z
   .object({
     application_number: text(32, true),
     applied_on: optionalIsoDate,
     applying_for: text(200),
-    campus: requiredId('Choose a branch.'),
+    campus: requiredId(tr('Choose a branch.')),
     first_name: text(150, true),
     middle_name: text(150),
     last_name: text(150, true),
@@ -30,7 +31,7 @@ export const admissionSchema = z
   // Enrolling creates the guardian as a parent only when they have a first name.
   .refine((v) => v.guardian_first_name || !(v.guardian_last_name || v.guardian_phone || v.guardian_email), {
     path: ['guardian_first_name'],
-    message: 'Add the guardian’s first name, or clear their other details.',
+    message: tr('Add the guardian’s first name, or clear their other details.'),
   })
 
 export type AdmissionForm = z.infer<typeof admissionSchema>

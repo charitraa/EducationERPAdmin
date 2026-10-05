@@ -10,6 +10,7 @@ import type { Student } from '@/features/students/api/students.api'
 import { StudentPicker } from '@/features/students/components/StudentPicker'
 import { TranscriptView } from '../components/ReportCardView'
 import { useTranscript } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 /** One student's transcript: published results marked for it, with a cumulative GPA. */
 export default function TranscriptsPage() {
@@ -22,7 +23,7 @@ export default function TranscriptsPage() {
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3 print:hidden">
         <div className="grid w-full max-w-md gap-1.5">
-          <Label htmlFor={pickerId}>Student</Label>
+          <Label htmlFor={pickerId}>{tr('Student')}</Label>
           <StudentPicker
             id={pickerId}
             value={student}
@@ -34,12 +35,12 @@ export default function TranscriptsPage() {
         </div>
         {transcript.data && (
           <Button variant="outline" className="ml-auto" onClick={() => window.print()}>
-            <Printer aria-hidden /> Print
+            <Printer aria-hidden /> {tr('Print')}
           </Button>
         )}
       </div>
       {id == null ? (
-        <EmptyState title="Find a student" description="Their published results marked for the transcript, oldest first." icon={ScrollText} />
+        <EmptyState title={tr('Find a student')} description={tr('Their published results marked for the transcript, oldest first.')} icon={ScrollText} />
       ) : transcript.isPending ? (
         <TableSkeleton rows={6} columns={6} />
       ) : transcript.isError ? (

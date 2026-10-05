@@ -1,13 +1,14 @@
 import { z } from 'zod'
 import { formatMoney, toPaisa } from '@/lib/currency'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 /** A money field: digits with at most two decimals, kept as a string. */
 export const moneyInput = z
   .string()
   .trim()
-  .regex(/^\d+(\.\d{1,2})?$/, 'An amount like 1500 or 1500.50.')
-  .refine((v) => (toPaisa(v) ?? 0n) > 0n, 'Must be more than zero.')
+  .regex(/^\d+(\.\d{1,2})?$/, tr('An amount like 1500 or 1500.50.'))
+  .refine((v) => (toPaisa(v) ?? 0n) > 0n, tr('Must be more than zero.'))
 
 /** An amount, right-aligned and tabular; negatives (scholarships, discounts) in the success colour. */
 export function Money({ value, className, tone }: { value: string | number | null | undefined; className?: string; tone?: 'auto' | 'none' }) {

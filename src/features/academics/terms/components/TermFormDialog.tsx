@@ -9,6 +9,7 @@ import { useAcademicYearOptions } from '../../academic-years/hooks/useAcademicYe
 import type { Term } from '../api/terms.api'
 import { useCreateTerm, useUpdateTerm } from '../hooks/useTerms'
 import { termDefaults, termSchema, toTermInput } from '../schemas/term.schema'
+import { tr } from '@/lib/i18n'
 
 interface Props {
   open: boolean
@@ -27,43 +28,43 @@ export function TermFormDialog({ open, onOpenChange, record, defaultAcademicYear
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? 'Edit term' : 'Add term'}
-      description="Terms split the year for exams and fees: First Term, Second Term…"
+      title={record ? tr('Edit term') : tr('Add term')}
+      description={tr('Terms split the year for exams and fees: First Term, Second Term…')}
       schema={termSchema}
       defaultValues={termDefaults(record, { academicYear: defaultAcademicYear, nextSequence })}
       onSubmit={async (values) => {
         const input = toTermInput(values)
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Term updated.' : 'Term added.')
+        toast.success(record ? tr('Term updated.') : tr('Term added.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
-          <FormField label="Academic year" required error={errors.academic_year?.message}>
+          <FormField label={tr('Academic year')} required error={errors.academic_year?.message}>
             {(p) => (
               <Controller
                 control={control}
                 name="academic_year"
                 render={({ field }) => (
-                  <SelectControl {...p} value={field.value} onChange={field.onChange} loading={years.isPending} options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? `${y.name} (current)` : y.name }))} />
+                  <SelectControl {...p} value={field.value} onChange={field.onChange} loading={years.isPending} options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? tr('{name} (current)', { name: y.name }) : y.name }))} />
                 )}
               />
             )}
           </FormField>
           <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="First Term" autoFocus />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('First Term')} autoFocus />
             </FormField>
-            <FormField label="Order" required error={errors.sequence?.message} description="1 for the first term.">
+            <FormField label={tr('Order')} required error={errors.sequence?.message} description={tr('1 for the first term.')}>
               <Input {...register('sequence')} inputMode="numeric" />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Starts" required error={errors.start_date?.message}>
+            <FormField label={tr('Starts')} required error={errors.start_date?.message}>
               {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
             </FormField>
-            <FormField label="Ends" required error={errors.end_date?.message}>
+            <FormField label={tr('Ends')} required error={errors.end_date?.message}>
               {(p) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
             </FormField>
           </div>

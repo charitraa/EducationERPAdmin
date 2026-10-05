@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type { ApiErrorBody, ApiErrorEnvelope } from '@/shared/types/api'
+import { tr } from '@/lib/i18n'
 
 /**
  * Every message inside a `details` value. The backend sends lists of strings
@@ -59,14 +60,14 @@ export function toApiError(err: unknown): ApiError {
     const data = err.response?.data as Partial<ApiErrorEnvelope> | undefined
     if (data?.error?.code) return new ApiError(data.error, err.response?.status)
     if (!err.response) {
-      return new ApiError({ code: 'network_error', message: "Can't reach the server. Check your connection." })
+      return new ApiError({ code: 'network_error', message: tr("Can't reach the server. Check your connection.") })
     }
     return new ApiError(
-      { code: 'http_error', message: 'Something went wrong on the server. Please try again.' },
+      { code: 'http_error', message: tr('Something went wrong on the server. Please try again.') },
       err.response.status,
     )
   }
-  return new ApiError({ code: 'unknown_error', message: err instanceof Error ? err.message : 'Something went wrong.' })
+  return new ApiError({ code: 'unknown_error', message: err instanceof Error ? err.message : tr('Something went wrong.') })
 }
 
 export const isStatus = (err: unknown, status: number) => toApiError(err).status === status

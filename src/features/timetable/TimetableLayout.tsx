@@ -1,19 +1,20 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { to: '/timetable', label: 'Week', end: true },
-  { to: '/timetable/day', label: 'Day' },
-  { to: '/timetable/lesson-changes', label: 'Lesson changes' },
-  { to: '/timetable/bell-schedules', label: 'Bell schedules' },
+  { to: '/timetable', label: tr('Week'), end: true },
+  { to: '/timetable/day', label: tr('Day') },
+  { to: '/timetable/lesson-changes', label: tr('Lesson changes') },
+  { to: '/timetable/bell-schedules', label: tr('Bell schedules') },
 ]
 
 export function TimetableLayout() {
   return (
     <div>
-      <PageHeader title="Timetable" description="Who teaches what, where and when; and today’s cover and cancellations." />
-      <nav aria-label="Timetable" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Timetable')} description={tr('Who teaches what, where and when; and today’s cover and cancellations.')} />
+      <nav aria-label={tr('Timetable')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.to}>

@@ -49,11 +49,12 @@ import {
   useUpdateCategory,
   useUpdateStructure,
 } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 // ---------------------------------------------------------------------------
 // Categories
 // ---------------------------------------------------------------------------
-const categorySchema = z.object({ code, name: z.string().trim().min(1, 'Required.').max(100), is_active: z.boolean() })
+const categorySchema = z.object({ code, name: z.string().trim().min(1, tr('Required.')).max(100), is_active: z.boolean() })
 
 function CategoryDialog({ open, record, onOpenChange }: { open: boolean; record: FeeCategory | null; onOpenChange: (o: boolean) => void }) {
   const create = useCreateCategory()
@@ -62,28 +63,28 @@ function CategoryDialog({ open, record, onOpenChange }: { open: boolean; record:
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? 'Edit fee category' : 'Add fee category'}
+      title={record ? tr('Edit fee category') : tr('Add fee category')}
       schema={categorySchema}
       defaultValues={{ code: record?.code ?? '', name: record?.name ?? '', is_active: record?.is_active ?? true }}
       onSubmit={async (v) => {
         if (record) await update.mutateAsync({ id: record.id, input: v })
         else await create.mutateAsync(v)
-        toast.success(record ? 'Category saved.' : 'Category added.')
+        toast.success(record ? tr('Category saved.') : tr('Category added.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-            <FormField label="Code" required error={errors.code?.message}>
+            <FormField label={tr('Code')} required error={errors.code?.message}>
               <Input {...register('code')} placeholder="tuition" />
             </FormField>
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="Tuition fee" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('Tuition fee')} />
             </FormField>
           </div>
           <Controller control={control} name="is_active" render={({ field }) => (
             <label className="flex items-center gap-3 text-sm">
-              <Switch checked={field.value} onCheckedChange={field.onChange} /> In use
+              <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('In use')}
             </label>
           )} />
         </>
@@ -100,12 +101,12 @@ function Categories() {
   return (
     <section>
       <SectionHeader
-        title="Fee categories"
-        description="The kinds of charge: tuition, admission, exam fee…"
+        title={tr('Fee categories')}
+        description={tr('The kinds of charge: tuition, admission, exam fee…')}
         action={
           <PermissionGate permission={PERMS.finance.manage}>
             <Button variant="outline" onClick={() => setEditing('new')}>
-              <Tags aria-hidden /> Add category
+              <Tags aria-hidden /> {tr('Add category')}
             </Button>
           </PermissionGate>
         }
@@ -115,17 +116,17 @@ function Categories() {
       ) : query.isError ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : query.data.results.length === 0 ? (
-        <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">No categories yet. Add one before making a fee structure.</p>
+        <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('No categories yet. Add one before making a fee structure.')}</p>
       ) : (
         <ul className="flex flex-wrap gap-2">
           {query.data.results.map((c) => (
             <li key={c.id} className="flex items-center gap-1 rounded-full border bg-card py-0.5 pl-3 pr-1 text-sm">
               <span className={c.is_active === false ? 'text-muted-foreground line-through' : undefined}>{c.name}</span>
               <RowActions
-                label={`Actions for ${c.name}`}
+                label={tr('Actions for {name}', { name: c.name })}
                 actions={[
-                  { label: 'Edit', icon: Pencil, permission: PERMS.finance.manage, onSelect: () => setEditing(c) },
-                  { label: 'Delete', icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => setDeleting(c) },
+                  { label: tr('Edit'), icon: Pencil, permission: PERMS.finance.manage, onSelect: () => setEditing(c) },
+                  { label: tr('Delete'), icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => setDeleting(c) },
                 ]}
               />
             </li>
@@ -136,10 +137,10 @@ function Categories() {
       <DeleteDialog
         open={deleting != null}
         onOpenChange={(o) => !o && setDeleting(null)}
-        subject={deleting ? `the category “${deleting.name}”` : 'this category'}
+        subject={deleting ? tr('the category “{name}”', { name: deleting.name }) : tr('this category')}
         onConfirm={async () => {
           await remove.mutateAsync(deleting!.id)
-          toast.success('Category deleted.')
+          toast.success(tr('Category deleted.'))
         }}
       />
     </section>
@@ -150,15 +151,15 @@ function Categories() {
 // Structures
 // ---------------------------------------------------------------------------
 const structureSchema = z.object({
-  program: z.string().min(1, 'Choose a program.'),
-  level: z.string().min(1, 'Choose a level.'),
-  academic_year: z.string().min(1, 'Choose a year.'),
+  program: z.string().min(1, tr('Choose a program.')),
+  level: z.string().min(1, tr('Choose a level.')),
+  academic_year: z.string().min(1, tr('Choose a year.')),
   name: z.string().max(200),
   is_active: z.boolean(),
   items: z
-    .array(z.object({ category: z.string().min(1, 'Choose a category.'), amount: moneyInput, frequency: z.string() }))
-    .min(1, 'Add what it charges.')
-    .refine((items) => new Set(items.map((i) => i.category)).size === items.length, 'A category is listed twice.'),
+    .array(z.object({ category: z.string().min(1, tr('Choose a category.')), amount: moneyInput, frequency: z.string() }))
+    .min(1, tr('Add what it charges.'))
+    .refine((items) => new Set(items.map((i) => i.category)).size === items.length, tr('A category is listed twice.')),
 })
 type StructureValues = z.infer<typeof structureSchema>
 
@@ -167,20 +168,20 @@ function ItemsEditor({ control, register, error, locked }: { control: Control<St
   const categories = useCategoryOptions()
   return (
     <fieldset disabled={locked} className="grid gap-2">
-      <legend className="mb-1 text-sm font-medium">Charges</legend>
+      <legend className="mb-1 text-sm font-medium">{tr('Charges')}</legend>
       {rows.fields.map((f, i) => (
         <div key={f.id} className="grid grid-cols-[1fr_8rem_10rem_auto] items-center gap-2">
-          <Controller control={control} name={`items.${i}.category`} render={({ field }) => <SelectControl value={field.value} onChange={field.onChange} disabled={locked} options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))} aria-label={`Charge ${i + 1} category`} />} />
-          <Input {...register(`items.${i}.amount`)} inputMode="decimal" className="tabular-nums" aria-label={`Charge ${i + 1} amount`} />
-          <Controller control={control} name={`items.${i}.frequency`} render={({ field }) => <SelectControl value={field.value} onChange={field.onChange} disabled={locked} options={enumOptions('FrequencyEnum')} aria-label={`Charge ${i + 1} frequency`} />} />
-          <Button type="button" size="icon" variant="ghost" onClick={() => rows.remove(i)} aria-label={`Remove charge ${i + 1}`}>
+          <Controller control={control} name={`items.${i}.category`} render={({ field }) => <SelectControl value={field.value} onChange={field.onChange} disabled={locked} options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))} aria-label={tr('Charge {value} category', { value: i + 1 })} />} />
+          <Input {...register(`items.${i}.amount`)} inputMode="decimal" className="tabular-nums" aria-label={tr('Charge {value} amount', { value: i + 1 })} />
+          <Controller control={control} name={`items.${i}.frequency`} render={({ field }) => <SelectControl value={field.value} onChange={field.onChange} disabled={locked} options={enumOptions('FrequencyEnum')} aria-label={tr('Charge {value} frequency', { value: i + 1 })} />} />
+          <Button type="button" size="icon" variant="ghost" onClick={() => rows.remove(i)} aria-label={tr('Remove charge {value}', { value: i + 1 })}>
             <X aria-hidden />
           </Button>
         </div>
       ))}
       {error && <p className="text-sm text-danger">{error}</p>}
       <Button type="button" variant="outline" size="sm" className="justify-self-start" onClick={() => rows.append({ category: '', amount: '', frequency: 'per_term' })}>
-        <Plus aria-hidden /> Add charge
+        <Plus aria-hidden /> {tr('Add charge')}
       </Button>
     </fieldset>
   )
@@ -197,8 +198,8 @@ function StructureDialog({ open, record, onOpenChange }: { open: boolean; record
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? 'Edit fee structure' : 'New fee structure'}
-      description="What one level of a program costs in one academic year. Once invoices are generated from it, its charges can’t change."
+      title={record ? tr('Edit fee structure') : tr('New fee structure')}
+      description={tr('What one level of a program costs in one academic year. Once invoices are generated from it, its charges can’t change.')}
       schema={structureSchema}
       defaultValues={{
         program: record ? String(record.program) : '',
@@ -219,7 +220,7 @@ function StructureDialog({ open, record, onOpenChange }: { open: boolean; record
         }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Fee structure saved.' : 'Fee structure added.')
+        toast.success(record ? tr('Fee structure saved.') : tr('Fee structure added.'))
       }}
     >
       {({ register, control, watch, setValue, formState: { errors } }) => {
@@ -228,24 +229,24 @@ function StructureDialog({ open, record, onOpenChange }: { open: boolean; record
           <>
             <FillWhenEmpty value={watch('academic_year')} fallback={String(current.data?.id ?? years.data?.[0]?.id ?? '') || null} fill={(v) => setValue('academic_year', v)} />
             <div className="grid gap-4 sm:grid-cols-3">
-              <FormField label="Program" required error={errors.program?.message}>
+              <FormField label={tr('Program')} required error={errors.program?.message}>
                 {(p) => <Controller control={control} name="program" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(programs.data ?? []).map((x) => ({ value: String(x.id), label: x.name }))} />} />}
               </FormField>
-              <FormField label="Level" required error={errors.level?.message}>
+              <FormField label={tr('Level')} required error={errors.level?.message}>
                 {(p) => <Controller control={control} name="level" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} disabled={!program} options={programLevels(program).map((l) => ({ value: String(l), label: levelLabel(program, l) }))} />} />}
               </FormField>
-              <FormField label="Academic year" required error={errors.academic_year?.message}>
+              <FormField label={tr('Academic year')} required error={errors.academic_year?.message}>
                 {(p) => <Controller control={control} name="academic_year" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.name }))} />} />}
               </FormField>
             </div>
-            <FormField label="Name" error={errors.name?.message} description="Optional. Shown instead of program, level and year.">
+            <FormField label={tr('Name')} error={errors.name?.message} description={tr('Optional. Shown instead of program, level and year.')}>
               <Input {...register('name')} maxLength={200} />
             </FormField>
             <ItemsEditor control={control} register={register} error={errors.items?.message ?? errors.items?.root?.message} locked={false} />
-            <RowErrors errors={errors.items} label="Charge" />
+            <RowErrors errors={errors.items} label={tr('Charge')} />
             <Controller control={control} name="is_active" render={({ field }) => (
               <label className="flex items-center gap-3 text-sm">
-                <Switch checked={field.value} onCheckedChange={field.onChange} /> In use
+                <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('In use')}
               </label>
             )} />
           </>
@@ -255,7 +256,7 @@ function StructureDialog({ open, record, onOpenChange }: { open: boolean; record
   )
 }
 
-const termSchema = z.object({ term: z.string().min(1, 'Choose a term.'), section: z.string(), due_date: optionalIsoDate })
+const termSchema = z.object({ term: z.string().min(1, tr('Choose a term.')), section: z.string(), due_date: optionalIsoDate })
 
 function GenerateTermDialog({ structure, onClose }: { structure: FeeStructure | null; onClose: () => void }) {
   const generate = useGenerateTermInvoices()
@@ -265,25 +266,25 @@ function GenerateTermDialog({ structure, onClose }: { structure: FeeStructure | 
     <FormDialog
       open={structure != null}
       onOpenChange={(o) => !o && onClose()}
-      title="Bill a term"
-      description="One invoice for each student placed in a matching class, with the per-term charges and their scholarships. Students already billed for the term are skipped, so it’s safe to run again."
-      submitLabel="Generate invoices"
+      title={tr('Bill a term')}
+      description={tr('One invoice for each student placed in a matching class, with the per-term charges and their scholarships. Students already billed for the term are skipped, so it’s safe to run again.')}
+      submitLabel={tr('Generate invoices')}
       schema={termSchema}
       defaultValues={{ term: '', section: '', due_date: '' }}
       onSubmit={async (v) => {
         const r = await generate.mutateAsync({ id: structure!.id, term: Number(v.term), ...(v.section ? { section: Number(v.section) } : {}), ...(v.due_date ? { due_date: v.due_date } : {}) })
-        toast.success(`${r.created} invoice${r.created === 1 ? '' : 's'} generated${r.skipped ? `, ${r.skipped} already billed` : ''}.`)
+        toast.success(tr('{created} invoice{value} generated{value2}.', { created: r.created, value: r.created === 1 ? '' : 's', value2: r.skipped ? ', ' + tr('{skipped} already billed', { skipped: r.skipped }) : '' }))
       }}
     >
       {({ control, formState: { errors } }) => (
         <>
-          <FormField label="Term" required error={errors.term?.message}>
-            {(p) => <Controller control={control} name="term" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(terms.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name }))} placeholder={terms.data?.results.length === 0 ? 'Add terms to the year first' : 'Choose…'} />} />}
+          <FormField label={tr('Term')} required error={errors.term?.message}>
+            {(p) => <Controller control={control} name="term" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(terms.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name }))} placeholder={terms.data?.results.length === 0 ? tr('Add terms to the year first') : tr('Choose…')} />} />}
           </FormField>
-          <FormField label="Class" description="Empty: every matching class.">
-            {(p) => <Controller control={control} name="section" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every class" options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name }))} />} />}
+          <FormField label={tr('Class')} description={tr('Empty: every matching class.')}>
+            {(p) => <Controller control={control} name="section" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every class')} options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name }))} />} />}
           </FormField>
-          <FormField label="Due date (AD)" error={errors.due_date?.message} description="Empty: 15 days from today.">
+          <FormField label={tr('Due date (AD)')} error={errors.due_date?.message} description={tr('Empty: 15 days from today.')}>
             {(p) => <Controller control={control} name="due_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
           </FormField>
         </>
@@ -300,23 +301,23 @@ function OneTimeDialog({ structure, onClose }: { structure: FeeStructure | null;
       open={structure != null}
       onOpenChange={(o) => !o && onClose()}
       wide
-      title="One-time invoice"
-      description="The one-time charges (admission and the like) for one student placed in a class this structure covers. Each student gets it once."
-      submitLabel="Generate invoice"
-      schema={z.object({ student: z.custom<Student | null>().refine((s) => s != null, 'Choose a student.'), due_date: optionalIsoDate })}
+      title={tr('One-time invoice')}
+      description={tr('The one-time charges (admission and the like) for one student placed in a class this structure covers. Each student gets it once.')}
+      submitLabel={tr('Generate invoice')}
+      schema={z.object({ student: z.custom<Student | null>().refine((s) => s != null, tr('Choose a student.')), due_date: optionalIsoDate })}
       defaultValues={{ student: null, due_date: '' }}
       onSubmit={async (v) => {
         const inv = await generate.mutateAsync({ id: structure!.id, student: v.student!.id, ...(v.due_date ? { due_date: v.due_date } : {}) })
-        toast.success(`Invoice ${inv.invoice_number} generated.`)
+        toast.success(tr('Invoice {invoice_number} generated.', { invoice_number: inv.invoice_number }))
         navigate(`/finance/invoices/${inv.id}`)
       }}
     >
       {({ control, formState: { errors } }) => (
         <>
-          <FormField label="Student" required error={errors.student?.message}>
+          <FormField label={tr('Student')} required error={errors.student?.message}>
             {(p) => <Controller control={control} name="student" render={({ field }) => <StudentPicker {...p} value={field.value} onChange={field.onChange} />} />}
           </FormField>
-          <FormField label="Due date (AD)" error={errors.due_date?.message}>
+          <FormField label={tr('Due date (AD)')} error={errors.due_date?.message}>
             {(p) => <Controller control={control} name="due_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
           </FormField>
         </>
@@ -345,11 +346,11 @@ export default function FeeStructuresPage() {
       <Categories />
       <section>
         <SectionHeader
-          title="Fee structures"
+          title={tr('Fee structures')}
           action={
             manage && (
               <Button onClick={() => setEditing('new')}>
-                <Plus aria-hidden /> New fee structure
+                <Plus aria-hidden /> {tr('New fee structure')}
               </Button>
             )
           }
@@ -359,7 +360,7 @@ export default function FeeStructuresPage() {
         ) : query.isError ? (
           <ErrorState error={query.error} onRetry={() => void query.refetch()} />
         ) : query.data.results.length === 0 ? (
-          <EmptyState title="No fee structures yet" description="Say what each level of each program costs this year, then bill a term in one go." />
+          <EmptyState title={tr('No fee structures yet')} description={tr('Say what each level of each program costs this year, then bill a term in one go.')} />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {query.data.results.map((s) => {
@@ -375,17 +376,17 @@ export default function FeeStructuresPage() {
                         {s.program_name} · {levelLabel(program(s.program), s.level)} · {yearName(s.academic_year)}
                       </p>
                     </div>
-                    {s.is_active === false && <StatusBadge status="inactive" label="Not in use" />}
+                    {s.is_active === false && <StatusBadge status="inactive" label={tr('Not in use')} />}
                     <RowActions
                       actions={[
-                        { label: 'Bill a term', icon: Files, permission: PERMS.finance.manage, hidden: perTerm.length === 0, onSelect: () => setBilling(s) },
-                        { label: 'One-time invoice', icon: FilePlus2, permission: PERMS.finance.manage, hidden: once.length === 0, onSelect: () => setOneTime(s) },
-                        { label: 'Edit', icon: Pencil, permission: PERMS.finance.manage, onSelect: () => setEditing(s) },
-                        { label: 'Delete', icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => setDeleting(s) },
+                        { label: tr('Bill a term'), icon: Files, permission: PERMS.finance.manage, hidden: perTerm.length === 0, onSelect: () => setBilling(s) },
+                        { label: tr('One-time invoice'), icon: FilePlus2, permission: PERMS.finance.manage, hidden: once.length === 0, onSelect: () => setOneTime(s) },
+                        { label: tr('Edit'), icon: Pencil, permission: PERMS.finance.manage, onSelect: () => setEditing(s) },
+                        { label: tr('Delete'), icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => setDeleting(s) },
                       ]}
                     />
                   </header>
-                  <table className="w-full text-sm" aria-label={`Charges of ${s.name || s.program_name}`}>
+                  <table className="w-full text-sm" aria-label={tr('Charges of {name}', { name: s.name || s.program_name })}>
                     <tbody className="divide-y">
                       {items.map((i) => (
                         <tr key={i.id}>
@@ -400,7 +401,7 @@ export default function FeeStructuresPage() {
                     <tfoot className="border-t text-xs text-muted-foreground">
                       <tr>
                         <td className="px-4 py-1.5" colSpan={2}>
-                          Per term
+                          {tr('Per term')}
                         </td>
                         <td className="px-4 py-1.5 text-right font-medium text-foreground">
                           <Money value={sumMoney(perTerm.map((i) => i.amount))} />
@@ -420,11 +421,11 @@ export default function FeeStructuresPage() {
       <DeleteDialog
         open={deleting != null}
         onOpenChange={(o) => !o && setDeleting(null)}
-        subject="this fee structure"
-        description="Only possible before any invoice is generated from it."
+        subject={tr('this fee structure')}
+        description={tr('Only possible before any invoice is generated from it.')}
         onConfirm={async () => {
           await remove.mutateAsync(deleting!.id)
-          toast.success('Fee structure deleted.')
+          toast.success(tr('Fee structure deleted.'))
         }}
       />
     </div>

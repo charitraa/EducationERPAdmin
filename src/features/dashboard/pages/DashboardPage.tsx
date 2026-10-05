@@ -3,7 +3,7 @@ import { PermissionGate } from '@/components/common/PermissionGate'
 import { useAuth } from '@/hooks/useAuth'
 import { usePermissions } from '@/hooks/usePermissions'
 import { todayIso, toBsDate } from '@/lib/dates'
-import { t, useLocale } from '@/lib/i18n'
+import { t, useLocale, tr } from '@/lib/i18n'
 import { PERMS } from '@/shared/constants/permissions'
 import { useCurrentAcademicYear } from '@/features/academics/academic-years/hooks/useAcademicYears'
 import { MySummary } from '@/features/self/components/MySummary'
@@ -34,14 +34,14 @@ export default function DashboardPage() {
             {user?.organization?.name}
             {year.data && (
               <>
-                {' · '}Academic year <span className="font-medium text-foreground">{year.data.name}</span>
+                {' · '}{tr('Academic year')} <span className="font-medium text-foreground">{year.data.name}</span>
               </>
             )}
           </p>
         </div>
         <p className="flex items-center gap-1.5 text-sm tabular-nums text-muted-foreground">
           <CalendarDays className="h-4 w-4" aria-hidden />
-          {today} <span aria-hidden>·</span> {toBsDate(today)} BS
+          {today} <span aria-hidden>·</span> {toBsDate(today)} {tr('BS')}
         </p>
       </header>
 

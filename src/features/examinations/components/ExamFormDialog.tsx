@@ -16,16 +16,17 @@ import { toast } from '@/hooks/useToast'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { dec, type Exam, type ExamInput } from '../api/examinations.api'
 import { useCreateExam, useExamTypeOptions, useGradeScaleOptions, useUpdateExam } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Required.').max(200),
-  exam_type: z.string().min(1, 'Choose a type.'),
-  program: z.string().min(1, 'Choose a program.'),
-  academic_year: z.string().min(1, 'Choose a year.'),
+  name: z.string().trim().min(1, tr('Required.')).max(200),
+  exam_type: z.string().min(1, tr('Choose a type.')),
+  program: z.string().min(1, tr('Choose a program.')),
+  academic_year: z.string().min(1, tr('Choose a year.')),
   term: z.string(),
-  campus: z.string().min(1, 'Choose a branch.'),
+  campus: z.string().min(1, tr('Choose a branch.')),
   grade_scale: z.string(),
-  min_attendance_percent: z.union([z.literal(''), z.string().trim().regex(/^\d+(\.\d+)?$/, 'A percentage.')]),
+  min_attendance_percent: z.union([z.literal(''), z.string().trim().regex(/^\d+(\.\d+)?$/, tr('A percentage.'))]),
   instructions: z.string(),
   on_transcript: z.boolean(),
 })
@@ -47,8 +48,8 @@ export function ExamFormDialog({ open, record, onOpenChange, onCreated }: { open
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? 'Edit exam' : 'New exam'}
-      description="One exam for one program at one branch and year. Add its papers next."
+      title={record ? tr('Edit exam') : tr('New exam')}
+      description={tr('One exam for one program at one branch and year. Add its papers next.')}
       schema={schema}
       defaultValues={{
         name: record?.name ?? '',
@@ -77,10 +78,10 @@ export function ExamFormDialog({ open, record, onOpenChange, onCreated }: { open
         }
         if (record) {
           await update.mutateAsync({ id: record.id, input })
-          toast.success('Exam saved.')
+          toast.success(tr('Exam saved.'))
         } else {
           const exam = await create.mutateAsync(input)
-          toast.success('Exam created. Add its papers next.')
+          toast.success(tr('Exam created. Add its papers next.'))
           onCreated?.(exam)
         }
       }}
@@ -92,28 +93,28 @@ export function ExamFormDialog({ open, record, onOpenChange, onCreated }: { open
           <>
             <TermReset year={year} clear={() => setValue('term', '')} />
             <FillWhenEmpty value={watch('academic_year')} fallback={String(current.data?.id ?? years.data?.[0]?.id ?? '') || null} fill={(v) => setValue('academic_year', v)} />
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="First terminal 2083" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('First terminal 2083')} />
             </FormField>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Exam type" required error={errors.exam_type?.message}>
-                {(p) => <Controller control={control} name="exam_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} loading={types.isPending} options={(types.data ?? []).map((t) => ({ value: String(t.id), label: t.name }))} placeholder={types.data?.length === 0 ? 'Add an exam type first' : 'Choose…'} />} />}
+              <FormField label={tr('Exam type')} required error={errors.exam_type?.message}>
+                {(p) => <Controller control={control} name="exam_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} loading={types.isPending} options={(types.data ?? []).map((t) => ({ value: String(t.id), label: t.name }))} placeholder={types.data?.length === 0 ? tr('Add an exam type first') : tr('Choose…')} />} />}
               </FormField>
-              <FormField label="Program" required error={errors.program?.message} description={structural ? 'Fixed once papers are added.' : undefined}>
+              <FormField label={tr('Program')} required error={errors.program?.message} description={structural ? tr('Fixed once papers are added.') : undefined}>
                 {(p) => <Controller control={control} name="program" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} disabled={structural} options={(programs.data ?? []).map((pr) => ({ value: String(pr.id), label: pr.name }))} />} />}
               </FormField>
-              <FormField label="Academic year" required error={errors.academic_year?.message}>
+              <FormField label={tr('Academic year')} required error={errors.academic_year?.message}>
                 {(p) => <Controller control={control} name="academic_year" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} disabled={structural} options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.name }))} />} />}
               </FormField>
-              <FormField label="Term" error={errors.term?.message}>
+              <FormField label={tr('Term')} error={errors.term?.message}>
                 {(p) => <Controller control={control} name="term" render={({ field }) => <TermSelect {...p} year={year} value={field.value} onChange={field.onChange} />} />}
               </FormField>
               {isMultiBranch && (
-                <FormField label="Branch" required error={errors.campus?.message}>
+                <FormField label={tr('Branch')} required error={errors.campus?.message}>
                   {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} disabled={structural} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
                 </FormField>
               )}
-              <FormField label="Grade scale" error={errors.grade_scale?.message} description="Empty: the program’s scale, or the default.">
+              <FormField label={tr('Grade scale')} error={errors.grade_scale?.message} description={tr('Empty: the program’s scale, or the default.')}>
                 {(p) => (
                   <Controller
                     control={control}
@@ -124,18 +125,18 @@ export function ExamFormDialog({ open, record, onOpenChange, onCreated }: { open
                         value={field.value}
                         onChange={field.onChange}
                         allowEmpty
-                        emptyLabel="Automatic"
+                        emptyLabel={tr('Automatic')}
                         options={(scales.data ?? []).filter((s) => s.program == null || String(s.program) === program).map((s) => ({ value: String(s.id), label: s.name }))}
                       />
                     )}
                   />
                 )}
               </FormField>
-              <FormField label="Minimum attendance (%)" error={errors.min_attendance_percent?.message} description="Below this, the admit card is withheld.">
+              <FormField label={tr('Minimum attendance (%)')} error={errors.min_attendance_percent?.message} description={tr('Below this, the admit card is withheld.')}>
                 <Input {...register('min_attendance_percent')} inputMode="decimal" placeholder="75" />
               </FormField>
             </div>
-            <FormField label="Instructions" error={errors.instructions?.message} description="Printed on every admit card.">
+            <FormField label={tr('Instructions')} error={errors.instructions?.message} description={tr('Printed on every admit card.')}>
               <Textarea {...register('instructions')} rows={3} />
             </FormField>
             <Controller
@@ -143,7 +144,7 @@ export function ExamFormDialog({ open, record, onOpenChange, onCreated }: { open
               name="on_transcript"
               render={({ field }) => (
                 <label className="flex items-center gap-3 text-sm">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} /> Show this exam’s own result on transcripts
+                  <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Show this exam’s own result on transcripts')}
                 </label>
               )}
             />
@@ -166,5 +167,5 @@ function TermReset({ year, clear }: { year: string; clear: () => void }) {
 
 function TermSelect({ year, value, onChange, ...p }: { year: string; value: string; onChange: (v: string) => void; id?: string }) {
   const terms = useTerms({ ...PICKER_PARAMS, academic_year: year || undefined }, { enabled: Boolean(year) })
-  return <SelectControl {...p} value={value} onChange={onChange} allowEmpty emptyLabel="Whole year" options={(terms.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name }))} />
+  return <SelectControl {...p} value={value} onChange={onChange} allowEmpty emptyLabel={tr('Whole year')} options={(terms.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name }))} />
 }

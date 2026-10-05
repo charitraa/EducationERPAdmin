@@ -35,9 +35,10 @@ import {
   useSubject,
   useWithdrawRegistration,
 } from '../hooks/useSelf'
+import { tr } from '@/lib/i18n'
 
 const paperTime = (p: { date: string | null; start_time: string | null; end_time: string | null }) =>
-  [p.date ? formatDate(p.date) : 'Date to be set', p.start_time ? `${hhmm(p.start_time)}–${hhmm(p.end_time)}` : ''].filter(Boolean).join(' · ')
+  [p.date ? formatDate(p.date) : tr('Date to be set'), p.start_time ? `${hhmm(p.start_time)}–${hhmm(p.end_time)}` : ''].filter(Boolean).join(' · ')
 
 // ---------------------------------------------------------------------------
 // Exams and admit cards
@@ -48,7 +49,7 @@ export function MyExamsPage() {
     <Loaded query={q}>
       {(exams) =>
         exams.length === 0 ? (
-          <EmptyState icon={ClipboardCheck} title="No exams scheduled" description="Exams for your class show here once they’re scheduled." />
+          <EmptyState icon={ClipboardCheck} title={tr('No exams scheduled')} description={tr('Exams for your class show here once they’re scheduled.')} />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {exams.map((e) => (
@@ -63,17 +64,17 @@ export function MyExamsPage() {
                   {e.admit_card?.status === 'issued' && (
                     <Button size="sm" variant="outline" asChild>
                       <Link to={`/me/exams/${e.id}/admit-card`}>
-                        <Printer aria-hidden /> Admit card
+                        <Printer aria-hidden /> {tr('Admit card')}
                       </Link>
                     </Button>
                   )}
                 </header>
                 {e.admit_card?.status === 'withheld' && (
-                  <p className="mt-3 rounded-md border border-danger/25 bg-danger-soft p-2 text-sm">Admit card withheld{e.admit_card.withheld_reason ? `: ${e.admit_card.withheld_reason}` : ''}. Contact the exam office.</p>
+                  <p className="mt-3 rounded-md border border-danger/25 bg-danger-soft p-2 text-sm">{tr('Admit card withheld{value}. Contact the exam office.', { value: e.admit_card.withheld_reason ? `: ${e.admit_card.withheld_reason}` : '' })}</p>
                 )}
                 {e.seat && (
                   <p className="mt-3 inline-flex items-center gap-1.5 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden /> {e.seat.room}, seat {e.seat.seat_number}
+                    <MapPin className="h-4 w-4 text-muted-foreground" aria-hidden /> {tr('{room}, seat {seat_number}', { room: e.seat.room, seat_number: e.seat.seat_number })}
                   </p>
                 )}
                 <ul className="mt-3 divide-y text-sm">
@@ -102,17 +103,17 @@ export function MyAdmitCardPage() {
     <Loaded query={q}>
       {(cards) => {
         const c = cards[0]
-        if (!c) return <EmptyState title="No admit card for this exam" description={<Link to="/me/exams" className="text-primary hover:underline">Back to exams</Link>} />
+        if (!c) return <EmptyState title={tr('No admit card for this exam')} description={<Link to="/me/exams" className="text-primary hover:underline">{tr('Back to exams')}</Link>} />
         return (
           <div className="mx-auto max-w-2xl">
             <PageHeader
               className="print:hidden"
               backTo="/me/exams"
-              title="Admit card"
+              title={tr('Admit card')}
               description={c.exam.name}
               actions={
                 <Button variant="outline" onClick={() => window.print()} disabled={c.status !== 'issued'}>
-                  <Printer aria-hidden /> Print
+                  <Printer aria-hidden /> {tr('Print')}
                 </Button>
               }
             />
@@ -120,35 +121,35 @@ export function MyAdmitCardPage() {
               <header className="border-b pb-3 text-center">
                 <p className="text-lg font-semibold">{user?.organization?.name}</p>
                 <p className="text-sm text-muted-foreground">{c.campus}</p>
-                <h1 className="mt-3 text-xl font-bold uppercase tracking-wide">Admit card</h1>
+                <h1 className="mt-3 text-xl font-bold uppercase tracking-wide">{tr('Admit card')}</h1>
                 <p className="text-sm">
                   {c.exam.name} · {c.exam.type}
                 </p>
               </header>
               <dl className="my-4 grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <dt className="text-xs text-muted-foreground">Student</dt>
+                  <dt className="text-xs text-muted-foreground">{tr('Student')}</dt>
                   <dd className="font-medium">{c.student.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Card number</dt>
+                  <dt className="text-xs text-muted-foreground">{tr('Card number')}</dt>
                   <dd className="font-mono">{c.card_number}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Student number</dt>
+                  <dt className="text-xs text-muted-foreground">{tr('Student number')}</dt>
                   <dd className="font-mono">{c.student.student_number}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-muted-foreground">Class</dt>
+                  <dt className="text-xs text-muted-foreground">{tr('Class')}</dt>
                   <dd>
                     {c.program} · {c.section}
                   </dd>
                 </div>
                 {c.seat && (
                   <div>
-                    <dt className="text-xs text-muted-foreground">Seat</dt>
+                    <dt className="text-xs text-muted-foreground">{tr('Seat')}</dt>
                     <dd>
-                      {c.seat.room}, seat {c.seat.seat_number}
+                      {tr('{room}, seat {seat_number}', { room: c.seat.room, seat_number: c.seat.seat_number })}
                     </dd>
                   </div>
                 )}
@@ -156,9 +157,9 @@ export function MyAdmitCardPage() {
               <table className="w-full text-sm">
                 <thead className="border-y text-left text-xs text-muted-foreground">
                   <tr>
-                    <th className="py-1.5">Paper</th>
-                    <th className="py-1.5">Date</th>
-                    <th className="py-1.5">Time</th>
+                    <th className="py-1.5">{tr('Paper')}</th>
+                    <th className="py-1.5">{tr('Date')}</th>
+                    <th className="py-1.5">{tr('Time')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -173,7 +174,7 @@ export function MyAdmitCardPage() {
               </table>
               {c.exam.instructions && <p className="mt-4 whitespace-pre-wrap text-xs">{c.exam.instructions}</p>}
               <footer className="mt-14 flex justify-end">
-                <div className="w-48 border-t pt-2 text-center text-xs">Exam controller</div>
+                <div className="w-48 border-t pt-2 text-center text-xs">{tr('Exam controller')}</div>
               </footer>
             </article>
           </div>
@@ -195,7 +196,7 @@ export function MyResultsPage() {
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
-        <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label="Show">
+        <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label={tr('Show')}>
           {(
             [
               ['cards', 'Report cards'],
@@ -208,19 +209,19 @@ export function MyResultsPage() {
           ))}
         </div>
         <Button variant="outline" size="sm" onClick={() => window.print()}>
-          <Printer aria-hidden /> Print
+          <Printer aria-hidden /> {tr('Print')}
         </Button>
       </div>
       {view === 'transcript' ? (
-        <Loaded query={transcript}>{(t) => (t.records.length === 0 ? <EmptyState icon={Award} title="No published results yet" /> : <TranscriptView t={t} />)}</Loaded>
+        <Loaded query={transcript}>{(t) => (t.records.length === 0 ? <EmptyState icon={Award} title={tr('No published results yet')} /> : <TranscriptView t={t} />)}</Loaded>
       ) : (
         <Loaded query={cards}>
           {(rows) => {
-            if (rows.length === 0) return <EmptyState icon={Award} title="No published results yet" description="Results show here once the school publishes them." />
+            if (rows.length === 0) return <EmptyState icon={Award} title={tr('No published results yet')} description={tr('Results show here once the school publishes them.')} />
             const card = rows.find((r) => r.result_id === picked) ?? rows[0]
             return (
               <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
-                <ul className="grid content-start gap-1.5 print:hidden" aria-label="Results">
+                <ul className="grid content-start gap-1.5 print:hidden" aria-label={tr('Results')}>
                   {rows.map((r) => (
                     <li key={r.result_id}>
                       <button
@@ -257,26 +258,26 @@ export function MyFeesPage() {
       {(st) => (
         <div className="grid gap-5">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Figure label="Billed" value={<Money value={st.total_billed} tone="none" />} />
-            <Figure label="Paid" value={<Money value={st.total_paid} tone="none" />} />
-            <Figure label="Still owed" value={<Money value={st.balance} tone="none" className={cn(st.balance > 0 && 'text-danger')} />} />
+            <Figure label={tr('Billed')} value={<Money value={st.total_billed} tone="none" />} />
+            <Figure label={tr('Paid')} value={<Money value={st.total_paid} tone="none" />} />
+            <Figure label={tr('Still owed')} value={<Money value={st.balance} tone="none" className={cn(st.balance > 0 && 'text-danger')} />} />
           </div>
           <MiniTable
-            label="Invoices"
+            label={tr('Invoices')}
             rows={st.invoices}
             rowKey={(i) => i.invoice}
-            empty={{ title: 'No invoices', icon: Wallet }}
+            empty={{ title: tr('No invoices'), icon: Wallet }}
             columns={[
-              { header: 'Invoice', cell: (i) => <span className="font-mono text-xs">{i.invoice_number}</span> },
-              { header: 'For', cell: (i) => i.term_name ?? 'One-time' },
-              { header: 'Issued', cell: (i) => formatDate(i.issue_date) },
-              { header: 'Due', cell: (i) => <span className={cn(i.is_overdue && 'font-medium text-danger')}>{formatDate(i.due_date)}</span> },
-              { header: 'Total', cell: (i) => <Money value={i.total} tone="none" />, className: 'text-right' },
-              { header: 'Paid', cell: (i) => <Money value={i.paid} tone="none" />, className: 'text-right' },
-              { header: 'Balance', cell: (i) => (i.is_paid ? <StatusBadge status="paid" label="Paid" /> : <Money value={i.balance} tone="none" className="font-medium" />), className: 'text-right' },
+              { header: tr('Invoice'), cell: (i) => <span className="font-mono text-xs">{i.invoice_number}</span> },
+              { header: tr('For'), cell: (i) => i.term_name ?? tr('One-time') },
+              { header: tr('Issued'), cell: (i) => formatDate(i.issue_date) },
+              { header: tr('Due'), cell: (i) => <span className={cn(i.is_overdue && 'font-medium text-danger')}>{formatDate(i.due_date)}</span> },
+              { header: tr('Total'), cell: (i) => <Money value={i.total} tone="none" />, className: 'text-right' },
+              { header: tr('Paid'), cell: (i) => <Money value={i.paid} tone="none" />, className: 'text-right' },
+              { header: tr('Balance'), cell: (i) => (i.is_paid ? <StatusBadge status="paid" label={tr('Paid')} /> : <Money value={i.balance} tone="none" className="font-medium" />), className: 'text-right' },
             ]}
           />
-          {st.balance > 0 && <Note>Pay at the accounts office; payments show here once they’re recorded.</Note>}
+          {st.balance > 0 && <Note>{tr('Pay at the accounts office; payments show here once they’re recorded.')}</Note>}
         </div>
       )}
     </Loaded>
@@ -307,21 +308,21 @@ function EventCard({ e, canAct, onRegister, onWithdraw }: { e: MyEvent; canAct: 
       {e.description && <p className="line-clamp-3 text-sm text-muted-foreground">{e.description}</p>}
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1 text-xs text-muted-foreground">
         <span>
-          {e.registration_mode === 'none' ? 'No sign-up needed' : e.registration_deadline ? `Sign up by ${formatDateTime(e.registration_deadline)}` : ''}
-          {e.capacity != null && ` · ${e.confirmed_count}/${e.capacity} places`}
+          {e.registration_mode === 'none' ? tr('No sign-up needed') : e.registration_deadline ? tr('Sign up by {dateTime}', { dateTime: formatDateTime(e.registration_deadline) }) : ''}
+          {e.capacity != null && ' · ' + tr('{confirmed_count}/{capacity} places', { confirmed_count: e.confirmed_count, capacity: e.capacity })}
         </span>
         {canAct &&
           (reg && (reg.status === 'pending' || reg.status === 'confirmed') ? (
             !e.is_over && (
               <Button size="sm" variant="outline" onClick={onWithdraw}>
-                Withdraw
+                {tr('Withdraw')}
               </Button>
             )
           ) : (
             e.registration_open &&
             e.registration_mode !== 'none' && (
               <Button size="sm" onClick={onRegister} disabled={full}>
-                {full ? 'Full' : e.registration_mode === 'approval' ? 'Ask to join' : 'Register'}
+                {full ? tr('Full') : e.registration_mode === 'approval' ? tr('Ask to join') : tr('Register')}
               </Button>
             )
           ))}
@@ -346,9 +347,9 @@ export function MyEventsPage() {
         const past = events.filter((e) => e.is_over && e.my_registration)
         return (
           <div className="grid gap-6">
-            <Block title="Coming up">
+            <Block title={tr('Coming up')}>
               {upcoming.length === 0 ? (
-                <EmptyState icon={PartyPopper} title="No events coming up" />
+                <EmptyState icon={PartyPopper} title={tr('No events coming up')} />
               ) : (
                 <ul className="grid gap-3 md:grid-cols-2">
                   {upcoming.map((e) => (
@@ -358,7 +359,7 @@ export function MyEventsPage() {
               )}
             </Block>
             {past.length > 0 && (
-              <Block title="Past events you signed up for">
+              <Block title={tr('Past events you signed up for')}>
                 <ul className="grid gap-3 md:grid-cols-2">
                   {past.map((e) => (
                     <EventCard key={e.id} e={e} canAct={false} onRegister={() => undefined} onWithdraw={() => undefined} />
@@ -369,19 +370,19 @@ export function MyEventsPage() {
             <FormDialog
               open={registering !== null}
               onOpenChange={(o) => !o && setRegistering(null)}
-              title={registering?.registration_mode === 'approval' ? `Ask to join ${registering?.name}` : `Register for ${registering?.name ?? ''}`}
-              description={registering?.registration_mode === 'approval' ? 'The organizer decides; you’ll be told.' : undefined}
-              submitLabel={registering?.registration_mode === 'approval' ? 'Ask' : 'Register'}
+              title={registering?.registration_mode === 'approval' ? tr('Ask to join {name}', { name: registering?.name }) : tr('Register for {name}', { name: registering?.name ?? '' })}
+              description={registering?.registration_mode === 'approval' ? tr('The organizer decides; you’ll be told.') : undefined}
+              submitLabel={registering?.registration_mode === 'approval' ? tr('Ask') : tr('Register')}
               schema={z.object({ note: z.string().max(255) })}
               defaultValues={{ note: '' }}
               onSubmit={async (v) => {
                 await register.mutateAsync({ id: registering!.id, note: v.note })
-                toast.success(registering!.registration_mode === 'approval' ? 'Request sent.' : 'You’re registered.')
+                toast.success(registering!.registration_mode === 'approval' ? tr('Request sent.') : tr('You’re registered.'))
               }}
             >
               {({ register: field }) =>
                 registering?.registration_mode === 'approval' ? (
-                  <FormField label="Why you’d like to take part">
+                  <FormField label={tr('Why you’d like to take part')}>
                     <Textarea {...field('note')} rows={3} />
                   </FormField>
                 ) : (
@@ -392,13 +393,13 @@ export function MyEventsPage() {
             <ConfirmDialog
               open={withdrawing !== null}
               onOpenChange={(o) => !o && setWithdrawing(null)}
-              title={`Withdraw from ${withdrawing?.name ?? ''}?`}
-              description="Your place goes to someone else."
-              confirmLabel="Withdraw"
+              title={tr('Withdraw from {name}?', { name: withdrawing?.name ?? '' })}
+              description={tr('Your place goes to someone else.')}
+              confirmLabel={tr('Withdraw')}
               tone="destructive"
               onConfirm={async () => {
                 await withdraw.mutateAsync(withdrawing!.my_registration!.id)
-                toast.success('Withdrawn.')
+                toast.success(tr('Withdrawn.'))
                 setWithdrawing(null)
               }}
             />
@@ -418,33 +419,33 @@ export function MyCertificatesPage() {
   const child = s.kind === 'student' ? s.child : null
   return (
     <Block
-      title="Certificates"
+      title={tr('Certificates')}
       description={
         <>
-          Issued by the school. To ask for one, send a certificate <Link to="/me/applications" className="text-primary hover:underline">application</Link>.
+          {tr('Issued by the school. To ask for one, send a certificate')} <Link to="/me/applications" className="text-primary hover:underline">{tr('application')}</Link>.
         </>
       }
     >
       <Loaded query={q}>
         {(rows) => (
           <MiniTable
-            label="My certificates"
+            label={tr('My certificates')}
             rows={child == null ? rows : rows.filter((c) => c.student === child)}
             rowKey={(c) => c.id}
-            empty={{ title: 'No certificates yet', icon: FileBadge }}
+            empty={{ title: tr('No certificates yet'), icon: FileBadge }}
             columns={[
               {
-                header: 'Certificate',
+                header: tr('Certificate'),
                 cell: (c) => (
                   <Link to={`/me/certificates/${c.id}`} className="font-medium text-primary hover:underline">
                     {c.title}
                   </Link>
                 ),
               },
-              { header: 'Number', cell: (c) => <span className="font-mono text-xs">{c.number}</span> },
-              { header: 'For', cell: (c) => c.student_name },
-              { header: 'Issued', cell: (c) => formatDate(c.issued_on) },
-              { header: 'Status', cell: (c) => (c.is_valid ? <StatusBadge status="issued" label="Valid" tone="success" /> : <StatusBadge status="revoked" label="Revoked" tone="danger" />) },
+              { header: tr('Number'), cell: (c) => <span className="font-mono text-xs">{c.number}</span> },
+              { header: tr('For'), cell: (c) => c.student_name },
+              { header: tr('Issued'), cell: (c) => formatDate(c.issued_on) },
+              { header: tr('Status'), cell: (c) => (c.is_valid ? <StatusBadge status="issued" label={tr('Valid')} tone="success" /> : <StatusBadge status="revoked" label={tr('Revoked')} tone="danger" />) },
             ]}
           />
         )}
@@ -460,17 +461,17 @@ export function MyCertificatePage() {
     <Loaded query={q}>
       {(rows) => {
         const c = rows.find((r) => r.id === id)
-        if (!c) return <EmptyState icon={CalendarDays} title="Certificate not found" description={<Link to="/me/certificates" className="text-primary hover:underline">Back to certificates</Link>} />
+        if (!c) return <EmptyState icon={CalendarDays} title={tr('Certificate not found')} description={<Link to="/me/certificates" className="text-primary hover:underline">{tr('Back to certificates')}</Link>} />
         return (
           <div className="mx-auto max-w-3xl">
             <PageHeader
               className="print:hidden"
               backTo="/me/certificates"
               title={c.title}
-              description={c.is_valid ? `No. ${c.number}` : `Revoked: ${c.revoked_reason}`}
+              description={c.is_valid ? tr('No. {number}', { number: c.number }) : tr('Revoked: {revoked_reason}', { revoked_reason: c.revoked_reason })}
               actions={
                 <Button variant="outline" onClick={() => window.print()} disabled={!c.is_valid}>
-                  <Printer aria-hidden /> Print
+                  <Printer aria-hidden /> {tr('Print')}
                 </Button>
               }
             />

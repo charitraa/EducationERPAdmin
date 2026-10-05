@@ -32,6 +32,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { StatusTone } from '@/shared/constants/statuses'
 import type { BankSheet, ComputeResult, PayrollRun, PayslipRow } from '../api/payroll.api'
 import { useApproveRun, useBankSheet, useCancelRun, useComputeRun, useCreateRun, useMarkPaid, usePayslips, useRun, useRuns } from '../hooks/usePayroll'
+import { tr } from '@/lib/i18n'
 
 const TONE: Record<string, StatusTone> = { draft: 'neutral', approved: 'info', paid: 'success', cancelled: 'muted' }
 
@@ -42,8 +43,8 @@ export function RunStatus({ status }: { status: string | null | undefined }) {
 const period = (r: Pick<PayrollRun, 'period_start' | 'period_end'>) => `${formatDate(r.period_start)} – ${formatDate(r.period_end)}`
 
 const runSchema = z
-  .object({ campus: z.string().min(1, 'Choose a branch.'), name: z.string().trim().min(1, 'Name the period.').max(100), period_start: isoDate, period_end: isoDate, notes: z.string() })
-  .refine((v) => v.period_end >= v.period_start, { path: ['period_end'], message: 'Must not be before the start.' })
+  .object({ campus: z.string().min(1, tr('Choose a branch.')), name: z.string().trim().min(1, tr('Name the period.')).max(100), period_start: isoDate, period_end: isoDate, notes: z.string() })
+  .refine((v) => v.period_end >= v.period_start, { path: ['period_end'], message: tr('Must not be before the start.') })
 
 /** Pay runs, newest first: one per branch per period. */
 export function RunsPage() {
@@ -54,70 +55,70 @@ export function RunsPage() {
   const { isMultiBranch, branches, selectedBranchId, defaultBranchId } = useBranches()
   const [creating, setCreating] = useState(false)
   const columns: Column<PayrollRun>[] = [
-    { id: 'name', header: 'Period', mobile: 'title', cell: (r) => <span className="font-medium">{r.name}</span> },
-    { id: 'dates', header: 'Dates', sortField: 'period_start', className: 'whitespace-nowrap tabular-nums', cell: period },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (r) => r.campus_name },
-    { id: 'slips', header: 'Payslips', className: 'tabular-nums', cell: (r) => (r.computed_at ? r.totals.payslips : <span className="text-muted-foreground">Not worked out</span>) },
-    { id: 'gross', header: 'Gross', className: 'text-right', cell: (r) => (r.computed_at ? <Money value={r.totals.gross_pay} /> : '—') },
-    { id: 'net', header: 'Net pay', className: 'text-right font-medium', cell: (r) => (r.computed_at ? <Money value={r.totals.net_pay} /> : '—') },
-    { id: 'status', header: 'Status', cell: (r) => <RunStatus status={r.status} /> },
+    { id: 'name', header: tr('Period'), mobile: 'title', cell: (r) => <span className="font-medium">{r.name}</span> },
+    { id: 'dates', header: tr('Dates'), sortField: 'period_start', className: 'whitespace-nowrap tabular-nums', cell: period },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (r) => r.campus_name },
+    { id: 'slips', header: tr('Payslips'), className: 'tabular-nums', cell: (r) => (r.computed_at ? r.totals.payslips : <span className="text-muted-foreground">{tr('Not worked out')}</span>) },
+    { id: 'gross', header: tr('Gross'), className: 'text-right', cell: (r) => (r.computed_at ? <Money value={r.totals.gross_pay} /> : '—') },
+    { id: 'net', header: tr('Net pay'), className: 'text-right font-medium', cell: (r) => (r.computed_at ? <Money value={r.totals.net_pay} /> : '—') },
+    { id: 'status', header: tr('Status'), cell: (r) => <RunStatus status={r.status} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Payroll runs"
+        ariaLabel={tr('Payroll runs')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(r) => r.id}
-        searchPlaceholder="Period name…"
+        searchPlaceholder={tr('Period name…')}
         onRowClick={(r) => navigate(`/payroll/runs/${r.id}`)}
         toolbar={
           <PermissionGate permission={PERMS.payroll.manage}>
             <Button onClick={() => setCreating(true)}>
-              <Plus aria-hidden /> New run
+              <Plus aria-hidden /> {tr('New run')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('PayrollRunStatusEnum') },
-          { name: 'campus', label: 'Branch', options: branches.map((b) => ({ value: String(b.id), label: b.name })), hidden: !isMultiBranch },
+          { name: 'status', label: tr('Status'), options: enumOptions('PayrollRunStatusEnum') },
+          { name: 'campus', label: tr('Branch'), options: branches.map((b) => ({ value: String(b.id), label: b.name })), hidden: !isMultiBranch },
         ]}
-        empty={{ title: 'No payroll runs yet', description: 'Open a run for a month, work out the payslips, approve them, then record the payment.' }}
+        empty={{ title: tr('No payroll runs yet'), description: tr('Open a run for a month, work out the payslips, approve them, then record the payment.') }}
       />
       <FormDialog
         open={creating}
         onOpenChange={setCreating}
-        title="New payroll run"
-        description="One branch, one pay period. Use the Nepali month’s own dates."
-        submitLabel="Create"
+        title={tr('New payroll run')}
+        description={tr('One branch, one pay period. Use the Nepali month’s own dates.')}
+        submitLabel={tr('Create')}
         schema={runSchema}
         defaultValues={{ campus: String(selectedBranchId ?? defaultBranchId ?? ''), name: '', period_start: '', period_end: '', notes: '' }}
         onSubmit={async (v) => {
           const run = await create.mutateAsync({ ...v, campus: Number(v.campus) })
-          toast.success('Run created. Work out the payslips next.')
+          toast.success(tr('Run created. Work out the payslips next.'))
           navigate(`/payroll/runs/${run.id}`)
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Name" required error={errors.name?.message}>
-                <Input {...register('name')} placeholder="Kartik 2083" />
+              <FormField label={tr('Name')} required error={errors.name?.message}>
+                <Input {...register('name')} placeholder={tr('Kartik 2083')} />
               </FormField>
               {isMultiBranch && (
-                <FormField label="Branch" required error={errors.campus?.message}>
+                <FormField label={tr('Branch')} required error={errors.campus?.message}>
                   {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
                 </FormField>
               )}
-              <FormField label="From" required error={errors.period_start?.message}>
+              <FormField label={tr('From')} required error={errors.period_start?.message}>
                 {(p) => <Controller control={control} name="period_start" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="To (inclusive)" required error={errors.period_end?.message}>
+              <FormField label={tr('To (inclusive)')} required error={errors.period_end?.message}>
                 {(p) => <Controller control={control} name="period_end" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
             </div>
-            <FormField label="Notes">
+            <FormField label={tr('Notes')}>
               <Textarea {...register('notes')} rows={2} />
             </FormField>
           </>
@@ -131,7 +132,7 @@ const csvCell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` 
 
 /** The bank sheet as a CSV file, for the bank's bulk-transfer upload. */
 function downloadBankSheet(run: PayrollRun, sheet: BankSheet) {
-  const header = ['Payslip', 'Employee no.', 'Name', 'Bank', 'Branch', 'Account name', 'Account number', 'Net pay']
+  const header = [tr('Payslip'), tr('Employee no.'), tr('Name'), tr('Bank'), tr('Branch'), tr('Account name'), tr('Account number'), tr('Net pay')]
   const rows = sheet.rows.map((r) => [r.payslip, r.employee_number, r.staff_name, r.bank_name, r.bank_branch, r.account_name, r.account_number, r.net_pay])
   const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
@@ -147,11 +148,11 @@ function BankSheetSection({ run }: { run: PayrollRun }) {
   return (
     <section className="mt-6">
       <SectionHeader
-        title="Bank sheet"
-        description="Who gets how much, to which account."
+        title={tr('Bank sheet')}
+        description={tr('Who gets how much, to which account.')}
         action={
           <Button size="sm" variant="outline" onClick={() => downloadBankSheet(run, sheet.data!)}>
-            <Download aria-hidden /> Download CSV
+            <Download aria-hidden /> {tr('Download CSV')}
           </Button>
         }
       />
@@ -159,7 +160,7 @@ function BankSheetSection({ run }: { run: PayrollRun }) {
         <p className="mb-3 flex items-start gap-2 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <span>
-            No bank account on file for {missing.join(', ')}. Add it to their <Link to="/hr/profiles" className="underline">HR profile</Link>, or pay them another way.
+            {tr('No bank account on file for {missing}. Add it to their', { missing: missing.join(', ') })} <Link to="/hr/profiles" className="underline">{tr('HR profile')}</Link>{', ' + tr('or pay them another way.')}
           </span>
         </p>
       )}
@@ -190,24 +191,24 @@ export function RunDetailPage() {
     try {
       const res = await compute.mutateAsync(r.id)
       setResult(res)
-      toast.success(`${pluralize(res.payslips, 'payslip')} worked out${res.skipped.length ? `; ${res.skipped.length} skipped` : ''}.`)
+      toast.success(tr('{pluralize} worked out{value}.', { pluralize: pluralize(res.payslips, 'payslip'), value: res.skipped.length ? '; ' + tr('{count} skipped', { count: res.skipped.length }) : '' }))
     } catch (e) {
       toast.error(errorMessage(e))
     }
   }
 
   const columns: Column<PayslipRow>[] = [
-    { id: 'who', header: 'Staff member', mobile: 'title', cell: (p) => (
+    { id: 'who', header: tr('Staff member'), mobile: 'title', cell: (p) => (
       <span>
         <span className="font-medium">{p.staff_name}</span> <span className="font-mono text-xs text-muted-foreground">{p.employee_number}</span>
       </span>
     ) },
-    { id: 'number', header: 'Payslip', mobile: 'hidden', className: 'font-mono text-xs', cell: (p) => p.number },
-    { id: 'basic', header: 'Basic', className: 'text-right', cell: (p) => <Money value={p.basic} /> },
-    { id: 'gross', header: 'Gross', className: 'text-right', cell: (p) => <Money value={p.gross_pay} /> },
-    { id: 'tax', header: 'Tax', className: 'text-right', cell: (p) => <Money value={p.tax} /> },
-    { id: 'deductions', header: 'Deductions', mobile: 'hidden', className: 'text-right', cell: (p) => <Money value={p.total_deductions} /> },
-    { id: 'net', header: 'Net pay', className: 'text-right font-medium', cell: (p) => <Money value={p.net_pay} /> },
+    { id: 'number', header: tr('Payslip'), mobile: 'hidden', className: 'font-mono text-xs', cell: (p) => p.number },
+    { id: 'basic', header: tr('Basic'), className: 'text-right', cell: (p) => <Money value={p.basic} /> },
+    { id: 'gross', header: tr('Gross'), className: 'text-right', cell: (p) => <Money value={p.gross_pay} /> },
+    { id: 'tax', header: tr('Tax'), className: 'text-right', cell: (p) => <Money value={p.tax} /> },
+    { id: 'deductions', header: tr('Deductions'), mobile: 'hidden', className: 'text-right', cell: (p) => <Money value={p.total_deductions} /> },
+    { id: 'net', header: tr('Net pay'), className: 'text-right font-medium', cell: (p) => <Money value={p.net_pay} /> },
   ]
 
   return (
@@ -224,21 +225,21 @@ export function RunDetailPage() {
           <>
             {draft && can(PERMS.payroll.manage) && (
               <Button variant={r.computed_at ? 'outline' : 'default'} onClick={work} disabled={compute.isPending}>
-                <Calculator aria-hidden /> {compute.isPending ? 'Working out…' : r.computed_at ? 'Recompute' : 'Work out payslips'}
+                <Calculator aria-hidden /> {compute.isPending ? tr('Working out…') : r.computed_at ? tr('Recompute') : tr('Work out payslips')}
               </Button>
             )}
             {draft && r.computed_at && r.totals.payslips > 0 && can(PERMS.payroll.approve) && (
               <Button onClick={() => setDialog('approve')}>
-                <CheckCircle2 aria-hidden /> Approve
+                <CheckCircle2 aria-hidden /> {tr('Approve')}
               </Button>
             )}
             {r.status === 'approved' && can(PERMS.payroll.manage) && (
               <Button onClick={() => setDialog('paid')}>
-                <Banknote aria-hidden /> Record payment
+                <Banknote aria-hidden /> {tr('Record payment')}
               </Button>
             )}
             {draft && can(PERMS.payroll.manage) && (
-              <Button variant="outline" onClick={() => setDialog('cancel')} aria-label="Cancel run">
+              <Button variant="outline" onClick={() => setDialog('cancel')} aria-label={tr('Cancel run')}>
                 <Ban aria-hidden />
               </Button>
             )}
@@ -249,7 +250,7 @@ export function RunDetailPage() {
       {result && result.skipped.length > 0 && (
         <div className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">
           <p className="mb-1 flex items-center gap-2 font-medium">
-            <AlertTriangle className="h-4 w-4" aria-hidden /> {pluralize(result.skipped.length, 'person', 'people')} left out
+            <AlertTriangle className="h-4 w-4" aria-hidden /> {pluralize(result.skipped.length, 'person', 'people')} {tr('left out')}
           </p>
           <ul className="ml-6 list-disc">
             {result.skipped.map((s) => (
@@ -258,7 +259,7 @@ export function RunDetailPage() {
                 {s.reason === 'no_salary' && (
                   <>
                     {' '}
-                    <Link to={`/payroll/salaries?staff=${s.staff}`} className="underline">Assign a salary</Link>
+                    <Link to={`/payroll/salaries?staff=${s.staff}`} className="underline">{tr('Assign a salary')}</Link>
                   </>
                 )}
               </li>
@@ -268,29 +269,29 @@ export function RunDetailPage() {
       )}
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Payslips" value={r.totals.payslips} icon={Users} />
-        <StatCard label="Gross pay" value={<Money value={r.totals.gross_pay} />} icon={Landmark} />
-        <StatCard label="Tax" value={<Money value={r.totals.tax} />} icon={Landmark} />
-        <StatCard label="Net pay" value={<Money value={r.totals.net_pay} />} icon={Banknote} hint={r.paid_at ? `Paid ${formatDateTime(r.paid_at)}${r.payment_reference ? ` · ${r.payment_reference}` : ''}` : r.approved_at ? `Approved ${formatDateTime(r.approved_at)}` : undefined} />
+        <StatCard label={tr('Payslips')} value={r.totals.payslips} icon={Users} />
+        <StatCard label={tr('Gross pay')} value={<Money value={r.totals.gross_pay} />} icon={Landmark} />
+        <StatCard label={tr('Tax')} value={<Money value={r.totals.tax} />} icon={Landmark} />
+        <StatCard label={tr('Net pay')} value={<Money value={r.totals.net_pay} />} icon={Banknote} hint={r.paid_at ? tr('Paid {dateTime}{value}', { dateTime: formatDateTime(r.paid_at), value: r.payment_reference ? ` · ${r.payment_reference}` : '' }) : r.approved_at ? tr('Approved {dateTime}', { dateTime: formatDateTime(r.approved_at) }) : undefined} />
       </div>
 
-      {r.status === 'cancelled' && r.cancelled_reason && <p className="mb-4 rounded-lg border bg-muted p-3 text-sm">Cancelled: {r.cancelled_reason}</p>}
+      {r.status === 'cancelled' && r.cancelled_reason && <p className="mb-4 rounded-lg border bg-muted p-3 text-sm">{tr('Cancelled: {cancelled_reason}', { cancelled_reason: r.cancelled_reason })}</p>}
 
       {!r.computed_at && draft ? (
         <div className="rounded-lg border bg-card p-6 text-center text-sm text-muted-foreground">
-          <p>Nothing worked out yet.</p>
-          <p className="mt-1">Payslips come from each person’s salary, approved leave and attendance in the period. Recompute as often as you like until you approve.</p>
+          <p>{tr('Nothing worked out yet.')}</p>
+          <p className="mt-1">{tr('Payslips come from each person’s salary, approved leave and attendance in the period. Recompute as often as you like until you approve.')}</p>
         </div>
       ) : (
         <DataTable
-          ariaLabel="Payslips"
+          ariaLabel={tr('Payslips')}
           columns={columns}
           query={slips}
           list={list}
           getRowId={(p) => p.id}
-          searchPlaceholder="Name, employee no. or payslip no.…"
+          searchPlaceholder={tr('Name, employee no. or payslip no.…')}
           onRowClick={(p) => navigate(`/payroll/payslips/${p.id}`)}
-          empty={{ title: 'No payslips', description: 'Nobody in this branch has a salary for the period.' }}
+          empty={{ title: tr('No payslips'), description: tr('Nobody in this branch has a salary for the period.') }}
         />
       )}
 
@@ -299,53 +300,53 @@ export function RunDetailPage() {
       <ConfirmDialog
         open={dialog === 'approve'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title={`Approve ${r.name}?`}
+        title={tr('Approve {name}?', { name: r.name })}
         description={
           <>
-            {pluralize(r.totals.payslips, 'payslip')}, net <Money value={r.totals.net_pay} />. Payslips are locked once approved, and staff can see theirs. Later corrections go in as adjustments on the next run.
+            {pluralize(r.totals.payslips, 'payslip')}{', ' + tr('net')} <Money value={r.totals.net_pay} />{tr('. Payslips are locked once approved, and staff can see theirs. Later corrections go in as adjustments on the next run.')}
           </>
         }
-        confirmLabel="Approve"
+        confirmLabel={tr('Approve')}
         onConfirm={async () => {
           await approve.mutateAsync(r.id)
-          toast.success('Run approved.')
+          toast.success(tr('Run approved.'))
         }}
       />
       <FormDialog
         open={dialog === 'paid'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Record the payment"
-        description={<>Net <Money value={r.totals.net_pay} /> to {pluralize(r.totals.payslips, 'person', 'people')}.</>}
-        submitLabel="Mark paid"
+        title={tr('Record the payment')}
+        description={<>{tr('Net')} <Money value={r.totals.net_pay} /> {tr('to')} {pluralize(r.totals.payslips, 'person', 'people')}.</>}
+        submitLabel={tr('Mark paid')}
         schema={z.object({ reference: z.string().max(100) })}
         defaultValues={{ reference: '' }}
         onSubmit={async (v) => {
           await markPaid.mutateAsync({ id: r.id, reference: v.reference })
-          toast.success('Run marked paid.')
+          toast.success(tr('Run marked paid.'))
         }}
       >
         {({ register }) => (
-          <FormField label="Bank reference">
-            <Input {...register('reference')} maxLength={100} placeholder="Bulk transfer no." />
+          <FormField label={tr('Bank reference')}>
+            <Input {...register('reference')} maxLength={100} placeholder={tr('Bulk transfer no.')} />
           </FormField>
         )}
       </FormDialog>
       <FormDialog
         open={dialog === 'cancel'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Cancel this run?"
-        description="Its payslips stop counting; adjustments on them go back to waiting for the next run."
-        submitLabel="Cancel run"
-        schema={z.object({ reason: z.string().trim().min(1, 'Say why.').max(255) })}
+        title={tr('Cancel this run?')}
+        description={tr('Its payslips stop counting; adjustments on them go back to waiting for the next run.')}
+        submitLabel={tr('Cancel run')}
+        schema={z.object({ reason: z.string().trim().min(1, tr('Say why.')).max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await cancel.mutateAsync({ id: r.id, reason: v.reason })
-          toast.success('Run cancelled.')
+          toast.success(tr('Run cancelled.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Reason" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Wrong dates" />
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Wrong dates')} />
           </FormField>
         )}
       </FormDialog>

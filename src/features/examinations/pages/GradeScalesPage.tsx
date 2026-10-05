@@ -24,22 +24,23 @@ import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
 import { dec, type GradeScale, type GradeScaleInput } from '../api/examinations.api'
 import { useCreateGradeScale, useGradeScales, useRemoveGradeScale, useUpdateGradeScale } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
-const num = z.string().trim().regex(/^\d+(\.\d+)?$/, 'A number.')
+const num = z.string().trim().regex(/^\d+(\.\d+)?$/, tr('A number.'))
 const optionalNum = z.union([z.literal(''), num])
 
 const schema = z
   .object({
-    name: z.string().trim().min(1, 'Required.').max(100),
+    name: z.string().trim().min(1, tr('Required.')).max(100),
     program: z.string(),
     max_grade_point: num,
     require_all_subjects_pass: z.boolean(),
     overall_pass_percentage: optionalNum,
     start: z.enum(['neb-style', 'percentage', 'own']),
-    bands: z.array(z.object({ min_percentage: num, letter: z.string().trim().min(1, 'Letter.').max(10), grade_point: num, remark: z.string().max(100), is_pass: z.boolean() })),
-    divisions: z.array(z.object({ min_percentage: num, name: z.string().trim().min(1, 'Name.').max(50) })),
+    bands: z.array(z.object({ min_percentage: num, letter: z.string().trim().min(1, tr('Letter.')).max(10), grade_point: num, remark: z.string().max(100), is_pass: z.boolean() })),
+    divisions: z.array(z.object({ min_percentage: num, name: z.string().trim().min(1, tr('Name.')).max(50) })),
   })
-  .refine((v) => v.start !== 'own' || v.bands.length > 0, { path: ['bands'], message: 'Add at least one band, starting from 0%.' })
+  .refine((v) => v.start !== 'own' || v.bands.length > 0, { path: ['bands'], message: tr('Add at least one band, starting from 0%.') })
 
 type Values = z.infer<typeof schema>
 
@@ -49,46 +50,46 @@ function BandsEditor({ control, register, errors, locked }: { control: Control<V
   return (
     <>
       <fieldset disabled={locked} className="grid gap-2">
-        <legend className="mb-1 text-sm font-medium">Grade bands</legend>
-        <p className="text-xs text-muted-foreground">Each band runs from its percentage up to the next one. The lowest must start at 0.</p>
+        <legend className="mb-1 text-sm font-medium">{tr('Grade bands')}</legend>
+        <p className="text-xs text-muted-foreground">{tr('Each band runs from its percentage up to the next one. The lowest must start at 0.')}</p>
         <div className="grid grid-cols-[5rem_4.5rem_4.5rem_1fr_auto_auto] items-center gap-2 text-xs text-muted-foreground">
-          <span>From %</span>
-          <span>Letter</span>
-          <span>GP</span>
-          <span>Remark</span>
-          <span>Pass</span>
+          <span>{tr('From %')}</span>
+          <span>{tr('Letter')}</span>
+          <span>{tr('GP')}</span>
+          <span>{tr('Remark')}</span>
+          <span>{tr('Pass')}</span>
           <span />
         </div>
         {bands.fields.map((f, i) => (
           <div key={f.id} className="grid grid-cols-[5rem_4.5rem_4.5rem_1fr_auto_auto] items-center gap-2">
-            <Input {...register(`bands.${i}.min_percentage`)} inputMode="decimal" aria-label={`Band ${i + 1} from percentage`} />
-            <Input {...register(`bands.${i}.letter`)} aria-label={`Band ${i + 1} letter`} />
-            <Input {...register(`bands.${i}.grade_point`)} inputMode="decimal" aria-label={`Band ${i + 1} grade point`} />
-            <Input {...register(`bands.${i}.remark`)} aria-label={`Band ${i + 1} remark`} />
-            <Controller control={control} name={`bands.${i}.is_pass`} render={({ field }) => <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} aria-label={`Band ${i + 1} passes`} />} />
-            <Button type="button" size="icon" variant="ghost" onClick={() => bands.remove(i)} aria-label={`Remove band ${i + 1}`}>
+            <Input {...register(`bands.${i}.min_percentage`)} inputMode="decimal" aria-label={tr('Band {value} from percentage', { value: i + 1 })} />
+            <Input {...register(`bands.${i}.letter`)} aria-label={tr('Band {value} letter', { value: i + 1 })} />
+            <Input {...register(`bands.${i}.grade_point`)} inputMode="decimal" aria-label={tr('Band {value} grade point', { value: i + 1 })} />
+            <Input {...register(`bands.${i}.remark`)} aria-label={tr('Band {value} remark', { value: i + 1 })} />
+            <Controller control={control} name={`bands.${i}.is_pass`} render={({ field }) => <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} aria-label={tr('Band {value} passes', { value: i + 1 })} />} />
+            <Button type="button" size="icon" variant="ghost" onClick={() => bands.remove(i)} aria-label={tr('Remove band {value}', { value: i + 1 })}>
               <X aria-hidden />
             </Button>
           </div>
         ))}
         {errors?.bands?.message && <p className="text-sm text-danger">{errors.bands.message}</p>}
         <Button type="button" variant="outline" size="sm" className="justify-self-start" onClick={() => bands.append({ min_percentage: '0', letter: '', grade_point: '0', remark: '', is_pass: true })}>
-          <Plus aria-hidden /> Add band
+          <Plus aria-hidden /> {tr('Add band')}
         </Button>
       </fieldset>
       <fieldset disabled={locked} className="grid gap-2">
-        <legend className="mb-1 text-sm font-medium">Divisions (optional)</legend>
+        <legend className="mb-1 text-sm font-medium">{tr('Divisions (optional)')}</legend>
         {divisions.fields.map((f, i) => (
           <div key={f.id} className="grid grid-cols-[5rem_1fr_auto] items-center gap-2">
-            <Input {...register(`divisions.${i}.min_percentage`)} inputMode="decimal" aria-label={`Division ${i + 1} from percentage`} />
-            <Input {...register(`divisions.${i}.name`)} aria-label={`Division ${i + 1} name`} placeholder="First division" />
-            <Button type="button" size="icon" variant="ghost" onClick={() => divisions.remove(i)} aria-label={`Remove division ${i + 1}`}>
+            <Input {...register(`divisions.${i}.min_percentage`)} inputMode="decimal" aria-label={tr('Division {value} from percentage', { value: i + 1 })} />
+            <Input {...register(`divisions.${i}.name`)} aria-label={tr('Division {value} name', { value: i + 1 })} placeholder={tr('First division')} />
+            <Button type="button" size="icon" variant="ghost" onClick={() => divisions.remove(i)} aria-label={tr('Remove division {value}', { value: i + 1 })}>
               <X aria-hidden />
             </Button>
           </div>
         ))}
         <Button type="button" variant="outline" size="sm" className="justify-self-start" onClick={() => divisions.append({ min_percentage: '', name: '' })}>
-          <Plus aria-hidden /> Add division
+          <Plus aria-hidden /> {tr('Add division')}
         </Button>
       </fieldset>
     </>
@@ -105,8 +106,8 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? 'Edit grade scale' : 'New grade scale'}
-      description="How a percentage becomes a letter, a grade point and pass or fail."
+      title={record ? tr('Edit grade scale') : tr('New grade scale')}
+      description={tr('How a percentage becomes a letter, a grade point and pass or fail.')}
       schema={schema}
       defaultValues={{
         name: record?.name ?? '',
@@ -129,22 +130,22 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
         }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Grade scale saved.' : 'Grade scale added.')
+        toast.success(record ? tr('Grade scale saved.') : tr('Grade scale added.'))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="Letter grading" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('Letter grading')} />
             </FormField>
-            <FormField label="For program" error={errors.program?.message} description="Empty: the default for every program without its own.">
-              {(p) => <Controller control={control} name="program" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Default (all programs)" options={(programs.data ?? []).map((pr) => ({ value: String(pr.id), label: pr.name }))} />} />}
+            <FormField label={tr('For program')} error={errors.program?.message} description={tr('Empty: the default for every program without its own.')}>
+              {(p) => <Controller control={control} name="program" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Default (all programs)')} options={(programs.data ?? []).map((pr) => ({ value: String(pr.id), label: pr.name }))} />} />}
             </FormField>
-            <FormField label="Highest grade point" error={errors.max_grade_point?.message}>
+            <FormField label={tr('Highest grade point')} error={errors.max_grade_point?.message}>
               <Input {...register('max_grade_point')} inputMode="decimal" />
             </FormField>
-            <FormField label="Overall pass (%)" error={errors.overall_pass_percentage?.message} description="Optional. Below this the whole result fails.">
+            <FormField label={tr('Overall pass (%)')} error={errors.overall_pass_percentage?.message} description={tr('Optional. Below this the whole result fails.')}>
               <Input {...register('overall_pass_percentage')} inputMode="decimal" />
             </FormField>
           </div>
@@ -153,12 +154,12 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
             name="require_all_subjects_pass"
             render={({ field }) => (
               <label className="flex items-center gap-3 text-sm">
-                <Switch checked={field.value} onCheckedChange={field.onChange} /> One failed subject fails the whole result
+                <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('One failed subject fails the whole result')}
               </label>
             )}
           />
           {!record && (
-            <FormField label="Bands">
+            <FormField label={tr('Bands')}>
               {(p) => (
                 <Controller
                   control={control}
@@ -169,9 +170,9 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
                       value={field.value}
                       onChange={field.onChange}
                       options={[
-                        { value: 'neb-style', label: 'Letters and GPA (A+ … NG, pass at 35%)' },
-                        { value: 'percentage', label: 'Pass/fail with divisions' },
-                        { value: 'own', label: 'My own bands' },
+                        { value: 'neb-style', label: tr('Letters and GPA (A+ … NG, pass at 35%)') },
+                        { value: 'percentage', label: tr('Pass/fail with divisions') },
+                        { value: 'own', label: tr('My own bands') },
                       ]}
                     />
                   )}
@@ -181,12 +182,12 @@ function ScaleDialog({ open, record, onOpenChange }: { open: boolean; record: Gr
           )}
           {locked && (
             <p className="flex items-center gap-2 rounded-md border border-warning/25 bg-warning-soft p-2 text-sm">
-              <Lock className="h-4 w-4" aria-hidden /> Published results use this scale, so its bands can’t change. Make a new scale for later exams.
+              <Lock className="h-4 w-4" aria-hidden /> {tr('Published results use this scale, so its bands can’t change. Make a new scale for later exams.')}
             </p>
           )}
           {watch('start') === 'own' && <BandsEditor control={control} register={register} errors={errors as never} locked={locked} />}
-          <RowErrors errors={errors.bands} label="Band" />
-          <RowErrors errors={errors.divisions} label="Division" />
+          <RowErrors errors={errors.bands} label={tr('Band')} />
+          <RowErrors errors={errors.divisions} label={tr('Division')} />
         </>
       )}
     </FormDialog>
@@ -201,12 +202,12 @@ export default function GradeScalesPage() {
   return (
     <>
       <SectionHeader
-        title="Grade scales"
-        description="An exam uses its program’s scale, or the default."
+        title={tr('Grade scales')}
+        description={tr('An exam uses its program’s scale, or the default.')}
         action={
           <PermissionGate permission={PERMS.grades.manage}>
             <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add grade scale
+              <Plus aria-hidden /> {tr('Add grade scale')}
             </Button>
           </PermissionGate>
         }
@@ -216,7 +217,7 @@ export default function GradeScalesPage() {
       ) : query.isError ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : query.data.results.length === 0 ? (
-        <EmptyState title="No grade scale yet" description="Exams need one. Add a default scale to start; a ready-made table is offered." />
+        <EmptyState title={tr('No grade scale yet')} description={tr('Exams need one. Add a default scale to start; a ready-made table is offered.')} />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {query.data.results.map((s) => (
@@ -225,26 +226,26 @@ export default function GradeScalesPage() {
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold">{s.name}</h3>
                   <p className="text-xs text-muted-foreground">
-                    {s.program_name ?? 'Default for all programs'} · GP out of {dec(s.max_grade_point)}
-                    {s.require_all_subjects_pass ? ' · every subject must pass' : ''}
-                    {s.overall_pass_percentage ? ` · overall pass ${dec(s.overall_pass_percentage)}%` : ''}
+                    {s.program_name ?? tr('Default for all programs')} {'· ' + tr('GP out of {dec}', { dec: dec(s.max_grade_point) })}
+                    {s.require_all_subjects_pass ? ' · ' + tr('every subject must pass') : ''}
+                    {s.overall_pass_percentage ? ' · ' + tr('overall pass {dec}%', { dec: dec(s.overall_pass_percentage) }) : ''}
                   </p>
                 </div>
-                {s.in_use && <StatusBadge status="closed" label="In use" />}
+                {s.in_use && <StatusBadge status="closed" label={tr('In use')} />}
                 <RowActions
                   actions={[
-                    { label: 'Edit', icon: Pencil, permission: PERMS.grades.manage, onSelect: () => crud.openEdit(s) },
-                    { label: 'Delete', icon: Trash2, permission: PERMS.grades.manage, destructive: true, onSelect: () => crud.openDelete(s) },
+                    { label: tr('Edit'), icon: Pencil, permission: PERMS.grades.manage, onSelect: () => crud.openEdit(s) },
+                    { label: tr('Delete'), icon: Trash2, permission: PERMS.grades.manage, destructive: true, onSelect: () => crud.openDelete(s) },
                   ]}
                 />
               </header>
-              <table className="w-full text-sm" aria-label={`Bands of ${s.name}`}>
+              <table className="w-full text-sm" aria-label={tr('Bands of {name}', { name: s.name })}>
                 <thead className="text-left text-xs text-muted-foreground">
                   <tr>
-                    <th className="px-4 py-1.5 font-medium">From</th>
-                    <th className="px-2 py-1.5 font-medium">Grade</th>
-                    <th className="px-2 py-1.5 font-medium">GP</th>
-                    <th className="px-2 py-1.5 font-medium">Remark</th>
+                    <th className="px-4 py-1.5 font-medium">{tr('From')}</th>
+                    <th className="px-2 py-1.5 font-medium">{tr('Grade')}</th>
+                    <th className="px-2 py-1.5 font-medium">{tr('GP')}</th>
+                    <th className="px-2 py-1.5 font-medium">{tr('Remark')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -259,7 +260,7 @@ export default function GradeScalesPage() {
                 </tbody>
               </table>
               {(s.divisions ?? []).length > 0 && (
-                <p className="border-t px-4 py-2 text-xs text-muted-foreground">Divisions: {(s.divisions ?? []).map((d) => `${d.name} from ${dec(d.min_percentage)}%`).join(' · ')}</p>
+                <p className="border-t px-4 py-2 text-xs text-muted-foreground">{tr('Divisions: {map}', { map: (s.divisions ?? []).map((d) => tr('{name} from {percent}%', { name: d.name, percent: dec(d.min_percentage) })).join(' · ') })}</p>
               )}
             </section>
           ))}
@@ -270,10 +271,10 @@ export default function GradeScalesPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`the grade scale “${crud.deleting.name}”`}
+          subject={tr('the grade scale “{name}”', { name: crud.deleting.name })}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Grade scale deleted.')
+            toast.success(tr('Grade scale deleted.'))
           }}
         />
       )}

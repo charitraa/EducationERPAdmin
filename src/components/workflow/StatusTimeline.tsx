@@ -1,6 +1,7 @@
 import { Check, X } from 'lucide-react'
 import { humanize } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 interface StatusTimelineProps {
   /** The happy path, in order, e.g. ['pending', 'approved', 'enrolled']. */
@@ -18,13 +19,13 @@ interface StatusTimelineProps {
  * A terminal off-path state (rejected, withdrawn) replaces the remaining steps.
  */
 export function StatusTimeline({ steps, current, labels = {}, terminal = [], className }: StatusTimelineProps) {
-  const label = (s: string) => labels[s] ?? humanize(s)
+  const label = (s: string) => (labels[s] ? tr(labels[s]) : humanize(s))
   const offPath = terminal.includes(current)
   const currentIndex = offPath ? -1 : steps.indexOf(current)
   const shown = offPath ? [...steps.slice(0, 1), current] : steps
 
   return (
-    <ol className={cn('flex flex-wrap items-center gap-y-2 text-sm', className)} aria-label="Progress">
+    <ol className={cn('flex flex-wrap items-center gap-y-2 text-sm', className)} aria-label={tr('Progress')}>
       {shown.map((step, i) => {
         const isCurrent = step === current
         // Reaching the last step finishes the workflow: show it ticked, not in progress.
@@ -47,7 +48,7 @@ export function StatusTimeline({ steps, current, labels = {}, terminal = [], cla
             </span>
             <span className={cn('ml-1.5', isCurrent ? 'font-medium' : 'text-muted-foreground')}>
               {label(step)}
-              <span className="sr-only">{isCurrent ? (done ? ' (done, current)' : ' (current)') : done ? ' (done)' : ' (next)'}</span>
+              <span className="sr-only">{isCurrent ? (done ? ' ' + tr('(done, current)') : ' ' + tr('(current)')) : done ? ' ' + tr('(done)') : ' ' + tr('(next)')}</span>
             </span>
           </li>
         )

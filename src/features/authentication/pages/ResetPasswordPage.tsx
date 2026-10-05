@@ -12,10 +12,11 @@ import { applyServerErrors } from '@/lib/errors'
 import { toApiError } from '@/shared/api/errors'
 import { passwordResetApi } from '../api/account.api'
 import { AuthLayout } from '../components/AuthLayout'
+import { tr } from '@/lib/i18n'
 
 const schema = z
-  .object({ new_password: z.string().min(8, 'At least 8 characters.'), confirm: z.string() })
-  .refine((v) => v.new_password === v.confirm, { path: ['confirm'], message: "Passwords don't match." })
+  .object({ new_password: z.string().min(8, tr('At least 8 characters.')), confirm: z.string() })
+  .refine((v) => v.new_password === v.confirm, { path: ['confirm'], message: tr("Passwords don't match.") })
 
 /** Target of the emailed link: `/reset-password?uid=…&token=…`. */
 export default function ResetPasswordPage() {
@@ -45,48 +46,48 @@ export default function ResetPasswordPage() {
 
   if (done)
     return (
-      <AuthLayout title="Password changed">
+      <AuthLayout title={tr('Password changed')}>
         <div role="status" className="mb-4 flex gap-3 rounded-md border bg-success-soft p-4 text-sm text-success">
           <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <p>Your new password is set. For safety, you've been signed out on every device; sign in again with the new one.</p>
+          <p>{tr("Your new password is set. For safety, you've been signed out on every device; sign in again with the new one.")}</p>
         </div>
         <Button asChild className="h-10 w-full">
-          <Link to="/login">Sign in</Link>
+          <Link to="/login">{tr('Sign in')}</Link>
         </Button>
       </AuthLayout>
     )
 
   if (badLink)
     return (
-      <AuthLayout title="This link doesn't work">
+      <AuthLayout title={tr("This link doesn't work")}>
         <div role="alert" className="mb-4 flex gap-3 rounded-md border bg-warning-soft p-4 text-sm text-warning">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <p>{badLink}</p>
         </div>
         <div className="grid gap-2">
           <Button asChild className="h-10">
-            <Link to="/forgot-password">Send a new link</Link>
+            <Link to="/forgot-password">{tr('Send a new link')}</Link>
           </Button>
           <Button asChild variant="ghost">
-            <Link to="/login">Back to sign in</Link>
+            <Link to="/login">{tr('Back to sign in')}</Link>
           </Button>
         </div>
       </AuthLayout>
     )
 
   return (
-    <AuthLayout title="Choose a new password" subtitle="You'll be signed out everywhere else once it's changed.">
+    <AuthLayout title={tr('Choose a new password')} subtitle={tr("You'll be signed out everywhere else once it's changed.")}>
       <form onSubmit={submit} noValidate className="grid gap-4">
         <FormError message={serverError} />
-        <FormField label="New password" error={errors.new_password?.message} description="At least 8 characters; avoid your name or a common word.">
+        <FormField label={tr('New password')} error={errors.new_password?.message} description={tr('At least 8 characters; avoid your name or a common word.')}>
           <Input {...register('new_password')} type="password" autoComplete="new-password" autoFocus />
         </FormField>
-        <FormField label="Confirm new password" error={errors.confirm?.message}>
+        <FormField label={tr('Confirm new password')} error={errors.confirm?.message}>
           <Input {...register('confirm')} type="password" autoComplete="new-password" />
         </FormField>
         <Button type="submit" className="h-10" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-          Change password
+          {tr('Change password')}
         </Button>
       </form>
     </AuthLayout>

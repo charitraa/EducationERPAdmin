@@ -2,7 +2,7 @@ import { Construction } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { navItemFor } from '@/app/navigation'
 import { Button } from '@/components/ui/button'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 import { StatusPage } from './StatusPage'
 
 /**
@@ -15,14 +15,14 @@ export default function PlannedModulePage() {
   return (
     <StatusPage
       icon={Construction}
-      title={item ? `${t(item.label)} is coming soon` : 'Coming soon'}
+      title={item ? tr('{t} is coming soon', { t: t(item.label) }) : tr('Coming soon')}
       actions={
         <Button asChild variant="outline">
-          <Link to="/">Back to dashboard</Link>
+          <Link to="/">{tr('Back to dashboard')}</Link>
         </Button>
       }
     >
-      These screens are being built. Everything you need from them is already stored safely on the server.
+      {tr('These screens are being built. Everything you need from them is already stored safely on the server.')}
     </StatusPage>
   )
 }

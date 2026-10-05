@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/api/client'
 import { createQueryKeys, createResourceApi } from '@/shared/api/resource'
 import type { Id, Schema } from '@/shared/types/api'
+import { tr } from '@/lib/i18n'
 
 export type Student = Schema<'Student'>
 export type StudentInput = Schema<'StudentRequest'>
@@ -31,11 +32,11 @@ export interface Enrollment {
 }
 
 export const ENROLLMENT_STATUS_LABELS: Record<Enrollment['status'], string> = {
-  active: 'Current',
-  completed: 'Completed',
-  transferred: 'Transferred',
-  withdrawn: 'Withdrawn',
-  moved: 'Moved to another class',
+  active: tr('Current'),
+  completed: tr('Completed'),
+  transferred: tr('Transferred'),
+  withdrawn: tr('Withdrawn'),
+  moved: tr('Moved to another class'),
 }
 
 export const currentEnrollment = (s: Pick<Student, 'current_enrollment'>) => s.current_enrollment as Enrollment | null

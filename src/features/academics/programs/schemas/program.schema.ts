@@ -2,11 +2,12 @@ import { z } from 'zod'
 import { code, optionalId, toInt, toNullableInt, wholeNumber } from '@/lib/validation'
 import type { Schema } from '@/shared/types/api'
 import type { Program, ProgramInput } from '../api/programs.api'
+import { tr } from '@/lib/i18n'
 
 export const programSchema = z
   .object({
     code,
-    name: z.string().trim().min(1, 'Required.').max(200),
+    name: z.string().trim().min(1, tr('Required.')).max(200),
     department: optionalId,
     level_type: z.enum(['grade', 'semester', 'year', 'trimester']),
     first_level: wholeNumber(),
@@ -15,7 +16,7 @@ export const programSchema = z
     description: z.string(),
     is_active: z.boolean(),
   })
-  .refine((v) => Number(v.last_level) >= Number(v.first_level), { path: ['last_level'], message: 'Must be the same as or after the first level.' })
+  .refine((v) => Number(v.last_level) >= Number(v.first_level), { path: ['last_level'], message: tr('Must be the same as or after the first level.') })
 
 export type ProgramForm = z.infer<typeof programSchema>
 

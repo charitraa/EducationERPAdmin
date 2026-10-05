@@ -1,6 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
-import { t, type MessageKey } from '@/lib/i18n'
+import { t, type MessageKey, tr } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 
 const TABS: Array<{ path: string; label: MessageKey }> = [
@@ -20,8 +20,8 @@ const TABS: Array<{ path: string; label: MessageKey }> = [
 export function AcademicsLayout() {
   return (
     <div>
-      <PageHeader title={t('nav.academics')} description="How your school is organized: what is taught, to which classes, and when." />
-      <nav aria-label="Academics" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={t('nav.academics')} description={tr('How your school is organized: what is taught, to which classes, and when.')} />
+      <nav aria-label={tr('Academics')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.path}>

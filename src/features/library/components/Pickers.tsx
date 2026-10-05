@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import type { Id } from '@/shared/types/api'
 import type { Copy, Loan, Member } from '../api/library.api'
 import { useCopies, useLoans, useMembers } from '../hooks/useLibrary'
+import { tr } from '@/lib/i18n'
 
 interface PickerProps<T> {
   value: T | null
@@ -48,17 +49,17 @@ function SearchPicker<T extends { id: Id }>({
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <Input id={id} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={placeholder} className="pl-9" autoComplete="off" aria-controls={listId} {...aria} />
       </div>
-      <div id={listId} role="listbox" aria-label={`Matching ${plural}`} className="max-h-56 overflow-y-auto rounded-md border">
+      <div id={listId} role="listbox" aria-label={tr('Matching {plural}', { plural })} className="max-h-56 overflow-y-auto rounded-md border">
         {term.length < minLength ? (
-          <p className="p-3 text-sm text-muted-foreground">{value ? `Selected: ${selectedLabel(value)}` : `Type to find a ${noun}.`}</p>
+          <p className="p-3 text-sm text-muted-foreground">{value ? tr('Selected: {selectedLabel}', { selectedLabel: selectedLabel(value) }) : tr('Type to find a {noun}.', { noun })}</p>
         ) : results.isPending ? (
           <div className="p-3">
             <Spinner />
           </div>
         ) : results.isError ? (
-          <p className="p-3 text-sm text-danger">Couldn’t search.</p>
+          <p className="p-3 text-sm text-danger">{tr('Couldn’t search.')}</p>
         ) : (results.data?.results.length ?? 0) === 0 ? (
-          <p className="p-3 text-sm text-muted-foreground">No {noun} matches “{term}”.</p>
+          <p className="p-3 text-sm text-muted-foreground">{tr('No {noun} matches “{term}”.', { noun, term })}</p>
         ) : (
           results.data!.results.map((row) => {
             const selected = value?.id === row.id
@@ -86,15 +87,15 @@ export function MemberPicker(props: PickerProps<Member>) {
   return (
     <SearchPicker
       {...props}
-      noun="member"
-      placeholder="Name, member or student no.…"
+      noun={tr('member')}
+      placeholder={tr('Name, member or student no.…')}
       useResults={(term, enabled) => useMembers({ search: term, is_active: true, page_size: 8 }, enabled)}
       selectedLabel={(m) => `${m.full_name} (${m.member_number})`}
       render={(m) => (
         <>
           <span className="block font-medium">{m.full_name}</span>
           <span className="block text-xs text-muted-foreground">
-            <span className="font-mono">{m.member_number}</span> · {m.active_issues}/{m.max_books ?? '?'} books out
+            <span className="font-mono">{m.member_number}</span> {'· ' + tr('{active_issues}/{max_books} books out', { active_issues: m.active_issues, max_books: m.max_books ?? '?' })}
           </span>
         </>
       )}
@@ -107,9 +108,9 @@ export function CopyPicker(props: PickerProps<Copy>) {
   return (
     <SearchPicker
       {...props}
-      noun="copy"
-      plural="copies"
-      placeholder="Accession no., title or ISBN…"
+      noun={tr('copy')}
+      plural={tr('copies')}
+      placeholder={tr('Accession no., title or ISBN…')}
       useResults={(term, enabled) => useCopies({ search: term, status: 'available', page_size: 8 }, enabled)}
       selectedLabel={(c) => `${c.book_title} (${c.accession_number})`}
       render={(c) => (
@@ -130,8 +131,8 @@ export function LoanPicker(props: PickerProps<Loan>) {
   return (
     <SearchPicker
       {...props}
-      noun="loan"
-      placeholder="Accession no., title or member no.…"
+      noun={tr('loan')}
+      placeholder={tr('Accession no., title or member no.…')}
       useResults={(term, enabled) => useLoans({ search: term, status: 'issued', page_size: 8 }, enabled)}
       selectedLabel={(l) => `${l.book_title} (${l.accession_number}) — ${l.member_name}`}
       render={(l) => (
@@ -140,8 +141,8 @@ export function LoanPicker(props: PickerProps<Loan>) {
             {l.book_title} <span className="font-mono text-xs font-normal">{l.accession_number}</span>
           </span>
           <span className={cn('block text-xs', l.is_overdue ? 'text-danger' : 'text-muted-foreground')}>
-            {l.member_name} · due {l.due_at.slice(0, 10)}
-            {l.is_overdue ? ' · overdue' : ''}
+            {tr('{member_name} · due {slice}', { member_name: l.member_name, slice: l.due_at.slice(0, 10) })}
+            {l.is_overdue ? ' · ' + tr('overdue') : ''}
           </span>
         </>
       )}

@@ -24,6 +24,7 @@ import type { Id } from '@/shared/types/api'
 import { sheetsApi, type MarkEntryInput, type MarkStatus, type SheetComponent, type SheetStudent } from '../api/examinations.api'
 import { SheetBadge } from '../components/ExamMarksPanel'
 import { useEnterMarks, useSheetAction, useSheetRoster } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 /** What a cell can hold besides a number. */
 const CODES: Record<string, Exclude<MarkStatus, 'present'>> = { AB: 'absent', EX: 'exempt', WH: 'withheld' }
@@ -101,7 +102,7 @@ export default function MarkEntryPage() {
   const missing = students.reduce((n, s) => n + components.filter((c) => textOf(key(s.enrollment, c.id)) === '').length, 0)
 
   const save = async (reason?: string) => {
-    if (problems.size) throw new Error(`Fix the ${problems.size} highlighted mark${problems.size === 1 ? '' : 's'} first.`)
+    if (problems.size) throw new Error(tr('Fix the {size} highlighted mark{value} first.', { size: problems.size, value: problems.size === 1 ? '' : 's' }))
     if (entries.length) await enter.mutateAsync({ id, entries, reason })
   }
 
@@ -110,7 +111,7 @@ export default function MarkEntryPage() {
     if (locked) return setDialog('reason')
     try {
       await save()
-      toast.success('Marks saved.')
+      toast.success(tr('Marks saved.'))
     } catch (err) {
       setError(errorMessage(err))
     }
@@ -140,7 +141,7 @@ export default function MarkEntryPage() {
         description={
           <span className="flex flex-wrap items-center gap-2">
             {sheet.exam_name}
-            {sheet.date ? ` · sat ${formatDate(sheet.date)}` : ''}
+            {sheet.date ? ' · ' + tr('sat {date}', { date: formatDate(sheet.date) }) : ''}
             <SheetBadge status={sheet.status} />
           </span>
         }
@@ -149,12 +150,12 @@ export default function MarkEntryPage() {
             <>
               {sheet.status === 'submitted' && (
                 <Button onClick={() => setDialog('verify')}>
-                  <CheckCircle2 aria-hidden /> Verify
+                  <CheckCircle2 aria-hidden /> {tr('Verify')}
                 </Button>
               )}
               {sheet.status !== 'open' && (
                 <Button variant="outline" onClick={() => setDialog('sendBack')}>
-                  <Undo2 aria-hidden /> Send back
+                  <Undo2 aria-hidden /> {tr('Send back')}
                 </Button>
               )}
             </>
@@ -162,35 +163,35 @@ export default function MarkEntryPage() {
         }
       />
 
-      {sheet.review_note && sheet.status === 'open' && <p className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">Sent back by the exam office: “{sheet.review_note}”</p>}
+      {sheet.review_note && sheet.status === 'open' && <p className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">{tr('Sent back by the exam office: “{review_note}”', { review_note: sheet.review_note })}</p>}
       {locked && (
         <p className="mb-4 rounded-lg border border-info/20 bg-info-soft p-3 text-sm">
-          {sheet.status === 'verified' ? `Verified ${sheet.verified_at ? formatDateTime(sheet.verified_at) : ''}.` : `Submitted ${sheet.submitted_at ? formatDateTime(sheet.submitted_at) : ''}.`}{' '}
-          {office ? 'Changes now are corrections and need a reason.' : 'Ask the exam office to send it back if a mark needs changing.'}
+          {sheet.status === 'verified' ? tr('Verified {value}.', { value: sheet.verified_at ? formatDateTime(sheet.verified_at) : '' }) : tr('Submitted {value}.', { value: sheet.submitted_at ? formatDateTime(sheet.submitted_at) : '' })}{' '}
+          {office ? tr('Changes now are corrections and need a reason.') : tr('Ask the exam office to send it back if a mark needs changing.')}
         </p>
       )}
 
       {students.length === 0 ? (
-        <EmptyState title="Nobody sits this paper" description="No student was in this class for the exam." />
+        <EmptyState title={tr('Nobody sits this paper')} description={tr('No student was in this class for the exam.')} />
       ) : (
         <>
           <p className="mb-2 text-xs text-muted-foreground">
-            Type the marks. <kbd className="rounded border px-1">Enter</kbd> or <kbd className="rounded border px-1">↓</kbd> goes to the next student. Use <b>AB</b> absent, <b>EX</b> exempt, <b>WH</b> withheld.
+            {tr('Type the marks.')} <kbd className="rounded border px-1">Enter</kbd> {tr('or')} <kbd className="rounded border px-1">↓</kbd> {tr('goes to the next student. Use')} <b>{tr('AB')}</b> {tr('absent') + ','} <b>{tr('EX')}</b> {tr('exempt') + ','} <b>{tr('WH')}</b> {tr('withheld.')}
           </p>
           <div className="overflow-x-auto rounded-lg border bg-card">
-            <table className="w-full text-sm" aria-label={`Marks for ${sheet.subject_name}, ${sheet.section_name}`}>
+            <table className="w-full text-sm" aria-label={tr('Marks for {subject_name}, {section_name}', { subject_name: sheet.subject_name, section_name: sheet.section_name })}>
               <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
                 <tr>
-                  <th className="sticky left-0 z-10 min-w-48 bg-muted px-3 py-2">Student</th>
+                  <th className="sticky left-0 z-10 min-w-48 bg-muted px-3 py-2">{tr('Student')}</th>
                   {components.map((c) => (
                     <th key={c.id} className="px-2 py-2 text-center">
                       {c.name}
                       <span className="block font-normal">
-                        of {c.full_marks} · pass {c.pass_marks}
+                        {tr('of {full_marks} · pass {pass_marks}', { full_marks: c.full_marks, pass_marks: c.pass_marks })}
                       </span>
                     </th>
                   ))}
-                  {components.length > 1 && <th className="px-3 py-2 text-right">Total of {full}</th>}
+                  {components.length > 1 && <th className="px-3 py-2 text-right">{tr('Total of {full}', { full })}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -199,7 +200,7 @@ export default function MarkEntryPage() {
                     <th scope="row" className="sticky left-0 bg-card px-3 py-1.5 text-left font-normal">
                       <span className="block font-medium">{s.student_name}</span>
                       <span className="font-mono text-xs text-muted-foreground">{s.student_number}</span>
-                      {s.admit_card === 'withheld' && <span className="ml-2 rounded border border-warning/25 bg-warning-soft px-1 text-[11px]">Admit card withheld</span>}
+                      {s.admit_card === 'withheld' && <span className="ml-2 rounded border border-warning/25 bg-warning-soft px-1 text-[11px]">{tr('Admit card withheld')}</span>}
                     </th>
                     {components.map((c, col) => {
                       const k = key(s.enrollment, c.id)
@@ -222,7 +223,7 @@ export default function MarkEntryPage() {
                             readOnly={!editable}
                             inputMode="decimal"
                             autoComplete="off"
-                            aria-label={`${c.name} for ${s.student_name}`}
+                            aria-label={tr('{name} for {student_name}', { name: c.name, student_name: s.student_name })}
                             aria-invalid={problem ? true : undefined}
                             title={problem}
                             className={cn('mx-auto h-9 w-20 text-center tabular-nums', dirty && 'bg-primary/5', below && 'text-danger', problem && 'border-danger ring-1 ring-danger', !p.ok || (p.entry && p.entry.status !== 'present') ? 'font-medium uppercase' : '')}
@@ -244,16 +245,16 @@ export default function MarkEntryPage() {
           <FormError message={error} className="mb-2" />
           <div className="flex flex-wrap items-center gap-2">
             <p className="mr-auto text-sm text-muted-foreground">
-              {changed.length ? `${changed.length} unsaved` : 'All saved'}
-              {problems.size ? ` · ${problems.size} to fix` : ''}
-              {missing ? ` · ${missing} empty` : ''}
+              {changed.length ? tr('{count} unsaved', { count: changed.length }) : tr('All saved')}
+              {problems.size ? ' · ' + tr('{size} to fix', { size: problems.size }) : ''}
+              {missing ? ' · ' + tr('{missing} empty', { missing }) : ''}
             </p>
             <Button variant={locked ? 'default' : 'outline'} onClick={() => void onSave()} disabled={enter.isPending || changed.length === 0}>
-              {enter.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Save aria-hidden />} {locked ? 'Save corrections' : 'Save'}
+              {enter.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Save aria-hidden />} {locked ? tr('Save corrections') : tr('Save')}
             </Button>
             {!locked && (
               <Button onClick={() => setDialog('submit')} disabled={enter.isPending}>
-                <Send aria-hidden /> Submit
+                <Send aria-hidden /> {tr('Submit')}
               </Button>
             )}
           </div>
@@ -263,61 +264,61 @@ export default function MarkEntryPage() {
       <ConfirmDialog
         open={dialog === 'submit'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Submit these marks?"
-        description={`They go to the exam office to verify. After this, only the office can change a mark.${missing ? ` ${missing} mark${missing === 1 ? ' is' : 's are'} still empty: fill them in first.` : ''}`}
-        confirmLabel="Submit"
+        title={tr('Submit these marks?')}
+        description={tr('They go to the exam office to verify. After this, only the office can change a mark.{value}', { value: missing ? ' ' + (missing === 1 ? tr('1 mark is still empty: fill it in first.') : tr('{missing} marks are still empty: fill them in first.', { missing })) : '' })}
+        confirmLabel={tr('Submit')}
         onConfirm={async () => {
           await save()
           await submit.mutateAsync(id)
-          toast.success('Marks submitted.')
+          toast.success(tr('Marks submitted.'))
         }}
       />
       <ConfirmDialog
         open={dialog === 'verify'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Verify these marks?"
-        description="They’re checked and final; results can be published once every sheet is verified. You can still correct a single mark later, with a reason."
-        confirmLabel="Verify"
+        title={tr('Verify these marks?')}
+        description={tr('They’re checked and final; results can be published once every sheet is verified. You can still correct a single mark later, with a reason.')}
+        confirmLabel={tr('Verify')}
         onConfirm={async () => {
           await verify.mutateAsync(id)
-          toast.success('Marks verified.')
+          toast.success(tr('Marks verified.'))
         }}
       />
       <FormDialog
         open={dialog === 'sendBack'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Send back to the teacher?"
-        description="The sheet opens again for the teacher, with your note."
-        submitLabel="Send back"
-        schema={z.object({ reason: z.string().trim().min(1, 'Say what needs another look.').max(255) })}
+        title={tr('Send back to the teacher?')}
+        description={tr('The sheet opens again for the teacher, with your note.')}
+        submitLabel={tr('Send back')}
+        schema={z.object({ reason: z.string().trim().min(1, tr('Say what needs another look.')).max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await sendBack.mutateAsync({ sid: id, reason: v.reason })
-          toast.success('Sent back.')
+          toast.success(tr('Sent back.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="What needs another look" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Practical marks missing for three students" />
+          <FormField label={tr('What needs another look')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Practical marks missing for three students')} />
           </FormField>
         )}
       </FormDialog>
       <FormDialog
         open={dialog === 'reason'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title={`Save ${entries.length} correction${entries.length === 1 ? '' : 's'}?`}
-        description="These marks were already submitted. The old values are kept with your reason."
-        submitLabel="Save corrections"
-        schema={z.object({ reason: z.string().trim().min(1, 'Give a reason.').max(255) })}
+        title={tr('Save {count} correction{value}?', { count: entries.length, value: entries.length === 1 ? '' : 's' })}
+        description={tr('These marks were already submitted. The old values are kept with your reason.')}
+        submitLabel={tr('Save corrections')}
+        schema={z.object({ reason: z.string().trim().min(1, tr('Give a reason.')).max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await save(v.reason)
-          toast.success('Corrections saved.')
+          toast.success(tr('Corrections saved.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Reason" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Re-totalled after a recheck request" />
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Re-totalled after a recheck request')} />
           </FormField>
         )}
       </FormDialog>

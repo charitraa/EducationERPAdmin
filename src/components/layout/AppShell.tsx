@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { useLocale } from '@/lib/i18n'
+import { useLocale, tr } from '@/lib/i18n'
 import { CommandMenu } from './CommandMenu'
 import { Header } from './Header'
 import { MobileBottomNav } from './MobileBottomNav'
@@ -29,14 +29,14 @@ export function AppShell() {
   return (
     <div className="min-h-dvh">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-background focus:px-3 focus:py-2">
-        Skip to content
+        {tr('Skip to content')}
       </a>
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 lg:block print:hidden">
         <Sidebar />
       </aside>
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetContent side="left" className="w-72 border-none p-0 [&>button]:text-sidebar-foreground">
-          <SheetTitle className="sr-only">Menu</SheetTitle>
+          <SheetTitle className="sr-only">{tr('Menu')}</SheetTitle>
           <Sidebar onNavigate={() => setMenuOpen(false)} />
         </SheetContent>
       </Sheet>

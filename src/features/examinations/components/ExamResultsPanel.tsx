@@ -15,6 +15,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Exam, ResultCounts, ResultRow } from '../api/examinations.api'
 import { useComputeExam, useExamSummary, useResults } from '../hooks/useExaminations'
 import { ResultBadge, resultCountsText } from './ResultBits'
+import { tr } from '@/lib/i18n'
 
 export const pct = (v: number | string | null | undefined) => (v == null ? '—' : `${Number(v)}%`)
 
@@ -27,13 +28,13 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
   const compute = useComputeExam()
   const [computing, setComputing] = useState(false)
 
-  if (exam.status === 'draft') return <EmptyState title="No results yet" description="Results are worked out from verified marks once the exam is scheduled." />
+  if (exam.status === 'draft') return <EmptyState title={tr('No results yet')} description={tr('Results are worked out from verified marks once the exam is scheduled.')} />
 
   const columns: Column<ResultRow>[] = [
-    { id: 'rank', header: 'Rank', sortField: 'rank_in_level', className: 'w-16 tabular-nums', cell: (r) => r.rank_in_level ?? '—' },
+    { id: 'rank', header: tr('Rank'), sortField: 'rank_in_level', className: 'w-16 tabular-nums', cell: (r) => r.rank_in_level ?? '—' },
     {
       id: 'student',
-      header: 'Student',
+      header: tr('Student'),
       mobile: 'title',
       cell: (r) => (
         <Link to={`/examinations/report-cards?exam=${exam.id}&student=${r.student}`} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
@@ -41,12 +42,12 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
         </Link>
       ),
     },
-    { id: 'section', header: 'Class', cell: (r) => r.section_name },
-    { id: 'marks', header: 'Marks', className: 'tabular-nums', cell: (r) => `${Number(r.total_obtained)} / ${Number(r.total_full)}` },
+    { id: 'section', header: tr('Class'), cell: (r) => r.section_name },
+    { id: 'marks', header: tr('Marks'), className: 'tabular-nums', cell: (r) => `${Number(r.total_obtained)} / ${Number(r.total_full)}` },
     { id: 'pct', header: '%', sortField: 'percentage', className: 'tabular-nums', cell: (r) => pct(r.percentage) },
     { id: 'gpa', header: 'GPA', sortField: 'grade_point', className: 'tabular-nums', cell: (r) => `${Number(r.grade_point)} ${r.letter}` },
-    { id: 'division', header: 'Division', mobile: 'hidden', cell: (r) => r.division || '—' },
-    { id: 'status', header: 'Result', cell: (r) => <ResultBadge status={r.status} /> },
+    { id: 'division', header: tr('Division'), mobile: 'hidden', cell: (r) => r.division || '—' },
+    { id: 'status', header: tr('Result'), cell: (r) => <ResultBadge status={r.status} /> },
   ]
 
   const s = summary.data
@@ -54,9 +55,9 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
     <div className="grid gap-6">
       {exam.status === 'scheduled' && can(PERMS.exams.manage) && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-card p-3">
-          <p className="flex-1 text-sm text-muted-foreground">Results update from the marks entered so far. Students and parents see nothing until you publish.</p>
+          <p className="flex-1 text-sm text-muted-foreground">{tr('Results update from the marks entered so far. Students and parents see nothing until you publish.')}</p>
           <Button variant="outline" onClick={() => setComputing(true)}>
-            <Calculator aria-hidden /> Work out results
+            <Calculator aria-hidden /> {tr('Work out results')}
           </Button>
         </div>
       )}
@@ -68,15 +69,15 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
         <>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Pass rate</p>
+              <p className="text-sm text-muted-foreground">{tr('Pass rate')}</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{pct(s.pass_rate)}</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Average</p>
+              <p className="text-sm text-muted-foreground">{tr('Average')}</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{pct(s.average_percentage)}</p>
             </div>
             <div className="rounded-lg border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Results</p>
+              <p className="text-sm text-muted-foreground">{tr('Results')}</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">{s.results}</p>
               <p className="text-xs text-muted-foreground">{resultCountsText(s.by_status)}</p>
             </div>
@@ -84,14 +85,14 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
           <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
             {s.subjects.length > 0 && (
               <div className="overflow-x-auto rounded-lg border bg-card">
-                <table className="w-full text-sm" aria-label="By subject">
+                <table className="w-full text-sm" aria-label={tr('By subject')}>
                   <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
                     <tr>
-                      <th className="px-3 py-2">Subject</th>
-                      <th className="px-3 py-2 text-right">Pass rate</th>
-                      <th className="px-3 py-2 text-right">Average</th>
-                      <th className="px-3 py-2 text-right">Highest</th>
-                      <th className="px-3 py-2 text-right">Lowest</th>
+                      <th className="px-3 py-2">{tr('Subject')}</th>
+                      <th className="px-3 py-2 text-right">{tr('Pass rate')}</th>
+                      <th className="px-3 py-2 text-right">{tr('Average')}</th>
+                      <th className="px-3 py-2 text-right">{tr('Highest')}</th>
+                      <th className="px-3 py-2 text-right">{tr('Lowest')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
@@ -111,7 +112,7 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
             {s.toppers.length > 0 && (
               <section className="rounded-lg border bg-card">
                 <h3 className="flex items-center gap-2 border-b px-4 py-2 text-sm font-semibold">
-                  <Trophy className="h-4 w-4 text-warning" aria-hidden /> Toppers
+                  <Trophy className="h-4 w-4 text-warning" aria-hidden /> {tr('Toppers')}
                 </h3>
                 <ol className="divide-y text-sm">
                   {s.toppers.map((t) => (
@@ -130,26 +131,26 @@ export function ExamResultsPanel({ exam }: { exam: Exam }) {
         </>
       ) : null}
       <section>
-        <SectionHeader title="Every result" />
+        <SectionHeader title={tr('Every result')} />
         <DataTable
-          ariaLabel="Results"
+          ariaLabel={tr('Results')}
           columns={columns}
           query={results}
           list={list}
           getRowId={(r) => r.id}
-          searchPlaceholder="Search students…"
-          empty={{ title: 'No results worked out yet', description: can(PERMS.exams.manage) ? 'Use Work out results once marks are in.' : undefined }}
+          searchPlaceholder={tr('Search students…')}
+          empty={{ title: tr('No results worked out yet'), description: can(PERMS.exams.manage) ? tr('Use Work out results once marks are in.') : undefined }}
         />
       </section>
       <ConfirmDialog
         open={computing}
         onOpenChange={setComputing}
-        title="Work out results now?"
-        description="From the marks entered so far. Missing marks show as incomplete. Nothing is published."
-        confirmLabel="Work out"
+        title={tr('Work out results now?')}
+        description={tr('From the marks entered so far. Missing marks show as incomplete. Nothing is published.')}
+        confirmLabel={tr('Work out')}
         onConfirm={async () => {
           const r = (await compute.mutateAsync(exam.id)) as { results: ResultCounts }
-          toast.success(`Results worked out: ${resultCountsText(r.results) || 'none'}.`)
+          toast.success(tr('Results worked out: {resultCountsText}.', { resultCountsText: resultCountsText(r.results) || 'none' }))
         }}
       />
     </div>

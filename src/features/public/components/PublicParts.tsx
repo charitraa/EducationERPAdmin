@@ -13,6 +13,7 @@ import type { FieldDefinition } from '@/features/applications/api/applications.a
 import { toApiError } from '@/shared/api/errors'
 import { cn } from '@/lib/utils'
 import { publicApi, type Receipt } from '../api/public.api'
+import { tr } from '@/lib/i18n'
 
 export function useOrgCode() {
   return useParams().organizationCode ?? ''
@@ -43,7 +44,7 @@ export function PublicLayout({ title, description, children }: { title: string; 
             </span>
             {forms.data?.organization ?? (forms.isPending ? '…' : code.toUpperCase())}
           </span>
-          <nav aria-label="Public pages" className="ml-auto flex flex-wrap gap-1">
+          <nav aria-label={tr('Public pages')} className="ml-auto flex flex-wrap gap-1">
             {link('admission', 'Admission', true)}
             {link('careers', 'Careers')}
             {link('application/status', 'Check status')}
@@ -69,20 +70,20 @@ function CopyRow({ label, value, secret }: { label: string; value: string; secre
         <code className="break-all rounded-md bg-muted px-3 py-2 font-mono text-lg font-semibold">{shown ? value : '•'.repeat(Math.min(24, value.length))}</code>
         {secret && (
           <Button type="button" size="sm" variant="ghost" onClick={() => setShown((s) => !s)}>
-            {shown ? 'Hide' : 'Show'}
+            {shown ? tr('Hide') : tr('Show')}
           </Button>
         )}
         <Button
           type="button"
           size="sm"
           variant="outline"
-          aria-label={`Copy ${label.toLowerCase()}`}
+          aria-label={tr('Copy {label}', { label: label.toLowerCase() })}
           onClick={() => {
             void navigator.clipboard?.writeText(value)
             setCopied(true)
           }}
         >
-          {copied ? <Check aria-hidden /> : <Copy aria-hidden />} {copied ? 'Copied' : 'Copy'}
+          {copied ? <Check aria-hidden /> : <Copy aria-hidden />} {copied ? tr('Copied') : tr('Copy')}
         </Button>
       </div>
     </div>
@@ -94,15 +95,15 @@ export function ReceiptCard({ receipt, what }: { receipt: Receipt; what: string 
   return (
     <section className="rounded-lg border border-success/30 bg-card p-6">
       <p className="flex items-center gap-2 text-lg font-semibold text-success">
-        <Check className="h-5 w-5" aria-hidden /> {what} submitted successfully
+        <Check className="h-5 w-5" aria-hidden /> {tr('{what} submitted successfully', { what })}
       </p>
       <div className="mt-5 grid gap-4">
-        <CopyRow label="Application number" value={receipt.number} />
-        <CopyRow label="Private status token" value={receipt.token} secret />
+        <CopyRow label={tr('Application number')} value={receipt.number} />
+        <CopyRow label={tr('Private status token')} value={receipt.token} secret />
       </div>
       <p role="alert" className="mt-5 flex items-start gap-2 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm font-medium">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-        Save these details. You will need them to check your application status. The token can’t be shown again.
+        {tr('Save these details. You will need them to check your application status. The token can’t be shown again.')}
       </p>
     </section>
   )
@@ -111,7 +112,7 @@ export function ReceiptCard({ receipt, what }: { receipt: Receipt; what: string 
 /** A 404 means the school's address is wrong; anything else (busy, offline) is said as it is. */
 export function loadError(err: unknown) {
   const e = toApiError(err)
-  return e.status === 404 ? new Error('No school uses this address. Check the link you were given.') : e
+  return e.status === 404 ? new Error(tr('No school uses this address. Check the link you were given.')) : e
 }
 
 export type Answers = Record<string, string | boolean>
@@ -137,7 +138,7 @@ export function Questions({ fields, value, onChange, errors = {} }: { fields: Fi
               ) : f.type === 'date' ? (
                 <DatePicker {...p} value={String(v ?? '')} onChange={(d) => set(f.name, d)} />
               ) : f.type === 'choice' ? (
-                <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} placeholder="Choose…" options={(f.choices ?? []).map((c) => ({ value: c, label: c }))} />
+                <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} placeholder={tr('Choose…')} options={(f.choices ?? []).map((c) => ({ value: c, label: c }))} />
               ) : (
                 <Input {...p} inputMode={f.type === 'number' ? 'decimal' : undefined} value={String(v ?? '')} onChange={(e) => set(f.name, e.target.value)} />
               )
@@ -156,7 +157,7 @@ export const answersPayload = (fields: FieldDefinition[], a: Answers) =>
   Object.fromEntries(fields.filter((f) => a[f.name] !== '' && a[f.name] !== undefined).map((f) => [f.name, f.type === 'number' ? Number(a[f.name]) : a[f.name]]))
 
 export function missingAnswers(fields: FieldDefinition[], a: Answers) {
-  return Object.fromEntries(fields.filter((f) => f.required && f.type !== 'boolean' && !String(a[f.name] ?? '').trim()).map((f) => [f.name, 'Required.']))
+  return Object.fromEntries(fields.filter((f) => f.required && f.type !== 'boolean' && !String(a[f.name] ?? '').trim()).map((f) => [f.name, tr('Required.')]))
 }
 
 /**
@@ -174,5 +175,5 @@ export function nestedErrors(err: unknown): { fields: Record<string, string>; me
     else if (v && typeof v === 'object') for (const [k, inner] of Object.entries(v)) walk(inner, k === 'non_field_errors' || k === 'detail' ? path : [...path, k])
   }
   walk(e.details, [])
-  return { fields: out, message: out.form ?? (Object.keys(out).length ? 'Check the highlighted answers.' : e.message) }
+  return { fields: out, message: out.form ?? (Object.keys(out).length ? tr('Check the highlighted answers.') : e.message) }
 }

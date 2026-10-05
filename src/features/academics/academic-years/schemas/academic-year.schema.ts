@@ -1,15 +1,16 @@
 import { z } from 'zod'
 import type { AcademicYear, AcademicYearInput } from '../api/academic-years.api'
+import { tr } from '@/lib/i18n'
 
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD.')
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, tr('Use YYYY-MM-DD.'))
 
 export const academicYearSchema = z
   .object({
-    name: z.string().trim().min(1, 'Give the year a name, e.g. 2082/83.').max(50),
+    name: z.string().trim().min(1, tr('Give the year a name, e.g. 2082/83.')).max(50),
     start_date: isoDate,
     end_date: isoDate,
   })
-  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: 'The year must end after it starts.' })
+  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: tr('The year must end after it starts.') })
 
 export type AcademicYearForm = z.infer<typeof academicYearSchema>
 

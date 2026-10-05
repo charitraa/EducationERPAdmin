@@ -1,8 +1,9 @@
 import { Loader2 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
-export function Spinner({ className, label = 'Loading' }: { className?: string; label?: string }) {
+export function Spinner({ className, label = tr('Loading') }: { className?: string; label?: string }) {
   return (
     <span role="status" className={cn('inline-flex items-center', className)}>
       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden />
@@ -21,7 +22,7 @@ export function PageLoader() {
 
 export function TableSkeleton({ rows = 8, columns = 5 }: { rows?: number; columns?: number }) {
   return (
-    <div className="divide-y" aria-busy="true" aria-label="Loading">
+    <div className="divide-y" aria-busy="true" aria-label={tr('Loading')}>
       {Array.from({ length: rows }, (_, r) => (
         <div key={r} className="flex items-center gap-4 px-3 py-3">
           {Array.from({ length: columns }, (_, c) => (

@@ -13,6 +13,7 @@ import { useProgramOptions } from '../../programs/hooks/usePrograms'
 import { WEEKDAYS, type CalendarEvent } from '../api/calendar.api'
 import { useCreateCalendarEvent, useUpdateCalendarEvent } from '../hooks/useCalendar'
 import { calendarEventDefaults, calendarEventSchema, toCalendarEventInput, type CalendarEventForm } from '../schemas/calendar-event.schema'
+import { tr } from '@/lib/i18n'
 
 function CalendarEventFields({ form }: { form: UseFormReturn<CalendarEventForm> }) {
   const { register, control, formState: { errors } } = form
@@ -23,23 +24,23 @@ function CalendarEventFields({ form }: { form: UseFormReturn<CalendarEventForm> 
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-        <FormField label="What" required error={errors.kind?.message}>
+        <FormField label={tr('What')} required error={errors.kind?.message}>
           {(p) => <Controller control={control} name="kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('CalendarEventKindEnum')} />} />}
         </FormField>
-        <FormField label="Title" required error={errors.title?.message}>
-          <Input {...register('title')} placeholder="Dashain holidays" autoFocus />
+        <FormField label={tr('Title')} required error={errors.title?.message}>
+          <Input {...register('title')} placeholder={tr('Dashain holidays')} autoFocus />
         </FormField>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <FormField label="From" required error={errors.start_date?.message}>
+        <FormField label={tr('From')} required error={errors.start_date?.message}>
           {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
         </FormField>
-        <FormField label="To" required error={errors.end_date?.message} description="Same as From for one day.">
+        <FormField label={tr('To')} required error={errors.end_date?.message} description={tr('Same as From for one day.')}>
           {(p) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
         </FormField>
       </div>
       {kind === 'makeup_day' && (
-        <FormField label="Run the timetable of" required error={errors.runs_timetable_of?.message}>
+        <FormField label={tr('Run the timetable of')} required error={errors.runs_timetable_of?.message}>
           {(p) => (
             <Controller
               control={control}
@@ -51,42 +52,42 @@ function CalendarEventFields({ form }: { form: UseFormReturn<CalendarEventForm> 
       )}
       <div className="grid gap-4 sm:grid-cols-3">
         {isMultiBranch && (
-          <FormField label="Branch" error={errors.campus?.message}>
+          <FormField label={tr('Branch')} error={errors.campus?.message}>
             {(p) => (
               <Controller
                 control={control}
                 name="campus"
-                render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every branch" options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
+                render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every branch')} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
               />
             )}
           </FormField>
         )}
-        <FormField label="Program" error={errors.program?.message}>
+        <FormField label={tr('Program')} error={errors.program?.message}>
           {(p) => (
             <Controller
               control={control}
               name="program"
               render={({ field }) => (
-                <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every program" options={(programs.data ?? []).map((pr) => ({ value: String(pr.id), label: pr.name }))} />
+                <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every program')} options={(programs.data ?? []).map((pr) => ({ value: String(pr.id), label: pr.name }))} />
               )}
             />
           )}
         </FormField>
         {program && (
-          <FormField label="Level" error={errors.level?.message}>
+          <FormField label={tr('Level')} error={errors.level?.message}>
             {(p) => (
               <Controller
                 control={control}
                 name="level"
                 render={({ field }) => (
-                  <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every level" options={programLevels(program).map((l) => ({ value: String(l), label: levelLabel(program, l) }))} />
+                  <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every level')} options={programLevels(program).map((l) => ({ value: String(l), label: levelLabel(program, l) }))} />
                 )}
               />
             )}
           </FormField>
         )}
       </div>
-      <FormField label="Classes on these days" error={errors.suspends_classes?.message}>
+      <FormField label={tr('Classes on these days')} error={errors.suspends_classes?.message}>
         {(p) => (
           <Controller
             control={control}
@@ -97,16 +98,16 @@ function CalendarEventFields({ form }: { form: UseFormReturn<CalendarEventForm> 
                 value={field.value}
                 onChange={field.onChange}
                 options={[
-                  { value: 'default', label: 'Usual for this kind (off for holidays, closures, exams)' },
-                  { value: 'yes', label: 'No classes' },
-                  { value: 'no', label: 'Classes run as normal' },
+                  { value: 'default', label: tr('Usual for this kind (off for holidays, closures, exams)') },
+                  { value: 'yes', label: tr('No classes') },
+                  { value: 'no', label: tr('Classes run as normal') },
                 ]}
               />
             )}
           />
         )}
       </FormField>
-      <FormField label="Notes" error={errors.description?.message}>
+      <FormField label={tr('Notes')} error={errors.description?.message}>
         <Textarea {...register('description')} rows={2} />
       </FormField>
     </>
@@ -122,15 +123,15 @@ export function CalendarEventFormDialog({ open, onOpenChange, record }: { open: 
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? 'Edit calendar entry' : 'Add to calendar'}
-      description="Holidays, closures and exam days stop the timetable and roll calls automatically."
+      title={record ? tr('Edit calendar entry') : tr('Add to calendar')}
+      description={tr('Holidays, closures and exam days stop the timetable and roll calls automatically.')}
       schema={calendarEventSchema}
       defaultValues={calendarEventDefaults(record)}
       onSubmit={async (values) => {
         const input = toCalendarEventInput(values)
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Calendar updated.' : 'Added to the calendar.')
+        toast.success(record ? tr('Calendar updated.') : tr('Added to the calendar.'))
       }}
     >
       {(form) => <CalendarEventFields form={form} />}

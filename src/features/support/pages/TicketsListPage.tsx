@@ -15,6 +15,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Ticket } from '../api/support.api'
 import { RaiseTicketDialog } from '../components/RaiseTicketDialog'
 import { useTickets } from '../hooks/useSupport'
+import { tr } from '@/lib/i18n'
 
 export default function TicketsListPage() {
   const navigate = useNavigate()
@@ -28,27 +29,27 @@ export default function TicketsListPage() {
 
   const columns: Column<Ticket>[] = [
     { id: 'id', header: '#', className: 'w-14 tabular-nums text-muted-foreground', mobile: 'hidden', cell: (t) => t.id },
-    { id: 'subject', header: 'Subject', mobile: 'title', cell: (t) => <span className="font-medium">{t.subject}</span> },
-    { id: 'by', header: 'Raised by', cell: (t) => (t.raised_by === user?.id ? 'You' : t.raised_by_name || '—') },
-    { id: 'assignee', header: 'Assigned to', cell: (t) => (t.assigned_to === user?.id ? 'You' : t.assigned_to_name || <span className="text-muted-foreground">Nobody yet</span>) },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (t) => t.campus_name ?? '—' },
-    { id: 'updated', header: 'Updated', mobile: 'hidden', cell: (t) => formatRelative(t.updated_at) },
-    { id: 'status', header: 'Status', cell: (t) => <StatusBadge status={t.status ?? 'open'} label={enumLabel('SupportTicketStatusEnum', t.status)} /> },
+    { id: 'subject', header: tr('Subject'), mobile: 'title', cell: (t) => <span className="font-medium">{t.subject}</span> },
+    { id: 'by', header: tr('Raised by'), cell: (t) => (t.raised_by === user?.id ? tr('You') : t.raised_by_name || '—') },
+    { id: 'assignee', header: tr('Assigned to'), cell: (t) => (t.assigned_to === user?.id ? tr('You') : t.assigned_to_name || <span className="text-muted-foreground">{tr('Nobody yet')}</span>) },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (t) => t.campus_name ?? '—' },
+    { id: 'updated', header: tr('Updated'), mobile: 'hidden', cell: (t) => formatRelative(t.updated_at) },
+    { id: 'status', header: tr('Status'), cell: (t) => <StatusBadge status={t.status ?? 'open'} label={enumLabel('SupportTicketStatusEnum', t.status)} /> },
   ]
 
   return (
     <>
       <PageHeader
-        title="Support"
-        description={office ? 'Requests from students, parents and staff. Assign, resolve, close.' : 'Your requests to the school office.'}
+        title={tr('Support')}
+        description={office ? tr('Requests from students, parents and staff. Assign, resolve, close.') : tr('Your requests to the school office.')}
         actions={
           <Button onClick={() => setRaising(true)}>
-            <Plus aria-hidden /> Raise a ticket
+            <Plus aria-hidden /> {tr('Raise a ticket')}
           </Button>
         }
       />
       <DataTable
-        ariaLabel="Tickets"
+        ariaLabel={tr('Tickets')}
         columns={columns}
         query={query}
         list={list}
@@ -56,11 +57,11 @@ export default function TicketsListPage() {
         onRowClick={(t) => navigate(`/support/tickets/${t.id}`)}
         searchable={false}
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('SupportTicketStatusEnum') },
-          { name: 'assigned_to', label: 'Assigned to', hidden: !office || !user, options: user ? [{ value: String(user.id), label: 'Me' }] : [] },
-          { name: 'campus', label: 'Branch', hidden: !isMultiBranch || !office, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('SupportTicketStatusEnum') },
+          { name: 'assigned_to', label: tr('Assigned to'), hidden: !office || !user, options: user ? [{ value: String(user.id), label: tr('Me') }] : [] },
+          { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch || !office, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
         ]}
-        empty={{ title: 'No tickets', description: 'When something needs the office’s attention, raise a ticket.', action: <Button onClick={() => setRaising(true)}>Raise a ticket</Button> }}
+        empty={{ title: tr('No tickets'), description: tr('When something needs the office’s attention, raise a ticket.'), action: <Button onClick={() => setRaising(true)}>{tr('Raise a ticket')}</Button> }}
       />
       <RaiseTicketDialog open={raising} onOpenChange={setRaising} onRaised={(t) => navigate(`/support/tickets/${t.id}`)} />
     </>

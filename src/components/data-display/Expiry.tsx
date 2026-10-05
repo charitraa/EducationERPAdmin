@@ -1,5 +1,6 @@
 import { formatDate, parseIsoDate, todayIso } from '@/lib/dates'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 /** Days until a date; negative once it has passed. */
 export const daysUntil = (iso: string | null | undefined) => {
@@ -15,7 +16,7 @@ export function Expiry({ on }: { on: string | null | undefined }) {
   return (
     <span className={cn('tabular-nums', days < 0 ? 'font-medium text-danger' : days <= 30 ? 'font-medium text-warning' : undefined)}>
       {formatDate(on)}
-      {days < 0 ? ' · expired' : days <= 30 ? ` · ${days} days` : ''}
+      {days < 0 ? ' · ' + tr('expired') : days <= 30 ? ' · ' + tr('{days} days', { days }) : ''}
     </span>
   )
 }

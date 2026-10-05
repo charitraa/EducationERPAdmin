@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/api/client'
 import { createQueryKeys, createResourceApi } from '@/shared/api/resource'
 import type { Id, ListParams, Schema } from '@/shared/types/api'
+import { tr } from '@/lib/i18n'
 
 export type BellSchedule = Schema<'BellSchedule'>
 export type BellScheduleInput = Schema<'BellScheduleRequest'>
@@ -16,13 +17,13 @@ export type Lesson = Schema<'Lesson'>
 
 /** ISO weekday numbers, as the API uses them. Nepal's school week usually runs Sunday–Friday. */
 export const WEEKDAYS = [
-  { value: 7, short: 'Sun', label: 'Sunday' },
-  { value: 1, short: 'Mon', label: 'Monday' },
-  { value: 2, short: 'Tue', label: 'Tuesday' },
-  { value: 3, short: 'Wed', label: 'Wednesday' },
-  { value: 4, short: 'Thu', label: 'Thursday' },
-  { value: 5, short: 'Fri', label: 'Friday' },
-  { value: 6, short: 'Sat', label: 'Saturday' },
+  { value: 7, short: tr('Sun'), label: tr('Sunday') },
+  { value: 1, short: tr('Mon'), label: tr('Monday') },
+  { value: 2, short: tr('Tue'), label: tr('Tuesday') },
+  { value: 3, short: tr('Wed'), label: tr('Wednesday') },
+  { value: 4, short: tr('Thu'), label: tr('Thursday') },
+  { value: 5, short: tr('Fri'), label: tr('Friday') },
+  { value: 6, short: tr('Sat'), label: tr('Saturday') },
 ] as const
 export const DEFAULT_DAYS = [7, 1, 2, 3, 4, 5]
 

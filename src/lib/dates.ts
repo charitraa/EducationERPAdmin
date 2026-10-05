@@ -1,4 +1,5 @@
 import NepaliDate from 'nepali-date-converter'
+import { tr } from '@/lib/i18n'
 
 /**
  * The backend's canonical dates are AD `YYYY-MM-DD`. BS (Bikram Sambat) is
@@ -52,10 +53,10 @@ export function formatDateTime(value: string | null | undefined): string {
 export function formatRelative(value: string, now = new Date()): string {
   const d = new Date(value)
   const seconds = Math.round((now.getTime() - d.getTime()) / 1000)
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} h ago`
-  if (seconds < 172800) return 'yesterday'
+  if (seconds < 60) return tr('just now')
+  if (seconds < 3600) return tr('{minutes} min ago', { minutes: Math.floor(seconds / 60) })
+  if (seconds < 86400) return tr('{hours} h ago', { hours: Math.floor(seconds / 3600) })
+  if (seconds < 172800) return tr('yesterday')
   return toIsoDate(d)
 }
 

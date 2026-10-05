@@ -29,6 +29,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Scholarship, StudentScholarship } from '../api/finance.api'
 import { moneyInput } from '../components/money'
 import { useCategoryOptions, useCreateScholarship, useEndGrant, useGrants, useGrantScholarship, useRemoveScholarship, useScholarshipOptions, useScholarships, useUpdateScholarship } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 const dayAfter = (iso: string) => {
   const d = parseIsoDate(iso)!
@@ -40,8 +41,8 @@ export const describeScholarship = (s: Pick<Scholarship, 'kind' | 'value' | 'cat
   `${s.kind === 'percentage' ? `${Number(s.value)}% off` : `${formatMoney(s.value)} off`} ${s.category_name ? s.category_name.toLowerCase() : 'every fee'}`
 
 const scholarshipSchema = z
-  .object({ name: z.string().trim().min(1, 'Required.').max(200), kind: z.string(), value: moneyInput, category: z.string(), is_active: z.boolean() })
-  .refine((v) => v.kind !== 'percentage' || Number(v.value) <= 100, { path: ['value'], message: 'At most 100%.' })
+  .object({ name: z.string().trim().min(1, tr('Required.')).max(200), kind: z.string(), value: moneyInput, category: z.string(), is_active: z.boolean() })
+  .refine((v) => v.kind !== 'percentage' || Number(v.value) <= 100, { path: ['value'], message: tr('At most 100%.') })
 
 function ScholarshipDialog({ open, record, onOpenChange }: { open: boolean; record: Scholarship | null; onOpenChange: (o: boolean) => void }) {
   const create = useCreateScholarship()
@@ -51,36 +52,36 @@ function ScholarshipDialog({ open, record, onOpenChange }: { open: boolean; reco
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? 'Edit scholarship' : 'New scholarship'}
-      description="A standing reduction, applied as a line on every invoice generated while a student holds it."
+      title={record ? tr('Edit scholarship') : tr('New scholarship')}
+      description={tr('A standing reduction, applied as a line on every invoice generated while a student holds it.')}
       schema={scholarshipSchema}
       defaultValues={{ name: record?.name ?? '', kind: record?.kind ?? 'percentage', value: record?.value ?? '', category: record?.category ? String(record.category) : '', is_active: record?.is_active ?? true }}
       onSubmit={async (v) => {
         const input = { name: v.name, kind: v.kind as Scholarship['kind'] & string, value: v.value, category: v.category ? Number(v.category) : null, is_active: v.is_active }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Scholarship saved.' : 'Scholarship added.')
+        toast.success(record ? tr('Scholarship saved.') : tr('Scholarship added.'))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
         <>
-          <FormField label="Name" required error={errors.name?.message}>
-            <Input {...register('name')} placeholder="Merit scholarship, Sibling discount…" />
+          <FormField label={tr('Name')} required error={errors.name?.message}>
+            <Input {...register('name')} placeholder={tr('Merit scholarship, Sibling discount…')} />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Kind">
+            <FormField label={tr('Kind')}>
               {(p) => <Controller control={control} name="kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('ScholarshipKindEnum')} />} />}
             </FormField>
-            <FormField label={watch('kind') === 'percentage' ? 'Percent off' : 'Amount off'} required error={errors.value?.message}>
+            <FormField label={watch('kind') === 'percentage' ? tr('Percent off') : tr('Amount off')} required error={errors.value?.message}>
               <Input {...register('value')} inputMode="decimal" className="tabular-nums" />
             </FormField>
           </div>
-          <FormField label="Applies to" description="Empty: every fee category.">
-            {(p) => <Controller control={control} name="category" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every category" options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))} />} />}
+          <FormField label={tr('Applies to')} description={tr('Empty: every fee category.')}>
+            {(p) => <Controller control={control} name="category" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every category')} options={(categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name }))} />} />}
           </FormField>
           <Controller control={control} name="is_active" render={({ field }) => (
             <label className="flex items-center gap-3 text-sm">
-              <Switch checked={field.value} onCheckedChange={field.onChange} /> Can be granted
+              <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Can be granted')}
             </label>
           )} />
         </>
@@ -97,31 +98,31 @@ function GrantDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: 
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title="Grant a scholarship"
-      description="It reduces invoices generated from the start date on. Invoices already issued don’t change."
-      submitLabel="Grant"
-      schema={z.object({ student: z.custom<Student | null>().refine((s) => s != null, 'Choose a student.'), scholarship: z.string().min(1, 'Choose one.'), started_on: isoDate, reason: z.string().max(255) })}
+      title={tr('Grant a scholarship')}
+      description={tr('It reduces invoices generated from the start date on. Invoices already issued don’t change.')}
+      submitLabel={tr('Grant')}
+      schema={z.object({ student: z.custom<Student | null>().refine((s) => s != null, tr('Choose a student.')), scholarship: z.string().min(1, tr('Choose one.')), started_on: isoDate, reason: z.string().max(255) })}
       defaultValues={{ student: null, scholarship: '', started_on: todayIso(), reason: '' }}
       onSubmit={async (v) => {
         await grant.mutateAsync({ student: v.student!.id, scholarship: Number(v.scholarship), started_on: v.started_on, reason: v.reason })
-        toast.success('Scholarship granted.')
+        toast.success(tr('Scholarship granted.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
-          <FormField label="Student" required error={errors.student?.message}>
+          <FormField label={tr('Student')} required error={errors.student?.message}>
             {(p) => <Controller control={control} name="student" render={({ field }) => <StudentPicker {...p} value={field.value} onChange={field.onChange} />} />}
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Scholarship" required error={errors.scholarship?.message}>
+            <FormField label={tr('Scholarship')} required error={errors.scholarship?.message}>
               {(p) => <Controller control={control} name="scholarship" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(scholarships.data ?? []).map((s) => ({ value: String(s.id), label: `${s.name} (${describeScholarship(s)})` }))} />} />}
             </FormField>
-            <FormField label="From (AD)" required error={errors.started_on?.message}>
+            <FormField label={tr('From (AD)')} required error={errors.started_on?.message}>
               {(p) => <Controller control={control} name="started_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
           </div>
-          <FormField label="Reason" error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="Topped the class, staff ward…" />
+          <FormField label={tr('Reason')} error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('Topped the class, staff ward…')} />
           </FormField>
         </>
       )}
@@ -141,28 +142,28 @@ export default function ScholarshipsPage() {
   const [ending, setEnding] = useState<StudentScholarship | null>(null)
 
   const grantColumns: Column<StudentScholarship>[] = [
-    { id: 'student', header: 'Student', mobile: 'title', cell: (g) => <span className="font-medium">{g.student_name}</span> },
-    { id: 'scholarship', header: 'Scholarship', cell: (g) => g.scholarship_name },
-    { id: 'from', header: 'From', className: 'tabular-nums', cell: (g) => formatDate(g.started_on) },
-    { id: 'to', header: 'Until', className: 'tabular-nums', cell: (g) => (g.ended_on ? formatDate(g.ended_on) : <StatusBadge status="active" label="Current" />) },
-    { id: 'reason', header: 'Reason', mobile: 'hidden', cell: (g) => g.reason || <span className="text-muted-foreground">—</span> },
+    { id: 'student', header: tr('Student'), mobile: 'title', cell: (g) => <span className="font-medium">{g.student_name}</span> },
+    { id: 'scholarship', header: tr('Scholarship'), cell: (g) => g.scholarship_name },
+    { id: 'from', header: tr('From'), className: 'tabular-nums', cell: (g) => formatDate(g.started_on) },
+    { id: 'to', header: tr('Until'), className: 'tabular-nums', cell: (g) => (g.ended_on ? formatDate(g.ended_on) : <StatusBadge status="active" label={tr('Current')} />) },
+    { id: 'reason', header: tr('Reason'), mobile: 'hidden', cell: (g) => g.reason || <span className="text-muted-foreground">—</span> },
   ]
 
   return (
     <div className="grid gap-8">
       <section>
         <SectionHeader
-          title="Scholarships"
+          title={tr('Scholarships')}
           action={
             <PermissionGate permission={PERMS.finance.manage}>
               <Button variant="outline" onClick={crud.openCreate}>
-                <Plus aria-hidden /> New scholarship
+                <Plus aria-hidden /> {tr('New scholarship')}
               </Button>
             </PermissionGate>
           }
         />
         {scholarships.data?.results.length === 0 ? (
-          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">None yet. Add the scholarships and discounts you offer.</p>
+          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('None yet. Add the scholarships and discounts you offer.')}</p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {(scholarships.data?.results ?? []).map((s) => (
@@ -171,11 +172,11 @@ export default function ScholarshipsPage() {
                   <p className="font-medium">{s.name}</p>
                   <p className="text-sm text-muted-foreground">{describeScholarship(s)}</p>
                 </div>
-                {s.is_active === false && <StatusBadge status="inactive" label="Closed" />}
+                {s.is_active === false && <StatusBadge status="inactive" label={tr('Closed')} />}
                 <RowActions
                   actions={[
-                    { label: 'Edit', icon: Pencil, permission: PERMS.finance.manage, onSelect: () => crud.openEdit(s) },
-                    { label: 'Delete', icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => crud.openDelete(s) },
+                    { label: tr('Edit'), icon: Pencil, permission: PERMS.finance.manage, onSelect: () => crud.openEdit(s) },
+                    { label: tr('Delete'), icon: Trash2, permission: PERMS.finance.manage, destructive: true, onSelect: () => crud.openDelete(s) },
                   ]}
                 />
               </li>
@@ -184,9 +185,9 @@ export default function ScholarshipsPage() {
         )}
       </section>
       <section>
-        <SectionHeader title="Students holding one" />
+        <SectionHeader title={tr('Students holding one')} />
         <DataTable
-          ariaLabel="Scholarship grants"
+          ariaLabel={tr('Scholarship grants')}
           columns={grantColumns}
           query={grants}
           list={list}
@@ -195,13 +196,13 @@ export default function ScholarshipsPage() {
           toolbar={
             <PermissionGate permission={PERMS.finance.manage}>
               <Button onClick={() => setGranting(true)} disabled={!scholarships.data?.results.length}>
-                <UserPlus aria-hidden /> Grant
+                <UserPlus aria-hidden /> {tr('Grant')}
               </Button>
             </PermissionGate>
           }
-          filters={[{ name: 'scholarship', label: 'Scholarship', options: (scholarships.data?.results ?? []).map((s) => ({ value: String(s.id), label: s.name })) }]}
-          rowActions={(g) => <RowActions actions={[{ label: 'End', icon: CalendarX, permission: PERMS.finance.manage, hidden: g.ended_on != null, onSelect: () => setEnding(g) }]} />}
-          empty={{ title: 'No student holds a scholarship yet' }}
+          filters={[{ name: 'scholarship', label: tr('Scholarship'), options: (scholarships.data?.results ?? []).map((s) => ({ value: String(s.id), label: s.name })) }]}
+          rowActions={(g) => <RowActions actions={[{ label: tr('End'), icon: CalendarX, permission: PERMS.finance.manage, hidden: g.ended_on != null, onSelect: () => setEnding(g) }]} />}
+          empty={{ title: tr('No student holds a scholarship yet') }}
         />
       </section>
       <ScholarshipDialog open={crud.formOpen} record={crud.record} onOpenChange={(o) => !o && crud.closeForm()} />
@@ -209,19 +210,19 @@ export default function ScholarshipsPage() {
       <FormDialog
         open={ending != null}
         onOpenChange={(o) => !o && setEnding(null)}
-        title={ending ? `End ${ending.student_name}’s ${ending.scholarship_name}?` : 'End'}
-        description="Invoices generated after this date won’t include it. The grant stays on record."
-        submitLabel="End scholarship"
+        title={ending ? tr('End {student_name}’s {scholarship_name}?', { student_name: ending.student_name, scholarship_name: ending.scholarship_name }) : tr('End')}
+        description={tr('Invoices generated after this date won’t include it. The grant stays on record.')}
+        submitLabel={tr('End scholarship')}
         schema={z.object({ ended_on: isoDate })}
         // It must end after it started: a grant made today can end tomorrow at the earliest.
         defaultValues={{ ended_on: ending && ending.started_on >= todayIso() ? dayAfter(ending.started_on) : todayIso() }}
         onSubmit={async (v) => {
           await end.mutateAsync({ id: ending!.id, ended_on: v.ended_on })
-          toast.success('Scholarship ended.')
+          toast.success(tr('Scholarship ended.'))
         }}
       >
         {({ control, formState: { errors } }) => (
-          <FormField label="Last day (AD)" required error={errors.ended_on?.message}>
+          <FormField label={tr('Last day (AD)')} required error={errors.ended_on?.message}>
             {(p) => <Controller control={control} name="ended_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
           </FormField>
         )}
@@ -230,11 +231,11 @@ export default function ScholarshipsPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`the scholarship “${crud.deleting.name}”`}
-          description="Only possible if no student was ever granted it; otherwise close it instead."
+          subject={tr('the scholarship “{name}”', { name: crud.deleting.name })}
+          description={tr('Only possible if no student was ever granted it; otherwise close it instead.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Scholarship deleted.')
+            toast.success(tr('Scholarship deleted.'))
           }}
         />
       )}

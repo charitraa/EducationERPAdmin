@@ -18,6 +18,7 @@ import { enumLabel } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
 import { STAFF_STATUS_CHANGES, StaffStatusDialog } from '../components/StaffStatusDialog'
 import { useStaffMember } from '../hooks/useStaff'
+import { tr } from '@/lib/i18n'
 
 const ICONS = { leave: Pause, back: Play, left: LogOut, rejoin: RotateCcw }
 
@@ -63,7 +64,7 @@ export default function StaffDetailPage() {
           <PermissionGate permission={PERMS.staff.update}>
             <Button asChild variant="outline" size="sm">
               <Link to={`/staff/${m.id}/edit`}>
-                <Pencil aria-hidden /> Edit details
+                <Pencil aria-hidden /> {tr('Edit details')}
               </Link>
             </Button>
           </PermissionGate>
@@ -88,33 +89,33 @@ export default function StaffDetailPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="grid gap-6 rounded-lg border bg-card p-4 sm:p-6 lg:col-span-2">
           <div>
-            <h2 className="mb-3 text-sm font-semibold">Profile</h2>
+            <h2 className="mb-3 text-sm font-semibold">{tr('Profile')}</h2>
             <dl className="grid gap-4 sm:grid-cols-3">
-              <Field label="First name">{m.first_name}</Field>
-              <Field label="Middle name">{m.middle_name}</Field>
-              <Field label="Last name">{m.last_name}</Field>
-              <Field label="Date of birth">{m.date_of_birth && <BsDateDisplay value={m.date_of_birth} />}</Field>
-              <Field label="Gender">{m.gender ? enumLabel('GenderEnum', m.gender) : ''}</Field>
+              <Field label={tr('First name')}>{m.first_name}</Field>
+              <Field label={tr('Middle name')}>{m.middle_name}</Field>
+              <Field label={tr('Last name')}>{m.last_name}</Field>
+              <Field label={tr('Date of birth')}>{m.date_of_birth && <BsDateDisplay value={m.date_of_birth} />}</Field>
+              <Field label={tr('Gender')}>{m.gender ? enumLabel('GenderEnum', m.gender) : ''}</Field>
             </dl>
           </div>
           <div>
-            <h2 className="mb-3 text-sm font-semibold">Contact</h2>
+            <h2 className="mb-3 text-sm font-semibold">{tr('Contact')}</h2>
             <dl className="grid gap-4 sm:grid-cols-3">
-              <Field label="Phone">{m.phone && <a href={`tel:${m.phone}`} className="tabular-nums hover:underline">{m.phone}</a>}</Field>
-              <Field label="Email">{m.email && <a href={`mailto:${m.email}`} className="hover:underline">{m.email}</a>}</Field>
-              <Field label="Address">{m.address}</Field>
+              <Field label={tr('Phone')}>{m.phone && <a href={`tel:${m.phone}`} className="tabular-nums hover:underline">{m.phone}</a>}</Field>
+              <Field label={tr('Email')}>{m.email && <a href={`mailto:${m.email}`} className="hover:underline">{m.email}</a>}</Field>
+              <Field label={tr('Address')}>{m.address}</Field>
             </dl>
           </div>
         </section>
         <section className="rounded-lg border bg-card p-4 sm:p-6">
-          <h2 className="mb-3 text-sm font-semibold">Employment</h2>
+          <h2 className="mb-3 text-sm font-semibold">{tr('Employment')}</h2>
           <dl className="grid gap-4">
-            <Field label="Type">{enumLabel('StaffTypeEnum', m.staff_type)}</Field>
-            <Field label="Designation">{m.designation}</Field>
-            {isMultiBranch && <Field label="Branch">{m.campus_name}</Field>}
-            <Field label="Joined on">{m.joined_on && <BsDateDisplay value={m.joined_on} />}</Field>
-            {status === 'left' && <Field label="Left on">{m.left_on && <BsDateDisplay value={m.left_on} />}</Field>}
-            <Field label="Portal login">{m.user ? 'Linked' : 'No login account'}</Field>
+            <Field label={tr('Type')}>{enumLabel('StaffTypeEnum', m.staff_type)}</Field>
+            <Field label={tr('Designation')}>{m.designation}</Field>
+            {isMultiBranch && <Field label={tr('Branch')}>{m.campus_name}</Field>}
+            <Field label={tr('Joined on')}>{m.joined_on && <BsDateDisplay value={m.joined_on} />}</Field>
+            {status === 'left' && <Field label={tr('Left on')}>{m.left_on && <BsDateDisplay value={m.left_on} />}</Field>}
+            <Field label={tr('Portal login')}>{m.user ? tr('Linked') : tr('No login account')}</Field>
           </dl>
         </section>
         {can(PERMS.hr.view) && <StaffHr staffId={m.id} />}

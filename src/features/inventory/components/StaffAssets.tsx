@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/dates'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { Id } from '@/shared/types/api'
 import { useAssignments } from '../hooks/useInventory'
+import { tr } from '@/lib/i18n'
 
 /** Staff → Assets: what a staff member holds now (laptop, keys, projector…), for the staff profile. */
 export function StaffAssets({ staffId }: { staffId: Id }) {
@@ -11,11 +12,11 @@ export function StaffAssets({ staffId }: { staffId: Id }) {
   const current = (query.data?.results ?? []).filter((a) => a.returned_on == null)
   return (
     <section className="rounded-lg border bg-card p-4 sm:p-6">
-      <h2 className="mb-3 text-sm font-semibold">Assets held</h2>
+      <h2 className="mb-3 text-sm font-semibold">{tr('Assets held')}</h2>
       {query.isPending ? (
         <TableSkeleton rows={2} columns={2} />
       ) : current.length === 0 ? (
-        <p className="text-sm text-muted-foreground">None.</p>
+        <p className="text-sm text-muted-foreground">{tr('None.')}</p>
       ) : (
         <ul className="divide-y text-sm">
           {current.map((a) => (
@@ -23,7 +24,7 @@ export function StaffAssets({ staffId }: { staffId: Id }) {
               <Link to={`/inventory/assets/${a.asset}`} className="min-w-0 hover:underline">
                 {a.asset_name} <span className="font-mono text-xs text-muted-foreground">{a.asset_tag}</span>
               </Link>
-              <span className="tabular-nums text-muted-foreground">since {formatDate(a.assigned_on)}</span>
+              <span className="tabular-nums text-muted-foreground">{tr('since {date}', { date: formatDate(a.assigned_on) })}</span>
             </li>
           ))}
         </ul>

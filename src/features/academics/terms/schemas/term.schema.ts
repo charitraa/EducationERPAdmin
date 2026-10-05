@@ -1,16 +1,17 @@
 import { z } from 'zod'
 import { isoDate, requiredId, toInt, wholeNumber } from '@/lib/validation'
 import type { Term, TermInput } from '../api/terms.api'
+import { tr } from '@/lib/i18n'
 
 export const termSchema = z
   .object({
-    academic_year: requiredId('Choose the academic year.'),
-    name: z.string().trim().min(1, 'Required.').max(100),
+    academic_year: requiredId(tr('Choose the academic year.')),
+    name: z.string().trim().min(1, tr('Required.')).max(100),
     sequence: wholeNumber(),
     start_date: isoDate,
     end_date: isoDate,
   })
-  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: 'The term must end after it starts.' })
+  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: tr('The term must end after it starts.') })
 
 export type TermForm = z.infer<typeof termSchema>
 

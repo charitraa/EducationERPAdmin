@@ -8,6 +8,7 @@ import { toast } from '@/hooks/useToast'
 import type { Campus } from '@/shared/types/organization'
 import { useCreateBranch, useUpdateBranch } from '../hooks/useBranchResource'
 import { branchDefaults, branchSchema, toBranchInput } from '../schemas/branch.schema'
+import { tr } from '@/lib/i18n'
 
 export function BranchFormDialog({ open, onOpenChange, record }: { open: boolean; onOpenChange: (o: boolean) => void; record: Campus | null }) {
   const create = useCreateBranch()
@@ -18,46 +19,46 @@ export function BranchFormDialog({ open, onOpenChange, record }: { open: boolean
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? `Edit ${record.name}` : 'Add a branch'}
-      description={record ? undefined : 'Once you have two branches, branch choices appear across the ERP.'}
+      title={record ? tr('Edit {name}', { name: record.name }) : tr('Add a branch')}
+      description={record ? undefined : tr('Once you have two branches, branch choices appear across the ERP.')}
       schema={branchSchema}
       defaultValues={branchDefaults(record)}
       onSubmit={async (values) => {
         const input = toBranchInput(values)
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Branch updated.' : 'Branch added.')
+        toast.success(record ? tr('Branch updated.') : tr('Branch added.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="Kathmandu" autoFocus />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('Kathmandu')} autoFocus />
             </FormField>
-            <FormField label="Code" required error={errors.code?.message}>
+            <FormField label={tr('Code')} required error={errors.code?.message}>
               <Input {...register('code')} placeholder="KTM" />
             </FormField>
           </div>
-          <FormField label="Address" error={errors.address?.message}>
+          <FormField label={tr('Address')} error={errors.address?.message}>
             <Textarea {...register('address')} rows={2} />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="City" error={errors.city?.message}>
+            <FormField label={tr('City')} error={errors.city?.message}>
               <Input {...register('city')} />
             </FormField>
-            <FormField label="Province" error={errors.state?.message}>
+            <FormField label={tr('Province')} error={errors.state?.message}>
               <Input {...register('state')} />
             </FormField>
-            <FormField label="Country" error={errors.country?.message}>
+            <FormField label={tr('Country')} error={errors.country?.message}>
               <Input {...register('country')} />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Phone" error={errors.phone?.message}>
+            <FormField label={tr('Phone')} error={errors.phone?.message}>
               <Input {...register('phone')} type="tel" />
             </FormField>
-            <FormField label="Email" error={errors.email?.message}>
+            <FormField label={tr('Email')} error={errors.email?.message}>
               <Input {...register('email')} type="email" />
             </FormField>
           </div>
@@ -67,7 +68,7 @@ export function BranchFormDialog({ open, onOpenChange, record }: { open: boolean
               name="is_main"
               render={({ field }) => (
                 <label className="flex items-center gap-3 text-sm">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} /> Main branch
+                  <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Main branch')}
                 </label>
               )}
             />
@@ -76,7 +77,7 @@ export function BranchFormDialog({ open, onOpenChange, record }: { open: boolean
               name="is_active"
               render={({ field }) => (
                 <label className="flex items-center gap-3 text-sm">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} /> Open (active)
+                  <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Open (active)')}
                 </label>
               )}
             />

@@ -16,6 +16,7 @@ import type { ResultRow } from '../api/examinations.api'
 import { pct } from '../components/ExamResultsPanel'
 import { ResultBadge } from '../components/ResultBits'
 import { useExamOptions, usePlans, useRemark, useResults } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 /** Every computed result across exams and term results. Staff see them before publishing; students only after. */
 export default function ResultsPage() {
@@ -30,7 +31,7 @@ export default function ResultsPage() {
   const columns: Column<ResultRow>[] = [
     {
       id: 'student',
-      header: 'Student',
+      header: tr('Student'),
       mobile: 'title',
       cell: (r) => (
         <span>
@@ -41,47 +42,47 @@ export default function ResultsPage() {
         </span>
       ),
     },
-    { id: 'source', header: 'Exam', cell: sourceName },
-    { id: 'section', header: 'Class', cell: (r) => r.section_name },
+    { id: 'source', header: tr('Exam'), cell: sourceName },
+    { id: 'section', header: tr('Class'), cell: (r) => r.section_name },
     { id: 'pct', header: '%', sortField: 'percentage', className: 'tabular-nums', cell: (r) => pct(r.percentage) },
     { id: 'gpa', header: 'GPA', sortField: 'grade_point', className: 'tabular-nums', cell: (r) => `${Number(r.grade_point)} ${r.letter}` },
-    { id: 'rank', header: 'Rank', sortField: 'rank_in_section', className: 'tabular-nums', cell: (r) => r.rank_in_section ?? '—' },
-    { id: 'status', header: 'Result', cell: (r) => <ResultBadge status={r.status} /> },
-    { id: 'published', header: 'Published', mobile: 'hidden', cell: (r) => (r.published ? 'Yes' : <span className="text-muted-foreground">Not yet</span>) },
+    { id: 'rank', header: tr('Rank'), sortField: 'rank_in_section', className: 'tabular-nums', cell: (r) => r.rank_in_section ?? '—' },
+    { id: 'status', header: tr('Result'), cell: (r) => <ResultBadge status={r.status} /> },
+    { id: 'published', header: tr('Published'), mobile: 'hidden', cell: (r) => (r.published ? tr('Yes') : <span className="text-muted-foreground">{tr('Not yet')}</span>) },
   ]
 
   return (
     <>
       <DataTable
-        ariaLabel="Results"
+        ariaLabel={tr('Results')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(r) => r.id}
-        searchPlaceholder="Search students…"
+        searchPlaceholder={tr('Search students…')}
         filters={[
-          { name: 'exam', label: 'Exam', options: (exams.data ?? []).map((e) => ({ value: String(e.id), label: e.name })) },
-          { name: 'plan', label: 'Term result', options: (plans.data?.results ?? []).map((p) => ({ value: String(p.id), label: p.name })) },
-          { name: 'status', label: 'Result', options: enumOptions('ResultStatusEnum') },
+          { name: 'exam', label: tr('Exam'), options: (exams.data ?? []).map((e) => ({ value: String(e.id), label: e.name })) },
+          { name: 'plan', label: tr('Term result'), options: (plans.data?.results ?? []).map((p) => ({ value: String(p.id), label: p.name })) },
+          { name: 'status', label: tr('Result'), options: enumOptions('ResultStatusEnum') },
         ]}
-        rowActions={(r) => <RowActions actions={[{ label: r.remark ? 'Edit remark' : 'Write remark', icon: MessageSquareText, permission: PERMS.exams.mark, onSelect: () => setRemarking(r) }]} />}
-        empty={{ title: 'No results yet', description: 'Results appear once an exam’s marks are worked out.' }}
+        rowActions={(r) => <RowActions actions={[{ label: r.remark ? tr('Edit remark') : tr('Write remark'), icon: MessageSquareText, permission: PERMS.exams.mark, onSelect: () => setRemarking(r) }]} />}
+        empty={{ title: tr('No results yet'), description: tr('Results appear once an exam’s marks are worked out.') }}
       />
       <FormDialog
         open={remarking != null}
         onOpenChange={(o) => !o && setRemarking(null)}
-        title={remarking ? `Remark for ${remarking.student_name}` : 'Remark'}
-        description="Printed on the report card. The class teacher or the exam office can write it."
+        title={remarking ? tr('Remark for {student_name}', { student_name: remarking.student_name }) : tr('Remark')}
+        description={tr('Printed on the report card. The class teacher or the exam office can write it.')}
         schema={z.object({ remark: z.string().max(500) })}
         defaultValues={{ remark: remarking?.remark ?? '' }}
         onSubmit={async (v) => {
           await remark.mutateAsync({ id: remarking!.id, remark: v.remark })
-          toast.success('Remark saved.')
+          toast.success(tr('Remark saved.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Remark" error={errors.remark?.message}>
-            <Textarea {...register('remark')} rows={3} maxLength={500} placeholder="Consistent effort; needs more practice in algebra." />
+          <FormField label={tr('Remark')} error={errors.remark?.message}>
+            <Textarea {...register('remark')} rows={3} maxLength={500} placeholder={tr('Consistent effort; needs more practice in algebra.')} />
           </FormField>
         )}
       </FormDialog>

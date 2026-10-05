@@ -21,12 +21,13 @@ import { DEFAULT_DAYS, hhmm, WEEKDAYS, type Entry, type Period } from '../api/ti
 import { EntryDialog, type EntrySlot } from '../components/EntryDialog'
 import { GenerateDialog } from '../components/GenerateDialog'
 import { useScheduleOptions, useSchedulePeriods, useWeek } from '../hooks/useTimetable'
+import { tr } from '@/lib/i18n'
 
 type By = 'class' | 'teacher' | 'room'
 const BY: Array<{ value: By; label: string }> = [
-  { value: 'class', label: 'Class' },
-  { value: 'teacher', label: 'Teacher' },
-  { value: 'room', label: 'Room' },
+  { value: 'class', label: tr('Class') },
+  { value: 'teacher', label: tr('Teacher') },
+  { value: 'room', label: tr('Room') },
 ]
 
 /** What a lesson cell shows depends on the view: the class view names the teacher, the teacher view the class. */
@@ -37,7 +38,7 @@ function LessonCard({ e, by, onClick }: { e: Entry; by: By; onClick?: () => void
       <span className="block truncate font-medium">{e.subject_name}</span>
       <span className="block truncate text-[11px] text-muted-foreground">{secondary}</span>
       {by !== 'room' && e.room_name && <span className="block truncate text-[11px] text-muted-foreground">{e.room_name}</span>}
-      {e.combined_group && <span className="block text-[10px] uppercase tracking-wide text-info">Combined</span>}
+      {e.combined_group && <span className="block text-[10px] uppercase tracking-wide text-info">{tr('Combined')}</span>}
     </>
   )
   const cls = 'block w-full rounded-md border border-primary/20 bg-accent/50 px-2 py-1.5 text-left text-xs'
@@ -103,19 +104,19 @@ export default function WeekPage() {
 
   const targetPicker =
     by === 'class' ? (
-      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={classes.isPending} placeholder="Choose a class" options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name }))} />
+      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={classes.isPending} placeholder={tr('Choose a class')} options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name }))} />
     ) : by === 'teacher' ? (
-      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={staff.isPending} placeholder="Choose a teacher" options={staff.data ?? []} />
+      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={staff.isPending} placeholder={tr('Choose a teacher')} options={staff.data ?? []} />
     ) : (
-      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={rooms.isPending} placeholder="Choose a room" options={rooms.data ?? []} />
+      <SelectControl id={ids.target} value={target} onChange={(v) => set({ id: v })} loading={rooms.isPending} placeholder={tr('Choose a room')} options={rooms.data ?? []} />
     )
 
   return (
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div className="grid gap-1.5">
-          <span className="text-sm font-medium">Show the week of a</span>
-          <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label="Show the week of a">
+          <span className="text-sm font-medium">{tr('Show the week of a')}</span>
+          <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label={tr('Show the week of a')}>
             {BY.map((b) => (
               <button
                 key={b.value}
@@ -136,21 +137,21 @@ export default function WeekPage() {
         </div>
         {(schedules.data?.length ?? 0) > 1 && (
           <div className="grid min-w-44 gap-1.5">
-            <Label htmlFor={ids.schedule}>Bell schedule</Label>
+            <Label htmlFor={ids.schedule}>{tr('Bell schedule')}</Label>
             <SelectControl id={ids.schedule} value={scheduleId} onChange={(v) => set({ schedule: v })} options={(schedules.data ?? []).map((s) => ({ value: String(s.id), label: s.name }))} />
           </div>
         )}
         {manage && schedule && (
           <Button variant="outline" className="ml-auto" onClick={() => setGenerating(true)}>
-            <Sparkles aria-hidden /> Generate
+            <Sparkles aria-hidden /> {tr('Generate')}
           </Button>
         )}
       </div>
 
       {schedules.data?.length === 0 ? (
-        <EmptyState title="No bell schedule" description="Set up the periods of the day under Bell schedules first." />
+        <EmptyState title={tr('No bell schedule')} description={tr('Set up the periods of the day under Bell schedules first.')} />
       ) : !target ? (
-        <EmptyState title={`Choose a ${by}`} description={by === 'class' ? 'See and edit its week. Click an empty slot to add a lesson.' : `See their week, across all classes.`} />
+        <EmptyState title={by === 'class' ? tr('Choose a class') : by === 'teacher' ? tr('Choose a teacher') : tr('Choose a room')} description={by === 'class' ? tr('See and edit its week. Click an empty slot to add a lesson.') : tr('See their week, across all classes.')} />
       ) : periods.isPending || week.isPending ? (
         <TableSkeleton rows={6} columns={6} />
       ) : week.isError ? (
@@ -159,11 +160,11 @@ export default function WeekPage() {
         <>
           {/* Desktop: the grid */}
           <div className="hidden overflow-x-auto rounded-lg border bg-card md:block">
-            <table className="w-full table-fixed text-sm" aria-label="Weekly timetable">
+            <table className="w-full table-fixed text-sm" aria-label={tr('Weekly timetable')}>
               <thead className="bg-muted/50 text-xs text-muted-foreground">
                 <tr>
                   <th scope="col" className="w-28 px-2 py-2 text-left font-medium">
-                    Period
+                    {tr('Period')}
                   </th>
                   {days.map((d) => (
                     <th key={d.value} scope="col" className="px-2 py-2 text-left font-medium">
@@ -204,7 +205,7 @@ export default function WeekPage() {
                                   type="button"
                                   onClick={() => setSlot({ entry: null, section: section.id, campus: section.campus, day: d.value, period: p })}
                                   className="flex h-12 items-center justify-center rounded-md border border-dashed text-muted-foreground opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100"
-                                  aria-label={`Add a lesson on ${d.label}, ${p.name}`}
+                                  aria-label={tr('Add a lesson on {label}, {name}', { label: d.label, name: p.name })}
                                 >
                                   <Plus className="h-4 w-4" />
                                 </button>
@@ -228,7 +229,7 @@ export default function WeekPage() {
                 <section key={d.value} className="rounded-lg border bg-card">
                   <h3 className="border-b px-3 py-2 text-sm font-semibold">{d.label}</h3>
                   {lessons.length === 0 ? (
-                    <p className="px-3 py-2 text-sm text-muted-foreground">No lessons.</p>
+                    <p className="px-3 py-2 text-sm text-muted-foreground">{tr('No lessons.')}</p>
                   ) : (
                     <ul className="divide-y">
                       {lessons.map((e) => (
@@ -251,7 +252,7 @@ export default function WeekPage() {
 
           {elsewhere.length > 0 && (
             <section className="mt-4 rounded-lg border bg-card p-4">
-              <h3 className="mb-2 text-sm font-semibold">In other bell schedules</h3>
+              <h3 className="mb-2 text-sm font-semibold">{tr('In other bell schedules')}</h3>
               <ul className="grid gap-1 text-sm">
                 {elsewhere.map((e) => (
                   <li key={e.id}>
@@ -261,7 +262,7 @@ export default function WeekPage() {
               </ul>
             </section>
           )}
-          {week.data?.length === 0 && canEdit && <p className="mt-3 text-sm text-muted-foreground">No lessons yet. Click a slot to add one, or use Generate.</p>}
+          {week.data?.length === 0 && canEdit && <p className="mt-3 text-sm text-muted-foreground">{tr('No lessons yet. Click a slot to add one, or use Generate.')}</p>}
         </>
       )}
 

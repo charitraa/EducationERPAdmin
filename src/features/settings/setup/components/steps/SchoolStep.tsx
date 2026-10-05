@@ -12,6 +12,7 @@ import { OrganizationFields } from '../../../organization/components/Organizatio
 import { useMyOrganization, useUpdateMyOrganization } from '../../../organization/hooks/useOrganization'
 import { ORGANIZATION_FIELDS, organizationDefaults, organizationSchema, toOrganizationInput, type OrganizationForm } from '../../../organization/schemas/organization.schema'
 import { StepNote } from './StepParts'
+import { tr } from '@/lib/i18n'
 
 export function SchoolStep({ onDone }: { onDone: () => void }) {
   const org = useMyOrganization()
@@ -30,7 +31,7 @@ export function SchoolStep({ onDone }: { onDone: () => void }) {
     setServerError(null)
     try {
       await update.mutateAsync(toOrganizationInput(values))
-      toast.success('School details saved.')
+      toast.success(tr('School details saved.'))
       onDone()
     } catch (err) {
       setServerError(applyServerErrors(err, form.setError, ORGANIZATION_FIELDS))
@@ -41,11 +42,11 @@ export function SchoolStep({ onDone }: { onDone: () => void }) {
     <form onSubmit={submit} noValidate className="grid gap-4">
       <FormError message={serverError} />
       <OrganizationFields form={form} compact />
-      <StepNote>A school logo can be added once logo upload is available.</StepNote>
+      <StepNote>{tr('A school logo can be added once logo upload is available.')}</StepNote>
       <div>
         <Button type="submit" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-          Save and continue
+          {tr('Save and continue')}
         </Button>
       </div>
     </form>

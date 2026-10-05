@@ -25,6 +25,7 @@ import { allNavItems } from './navigation'
 import { PermissionRoute } from './PermissionRoute'
 import { ProtectedLayout } from './ProtectedLayout'
 import { ProtectedRoute } from './ProtectedRoute'
+import { tr, trc } from '@/lib/i18n'
 
 // Every page is its own chunk: first login doesn't download the whole ERP.
 const LoginPage = lazy(() => import('@/features/authentication/pages/LoginPage'))
@@ -224,7 +225,7 @@ const plannedRoutes: RouteObject[] = allNavItems
 
 const academicsRoutes: RouteObject = {
   path: 'academics',
-  handle: crumb('Academics'),
+  handle: crumb(tr('Academics')),
   element: (
     <PermissionRoute permission={PERMS.academics.view}>
       <AcademicsLayout />
@@ -232,139 +233,139 @@ const academicsRoutes: RouteObject = {
   ),
   children: [
     { index: true, element: <Navigate to="programs" replace /> },
-    { path: 'programs', handle: crumb('Programs'), element: page(ProgramsPage) },
-    { path: 'subjects', handle: crumb('Subjects'), element: page(SubjectsPage) },
-    { path: 'curriculum', handle: crumb('Curriculum'), element: page(CurriculumPage) },
-    { path: 'classes', handle: crumb('Classes'), element: page(ClassesPage) },
-    { path: 'teaching', handle: crumb('Teaching'), element: page(TeachingPage) },
-    { path: 'academic-years', handle: crumb('Academic years'), element: page(AcademicYearsPage) },
-    { path: 'terms', handle: crumb('Terms'), element: page(TermsPage) },
-    { path: 'rooms', handle: crumb('Rooms'), element: page(RoomsPage) },
-    { path: 'calendar', handle: crumb('Calendar'), element: page(CalendarPage) },
-    { path: 'departments', handle: crumb('Departments'), element: page(DepartmentsPage) },
+    { path: 'programs', handle: crumb(tr('Programs')), element: page(ProgramsPage) },
+    { path: 'subjects', handle: crumb(tr('Subjects')), element: page(SubjectsPage) },
+    { path: 'curriculum', handle: crumb(tr('Curriculum')), element: page(CurriculumPage) },
+    { path: 'classes', handle: crumb(tr('Classes')), element: page(ClassesPage) },
+    { path: 'teaching', handle: crumb(tr('Teaching')), element: page(TeachingPage) },
+    { path: 'academic-years', handle: crumb(tr('Academic years')), element: page(AcademicYearsPage) },
+    { path: 'terms', handle: crumb(tr('Terms')), element: page(TermsPage) },
+    { path: 'rooms', handle: crumb(tr('Rooms')), element: page(RoomsPage) },
+    { path: 'calendar', handle: crumb(tr('Calendar')), element: page(CalendarPage) },
+    { path: 'departments', handle: crumb(tr('Departments')), element: page(DepartmentsPage) },
   ],
 }
 
 const studentsRoutes: RouteObject = {
   path: 'students',
-  handle: crumb('Students'),
+  handle: crumb(tr('Students')),
   element: <PermissionRoute permission={PERMS.students.view} />,
   children: [
     { index: true, element: page(StudentsListPage) },
-    { path: 'new', handle: crumb('Add student'), element: page(StudentFormPage, PERMS.students.create) },
-    { path: ':id', handle: crumb('Student'), element: page(StudentDetailPage) },
-    { path: ':id/edit', handle: crumb('Edit'), element: page(StudentFormPage, PERMS.students.update) },
+    { path: 'new', handle: crumb(tr('Add student')), element: page(StudentFormPage, PERMS.students.create) },
+    { path: ':id', handle: crumb(tr('Student')), element: page(StudentDetailPage) },
+    { path: ':id/edit', handle: crumb(tr('Edit')), element: page(StudentFormPage, PERMS.students.update) },
   ],
 }
 
 const admissionsRoutes: RouteObject = {
   path: 'admissions',
-  handle: crumb('Admissions'),
+  handle: crumb(tr('Admissions')),
   element: <PermissionRoute permission={PERMS.admissions.view} />,
   children: [
     { index: true, element: page(AdmissionsListPage) },
-    { path: ':id', handle: crumb('Application'), element: page(AdmissionDetailPage) },
+    { path: ':id', handle: crumb(tr('Application')), element: page(AdmissionDetailPage) },
   ],
 }
 
 const parentsRoutes: RouteObject = {
   path: 'parents',
-  handle: crumb('Parents'),
+  handle: crumb(tr('Parents')),
   element: <PermissionRoute permission={PERMS.parents.view} />,
   children: [
     { index: true, element: page(ParentsListPage) },
-    { path: ':id', handle: crumb('Parent'), element: page(ParentDetailPage) },
+    { path: ':id', handle: crumb(tr('Parent')), element: page(ParentDetailPage) },
   ],
 }
 
 const staffRoutes: RouteObject = {
   path: 'staff',
-  handle: crumb('Staff'),
+  handle: crumb(tr('Staff')),
   element: <PermissionRoute permission={PERMS.staff.view} />,
   children: [
     { index: true, element: page(StaffListPage) },
-    { path: 'new', handle: crumb('Add staff member'), element: page(StaffFormPage, PERMS.staff.create) },
-    { path: ':id', handle: crumb('Staff member'), element: page(StaffDetailPage) },
-    { path: ':id/edit', handle: crumb('Edit'), element: page(StaffFormPage, PERMS.staff.update) },
+    { path: 'new', handle: crumb(tr('Add staff member')), element: page(StaffFormPage, PERMS.staff.create) },
+    { path: ':id', handle: crumb(tr('Staff member')), element: page(StaffDetailPage) },
+    { path: ':id/edit', handle: crumb(tr('Edit')), element: page(StaffFormPage, PERMS.staff.update) },
   ],
 }
 
 const usersRoutes: RouteObject = {
   path: 'users',
-  handle: crumb('Users'),
+  handle: crumb(tr('Users')),
   element: <PermissionRoute permission={PERMS.users.view} />,
   children: [
     { index: true, element: page(UsersListPage) },
-    { path: ':id', handle: crumb('User'), element: page(UserDetailPage) },
+    { path: ':id', handle: crumb(tr('User')), element: page(UserDetailPage) },
   ],
 }
 
 const rolesRoutes: RouteObject = {
   path: 'roles',
-  handle: crumb('Roles'),
+  handle: crumb(tr('Roles')),
   element: <PermissionRoute permission={PERMS.roles.view} />,
   children: [
     { index: true, element: page(RolesListPage) },
-    { path: 'new', handle: crumb('New role'), element: page(RoleEditorPage, PERMS.roles.create) },
-    { path: ':id', handle: crumb('Role'), element: page(RoleEditorPage) },
+    { path: 'new', handle: crumb(tr('New role')), element: page(RoleEditorPage, PERMS.roles.create) },
+    { path: ':id', handle: crumb(tr('Role')), element: page(RoleEditorPage) },
   ],
 }
 
 // Every member may read notices; writing needs notices.manage.
 const noticesRoutes: RouteObject = {
   path: 'notices',
-  handle: crumb('Notices'),
+  handle: crumb(tr('Notices')),
   children: [
     { index: true, element: page(NoticesListPage) },
-    { path: 'new', handle: crumb('Write a notice'), element: page(NoticePage, PERMS.notices.manage) },
-    { path: ':id', handle: crumb('Notice'), element: page(NoticePage) },
+    { path: 'new', handle: crumb(tr('Write a notice')), element: page(NoticePage, PERMS.notices.manage) },
+    { path: ':id', handle: crumb(tr('Notice')), element: page(NoticePage) },
   ],
 }
 
 // Anyone may raise a ticket and follow their own; support.manage sees the office queue.
 const supportRoutes: RouteObject = {
   path: 'support',
-  handle: crumb('Support'),
+  handle: crumb(tr('Support')),
   children: [
     { index: true, element: <Navigate to="tickets" replace /> },
     { path: 'tickets', element: page(TicketsListPage) },
-    { path: 'tickets/:id', handle: crumb('Ticket'), element: page(TicketDetailPage) },
+    { path: 'tickets/:id', handle: crumb(tr('Ticket')), element: page(TicketDetailPage) },
   ],
 }
 
 // Everyone has conversations; who may start one or publish slots is checked in place.
 const messagesRoutes: RouteObject = {
   path: 'messages',
-  handle: crumb('Messages'),
+  handle: crumb(tr('Messages')),
   children: [
     { index: true, element: page(MessagesPage) },
-    { path: 'appointments', handle: crumb('Appointments'), element: page(AppointmentsPage) },
-    { path: ':threadId', handle: crumb('Conversation'), element: page(MessagesPage) },
+    { path: 'appointments', handle: crumb(tr('Appointments')), element: page(AppointmentsPage) },
+    { path: ':threadId', handle: crumb(tr('Conversation')), element: page(MessagesPage) },
   ],
 }
 
 const eventsRoutes: RouteObject = {
   path: 'events',
-  handle: crumb('Events'),
+  handle: crumb(tr('Events')),
   element: <PermissionRoute permission={PERMS.events.view} />,
   children: [
     {
       element: <EventsLayout />,
       children: [
         { index: true, element: page(EventsListPage) },
-        { path: 'leaderboard', handle: crumb('Leaderboard'), element: page(LeaderboardPage) },
-        { path: 'awards', handle: crumb('Awards'), element: page(AwardsPage) },
-        { path: 'point-rules', handle: crumb('Point rules'), element: page(PointRulesPage) },
-        { path: 'categories', handle: crumb('Categories'), element: page(EventCategoriesPage) },
+        { path: 'leaderboard', handle: crumb(tr('Leaderboard')), element: page(LeaderboardPage) },
+        { path: 'awards', handle: crumb(tr('Awards')), element: page(AwardsPage) },
+        { path: 'point-rules', handle: crumb(tr('Point rules')), element: page(PointRulesPage) },
+        { path: 'categories', handle: crumb(tr('Categories')), element: page(EventCategoriesPage) },
       ],
     },
-    { path: ':id', handle: crumb('Event'), element: page(EventDetailPage) },
+    { path: ':id', handle: crumb(tr('Event')), element: page(EventDetailPage) },
   ],
 }
 
 const timetableRoutes: RouteObject = {
   path: 'timetable',
-  handle: crumb('Timetable'),
+  handle: crumb(tr('Timetable')),
   element: (
     <PermissionRoute permission={PERMS.timetable.view}>
       <TimetableLayout />
@@ -372,76 +373,76 @@ const timetableRoutes: RouteObject = {
   ),
   children: [
     { index: true, element: page(WeekPage) },
-    { path: 'day', handle: crumb('Day'), element: page(DayPage) },
-    { path: 'lesson-changes', handle: crumb('Lesson changes'), element: page(LessonChangesPage) },
-    { path: 'bell-schedules', handle: crumb('Bell schedules'), element: page(BellSchedulesPage) },
+    { path: 'day', handle: crumb(tr('Day')), element: page(DayPage) },
+    { path: 'lesson-changes', handle: crumb(tr('Lesson changes')), element: page(LessonChangesPage) },
+    { path: 'bell-schedules', handle: crumb(tr('Bell schedules')), element: page(BellSchedulesPage) },
   ],
 }
 
 // Teachers with only attendance.mark get Today and the roll call; the rest is the office's.
 const attendanceRoutes: RouteObject = {
   path: 'attendance',
-  handle: crumb('Attendance'),
+  handle: crumb(tr('Attendance')),
   element: <PermissionRoute permission={{ any: [PERMS.attendance.view, PERMS.attendance.mark] }} />,
   children: [
     {
       element: <AttendanceLayout />,
       children: [
         { index: true, element: page(AttendanceTodayPage) },
-        { path: 'sessions', handle: crumb('Sessions'), element: page(AttendanceSessionsPage, PERMS.attendance.view) },
-        { path: 'reports', handle: crumb('Reports'), element: page(AttendanceReportsPage, PERMS.attendance.view) },
-        { path: 'staff', handle: crumb('Staff'), element: page(StaffAttendancePage, PERMS.attendance.view) },
-        { path: 'schedules', handle: crumb('Work schedules'), element: page(WorkSchedulesPage, PERMS.attendance.view) },
-        { path: 'devices', handle: crumb('Devices'), element: page(AttendanceDevicesPage, PERMS.attendance.devices) },
+        { path: 'sessions', handle: crumb(tr('Sessions')), element: page(AttendanceSessionsPage, PERMS.attendance.view) },
+        { path: 'reports', handle: crumb(tr('Reports')), element: page(AttendanceReportsPage, PERMS.attendance.view) },
+        { path: 'staff', handle: crumb(tr('Staff')), element: page(StaffAttendancePage, PERMS.attendance.view) },
+        { path: 'schedules', handle: crumb(tr('Work schedules')), element: page(WorkSchedulesPage, PERMS.attendance.view) },
+        { path: 'devices', handle: crumb(tr('Devices')), element: page(AttendanceDevicesPage, PERMS.attendance.devices) },
       ],
     },
-    { path: 'sessions/:id', handle: crumb('Roll call'), element: page(RollCallPage) },
+    { path: 'sessions/:id', handle: crumb(tr('Roll call')), element: page(RollCallPage) },
   ],
 }
 
 // Teachers with only exams.mark get their mark sheets; the rest is the exam office's.
 const examinationsRoutes: RouteObject = {
   path: 'examinations',
-  handle: crumb('Examinations'),
+  handle: crumb(tr('Examinations')),
   element: <PermissionRoute permission={{ any: [PERMS.exams.view, PERMS.exams.mark] }} />,
   children: [
     {
       element: <ExamsLayout />,
       children: [
         { index: true, element: <ExamsIndexGate>{page(ExamsListPage)}</ExamsIndexGate> },
-        { path: 'mark-sheets', handle: crumb('Mark sheets'), element: page(MarkSheetsPage) },
-        { path: 'results', handle: crumb('Results'), element: page(ResultsPage, PERMS.exams.view) },
-        { path: 'term-results', handle: crumb('Term results'), element: page(TermResultsPage, PERMS.exams.view) },
-        { path: 'report-cards', handle: crumb('Report cards'), element: page(ReportCardsPage, PERMS.exams.view) },
-        { path: 'transcripts', handle: crumb('Transcripts'), element: page(TranscriptsPage, PERMS.exams.view) },
-        { path: 'grades', handle: crumb('Grade scales'), element: page(GradeScalesPage, PERMS.grades.view) },
-        { path: 'types', handle: crumb('Exam types'), element: page(ExamTypesPage, PERMS.exams.view) },
+        { path: 'mark-sheets', handle: crumb(tr('Mark sheets')), element: page(MarkSheetsPage) },
+        { path: 'results', handle: crumb(tr('Results')), element: page(ResultsPage, PERMS.exams.view) },
+        { path: 'term-results', handle: crumb(tr('Term results')), element: page(TermResultsPage, PERMS.exams.view) },
+        { path: 'report-cards', handle: crumb(tr('Report cards')), element: page(ReportCardsPage, PERMS.exams.view) },
+        { path: 'transcripts', handle: crumb(tr('Transcripts')), element: page(TranscriptsPage, PERMS.exams.view) },
+        { path: 'grades', handle: crumb(tr('Grade scales')), element: page(GradeScalesPage, PERMS.grades.view) },
+        { path: 'types', handle: crumb(tr('Exam types')), element: page(ExamTypesPage, PERMS.exams.view) },
       ],
     },
-    { path: 'mark-sheets/:id', handle: crumb('Marks'), element: page(MarkEntryPage) },
-    { path: ':id', handle: crumb('Exam'), element: page(ExamDetailPage, PERMS.exams.view) },
+    { path: 'mark-sheets/:id', handle: crumb(tr('Marks')), element: page(MarkEntryPage) },
+    { path: ':id', handle: crumb(tr('Exam')), element: page(ExamDetailPage, PERMS.exams.view) },
   ],
 }
 
 // Every finance list needs finance.view; a cashier also needs it to find invoices to take payments on.
 const financeRoutes: RouteObject = {
   path: 'finance',
-  handle: crumb('Finance'),
+  handle: crumb(tr('Finance')),
   element: <PermissionRoute permission={PERMS.finance.view} />,
   children: [
     {
       element: <FinanceLayout />,
       children: [
         { index: true, element: page(FinanceOverviewPage) },
-        { path: 'invoices', handle: crumb('Invoices'), element: page(InvoicesPage) },
-        { path: 'payments', handle: crumb('Payments'), element: page(PaymentsPage) },
-        { path: 'fees', handle: crumb('Fee structures'), element: page(FeeStructuresPage) },
-        { path: 'scholarships', handle: crumb('Scholarships'), element: page(ScholarshipsPage) },
-        { path: 'reports', handle: crumb('Reports'), element: page(FinanceReportsPage) },
+        { path: 'invoices', handle: crumb(tr('Invoices')), element: page(InvoicesPage) },
+        { path: 'payments', handle: crumb(tr('Payments')), element: page(PaymentsPage) },
+        { path: 'fees', handle: crumb(tr('Fee structures')), element: page(FeeStructuresPage) },
+        { path: 'scholarships', handle: crumb(tr('Scholarships')), element: page(ScholarshipsPage) },
+        { path: 'reports', handle: crumb(tr('Reports')), element: page(FinanceReportsPage) },
       ],
     },
-    { path: 'invoices/:id', handle: crumb('Invoice'), element: page(InvoiceDetailPage) },
-    { path: 'payments/:id', handle: crumb('Receipt'), element: page(ReceiptPage) },
+    { path: 'invoices/:id', handle: crumb(tr('Invoice')), element: page(InvoiceDetailPage) },
+    { path: 'payments/:id', handle: crumb(tr('Receipt')), element: page(ReceiptPage) },
   ],
 }
 
@@ -449,44 +450,44 @@ const financeRoutes: RouteObject = {
 // Loans, reservations and fines lists are scoped by the backend (staff see their branch, members their own).
 const libraryRoutes: RouteObject = {
   path: 'library',
-  handle: crumb('Library'),
+  handle: crumb(tr('Library')),
   element: <PermissionRoute permission={{ any: [PERMS.library.circulate, PERMS.library.manage] }} />,
   children: [
     {
       element: <LibraryLayout />,
       children: [
         { index: true, element: page(LibraryDeskPage) },
-        { path: 'books', handle: crumb('Books'), element: page(LibraryBooksPage) },
-        { path: 'members', handle: crumb('Members'), element: page(LibraryMembersPage, PERMS.library.manage) },
-        { path: 'loans', handle: crumb('Loans'), element: page(LibraryLoansPage) },
-        { path: 'reservations', handle: crumb('Reservations'), element: page(LibraryReservationsPage) },
-        { path: 'fines', handle: crumb('Fines'), element: page(LibraryFinesPage) },
-        { path: 'setup', handle: crumb('Catalog setup'), element: page(LibrarySetupPage, PERMS.library.manage) },
+        { path: 'books', handle: crumb(tr('Books')), element: page(LibraryBooksPage) },
+        { path: 'members', handle: crumb(tr('Members')), element: page(LibraryMembersPage, PERMS.library.manage) },
+        { path: 'loans', handle: crumb(tr('Loans')), element: page(LibraryLoansPage) },
+        { path: 'reservations', handle: crumb(tr('Reservations')), element: page(LibraryReservationsPage) },
+        { path: 'fines', handle: crumb(tr('Fines')), element: page(LibraryFinesPage) },
+        { path: 'setup', handle: crumb(tr('Catalog setup')), element: page(LibrarySetupPage, PERMS.library.manage) },
       ],
     },
-    { path: 'books/:id', handle: crumb('Book'), element: page(LibraryBookPage) },
+    { path: 'books/:id', handle: crumb(tr('Book')), element: page(LibraryBookPage) },
   ],
 }
 
 const inventoryRoutes: RouteObject = {
   path: 'inventory',
-  handle: crumb('Inventory'),
+  handle: crumb(tr('Inventory')),
   element: <PermissionRoute permission={PERMS.inventory.view} />,
   children: [
     {
       element: <InventoryLayout />,
       children: [
         { index: true, element: page(InventoryStockPage) },
-        { path: 'items', handle: crumb('Items'), element: page(InventoryItemsPage) },
-        { path: 'purchases', handle: crumb('Purchases'), element: page(PurchasesPage) },
-        { path: 'assets', handle: crumb('Assets'), element: page(AssetsPage) },
-        { path: 'assignments', handle: crumb('Assignments'), element: page(AssignmentsPage) },
-        { path: 'maintenance', handle: crumb('Maintenance'), element: page(MaintenancePage) },
-        { path: 'categories', handle: crumb('Categories & stores'), element: page(InventorySetupPage) },
+        { path: 'items', handle: crumb(tr('Items')), element: page(InventoryItemsPage) },
+        { path: 'purchases', handle: crumb(tr('Purchases')), element: page(PurchasesPage) },
+        { path: 'assets', handle: crumb(tr('Assets')), element: page(AssetsPage) },
+        { path: 'assignments', handle: crumb(tr('Assignments')), element: page(AssignmentsPage) },
+        { path: 'maintenance', handle: crumb(tr('Maintenance')), element: page(MaintenancePage) },
+        { path: 'categories', handle: crumb(tr('Categories & stores')), element: page(InventorySetupPage) },
       ],
     },
-    { path: 'purchases/:id', handle: crumb('Order'), element: page(PurchaseDetailPage) },
-    { path: 'assets/:id', handle: crumb('Asset'), element: page(AssetDetailPage) },
+    { path: 'purchases/:id', handle: crumb(trc('purchase', 'Order')), element: page(PurchaseDetailPage) },
+    { path: 'assets/:id', handle: crumb(tr('Asset')), element: page(AssetDetailPage) },
   ],
 }
 
@@ -502,11 +503,11 @@ const hrRoutes: RouteObject = {
   children: [
     { index: true, element: page(LeaveRequestsPage) },
     { path: 'leave-requests', element: <Navigate to="/hr" replace /> },
-    { path: 'leave', handle: crumb('Leave balances'), element: page(LeaveBalancesPage, PERMS.hr.view) },
-    { path: 'contracts', handle: crumb('Contracts'), element: page(ContractsPage, PERMS.hr.view) },
-    { path: 'profiles', handle: crumb('HR profiles'), element: page(HrProfilesPage, PERMS.hr.view) },
-    { path: 'documents', handle: crumb('Documents'), element: page(HrDocumentsPage, PERMS.hr.view) },
-    { path: 'setup', handle: crumb('Setup'), element: page(HrSetupPage, PERMS.hr.view) },
+    { path: 'leave', handle: crumb(tr('Leave balances')), element: page(LeaveBalancesPage, PERMS.hr.view) },
+    { path: 'contracts', handle: crumb(tr('Contracts')), element: page(ContractsPage, PERMS.hr.view) },
+    { path: 'profiles', handle: crumb(tr('HR profiles')), element: page(HrProfilesPage, PERMS.hr.view) },
+    { path: 'documents', handle: crumb(tr('Documents')), element: page(HrDocumentsPage, PERMS.hr.view) },
+    { path: 'setup', handle: crumb(tr('Setup')), element: page(HrSetupPage, PERMS.hr.view) },
     // Staff attendance lives with the rest of attendance.
     { path: 'attendance', element: <Navigate to="/attendance/staff" replace /> },
   ],
@@ -514,22 +515,22 @@ const hrRoutes: RouteObject = {
 
 const payrollRoutes: RouteObject = {
   path: 'payroll',
-  handle: crumb('Payroll'),
+  handle: crumb(tr('Payroll')),
   element: <PermissionRoute permission={PERMS.payroll.view} />,
   children: [
     {
       element: <PayrollLayout />,
       children: [
         { index: true, element: page(PayrollRunsPage) },
-        { path: 'payslips', handle: crumb('Payslips'), element: page(PayslipsPage) },
-        { path: 'salaries', handle: crumb('Salaries'), element: page(SalariesPage) },
-        { path: 'adjustments', handle: crumb('Adjustments'), element: page(PayrollAdjustmentsPage) },
-        { path: 'setup', handle: crumb('Setup'), element: page(PayrollSetupPage) },
+        { path: 'payslips', handle: crumb(tr('Payslips')), element: page(PayslipsPage) },
+        { path: 'salaries', handle: crumb(tr('Salaries')), element: page(SalariesPage) },
+        { path: 'adjustments', handle: crumb(tr('Adjustments')), element: page(PayrollAdjustmentsPage) },
+        { path: 'setup', handle: crumb(tr('Setup')), element: page(PayrollSetupPage) },
       ],
     },
     { path: 'runs', element: <Navigate to="/payroll" replace /> },
-    { path: 'runs/:id', handle: crumb('Run'), element: page(PayrollRunPage) },
-    { path: 'payslips/:id', handle: crumb('Payslip'), element: page(PayslipPage) },
+    { path: 'runs/:id', handle: crumb(tr('Run')), element: page(PayrollRunPage) },
+    { path: 'payslips/:id', handle: crumb(tr('Payslip')), element: page(PayslipPage) },
   ],
 }
 
@@ -537,40 +538,40 @@ const payrollRoutes: RouteObject = {
 // Self-service: everyone may open these; each endpoint returns only the caller's own records.
 const selfRoutes: RouteObject = {
   path: 'me',
-  handle: crumb('My account'),
+  handle: crumb(tr('My account')),
   children: [
     {
       element: <SelfLayout />,
       children: [
         { index: true, element: page(ProfilePage) },
-        { path: 'timetable', handle: crumb('Timetable'), element: page(SelfMyTimetablePage) },
-        { path: 'attendance', handle: crumb('Attendance'), element: page(SelfMyAttendancePage) },
-        { path: 'mark-sheets', handle: crumb('Marking'), element: page(SelfMyMarkingPage, PERMS.exams.mark) },
-        { path: 'leave', handle: crumb('Leave'), element: page(SelfMyLeavePage) },
-        { path: 'payslips', handle: crumb('Payslips'), element: page(SelfMyPayslipsPage) },
-        { path: 'employment', handle: crumb('Employment'), element: page(SelfMyEmploymentPage) },
+        { path: 'timetable', handle: crumb(tr('Timetable')), element: page(SelfMyTimetablePage) },
+        { path: 'attendance', handle: crumb(tr('Attendance')), element: page(SelfMyAttendancePage) },
+        { path: 'mark-sheets', handle: crumb(tr('Marking')), element: page(SelfMyMarkingPage, PERMS.exams.mark) },
+        { path: 'leave', handle: crumb(tr('Leave')), element: page(SelfMyLeavePage) },
+        { path: 'payslips', handle: crumb(tr('Payslips')), element: page(SelfMyPayslipsPage) },
+        { path: 'employment', handle: crumb(tr('Employment')), element: page(SelfMyEmploymentPage) },
         { path: 'contracts', element: <Navigate to="/me/employment" replace /> },
-        { path: 'assets', handle: crumb('Assets'), element: page(SelfMyAssetsPage) },
-        { path: 'transport', handle: crumb('Transport'), element: page(SelfMyTransportPage) },
-        { path: 'hostel', handle: crumb('Hostel'), element: page(SelfMyHostelPage) },
-        { path: 'library', handle: crumb('Library'), element: page(SelfMyLibraryPage) },
-        { path: 'interviews', handle: crumb('Interviews'), element: page(SelfMyInterviewsPage) },
-        { path: 'jobs', handle: crumb('Jobs'), element: page(SelfMyJobsPage) },
-        { path: 'exams', handle: crumb('Exams'), element: page(SelfMyExamsPage) },
-        { path: 'results', handle: crumb('Results'), element: page(SelfMyResultsPage) },
+        { path: 'assets', handle: crumb(tr('Assets')), element: page(SelfMyAssetsPage) },
+        { path: 'transport', handle: crumb(tr('Transport')), element: page(SelfMyTransportPage) },
+        { path: 'hostel', handle: crumb(tr('Hostel')), element: page(SelfMyHostelPage) },
+        { path: 'library', handle: crumb(tr('Library')), element: page(SelfMyLibraryPage) },
+        { path: 'interviews', handle: crumb(tr('Interviews')), element: page(SelfMyInterviewsPage) },
+        { path: 'jobs', handle: crumb(tr('Jobs')), element: page(SelfMyJobsPage) },
+        { path: 'exams', handle: crumb(tr('Exams')), element: page(SelfMyExamsPage) },
+        { path: 'results', handle: crumb(tr('Results')), element: page(SelfMyResultsPage) },
         { path: 'report-card', element: <Navigate to="/me/results" replace /> },
         { path: 'transcript', element: <Navigate to="/me/results" replace /> },
-        { path: 'fees', handle: crumb('Fees'), element: page(SelfMyFeesPage) },
-        { path: 'events', handle: crumb('Events'), element: page(SelfMyEventsPage) },
-        { path: 'certificates', handle: crumb('Certificates'), element: page(SelfMyCertificatesPage) },
-        { path: 'mentoring', handle: crumb('Mentoring'), element: page(SelfMyMentoringPage) },
-        { path: 'alumni-events', handle: crumb('Alumni events'), element: page(SelfMyAlumniEventsPage) },
-        { path: 'applications', handle: crumb('Applications'), element: page(SelfMyApplicationsPage) },
+        { path: 'fees', handle: crumb(tr('Fees')), element: page(SelfMyFeesPage) },
+        { path: 'events', handle: crumb(tr('Events')), element: page(SelfMyEventsPage) },
+        { path: 'certificates', handle: crumb(tr('Certificates')), element: page(SelfMyCertificatesPage) },
+        { path: 'mentoring', handle: crumb(tr('Mentoring')), element: page(SelfMyMentoringPage) },
+        { path: 'alumni-events', handle: crumb(tr('Alumni events')), element: page(SelfMyAlumniEventsPage) },
+        { path: 'applications', handle: crumb(tr('Applications')), element: page(SelfMyApplicationsPage) },
         { path: 'profile', element: <Navigate to="/me" replace /> },
         // Printable documents; the tabs and header don't print.
-        { path: 'payslips/:id', handle: crumb('Payslip'), element: page(SelfMyPayslipPage) },
-        { path: 'exams/:examId/admit-card', handle: crumb('Admit card'), element: page(SelfMyAdmitCardPage) },
-        { path: 'certificates/:id', handle: crumb('Certificate'), element: page(SelfMyCertificatePage) },
+        { path: 'payslips/:id', handle: crumb(tr('Payslip')), element: page(SelfMyPayslipPage) },
+        { path: 'exams/:examId/admit-card', handle: crumb(tr('Admit card')), element: page(SelfMyAdmitCardPage) },
+        { path: 'certificates/:id', handle: crumb(tr('Certificate')), element: page(SelfMyCertificatePage) },
       ],
     },
   ],
@@ -578,58 +579,58 @@ const selfRoutes: RouteObject = {
 
 const applicationsRoutes: RouteObject = {
   path: 'applications',
-  handle: crumb('Applications'),
+  handle: crumb(tr('Applications')),
   children: [
     {
       element: <ApplicationsLayout />,
       children: [
         { index: true, element: page(PendingApplicationsPage) },
         { path: 'pending', element: <Navigate to="/applications" replace /> },
-        { path: 'all', handle: crumb('All'), element: page(AllApplicationsPage, PERMS.applications.view) },
-        { path: 'mine', handle: crumb('Mine'), element: page(MyApplicationsPage) },
-        { path: 'types', handle: crumb('Forms'), element: page(ApplicationTypesPage, PERMS.applications.view) },
+        { path: 'all', handle: crumb(tr('All')), element: page(AllApplicationsPage, PERMS.applications.view) },
+        { path: 'mine', handle: crumb(tr('Mine')), element: page(MyApplicationsPage) },
+        { path: 'types', handle: crumb(tr('Forms')), element: page(ApplicationTypesPage, PERMS.applications.view) },
       ],
     },
-    { path: ':id', handle: crumb('Application'), element: page(ApplicationDetailPage) },
+    { path: ':id', handle: crumb(tr('Application')), element: page(ApplicationDetailPage) },
   ],
 }
 
 const certificatesRoutes: RouteObject = {
   path: 'certificates',
-  handle: crumb('Certificates'),
+  handle: crumb(tr('Certificates')),
   element: <PermissionRoute permission={{ any: [PERMS.applications.view, PERMS.applications.certify] }} />,
   children: [
     { index: true, element: page(CertificatesPage) },
     { path: 'templates', element: <Navigate to="/applications/types?kind=certificate" replace /> },
     { path: 'requests', element: <Navigate to="/applications/all?application_type__kind=certificate" replace /> },
-    { path: ':id', handle: crumb('Certificate'), element: page(CertificatePage) },
+    { path: ':id', handle: crumb(tr('Certificate')), element: page(CertificatePage) },
   ],
 }
 
 const careersRoutes: RouteObject = {
   path: 'careers',
-  handle: crumb('Careers'),
+  handle: crumb(tr('Careers')),
   element: <PermissionRoute permission={PERMS.careers.view} />,
   children: [
     {
       element: <CareersLayout />,
       children: [
         { index: true, element: page(VacanciesPage) },
-        { path: 'applications', handle: crumb('Candidates'), element: page(CandidatesPage) },
-        { path: 'interviews', handle: crumb('Interviews'), element: page(InterviewsPage) },
-        { path: 'offers', handle: crumb('Offers'), element: page(OffersPage) },
-        { path: 'board', handle: crumb('Job board'), element: page(JobBoardPage) },
+        { path: 'applications', handle: crumb(tr('Candidates')), element: page(CandidatesPage) },
+        { path: 'interviews', handle: crumb(tr('Interviews')), element: page(InterviewsPage) },
+        { path: 'offers', handle: crumb(tr('Offers')), element: page(OffersPage) },
+        { path: 'board', handle: crumb(tr('Job board')), element: page(JobBoardPage) },
       ],
     },
     { path: 'vacancies', element: <Navigate to="/careers" replace /> },
-    { path: 'vacancies/:id', handle: crumb('Vacancy'), element: page(VacancyDetailPage) },
-    { path: 'applications/:id', handle: crumb('Candidate'), element: page(CandidatePage) },
+    { path: 'vacancies/:id', handle: crumb(tr('Vacancy')), element: page(VacancyDetailPage) },
+    { path: 'applications/:id', handle: crumb(tr('Candidate')), element: page(CandidatePage) },
   ],
 }
 
 const alumniRoutes: RouteObject = {
   path: 'alumni',
-  handle: crumb('Alumni'),
+  handle: crumb(tr('Alumni')),
   element: <PermissionRoute permission={PERMS.alumni.view} />,
   children: [
     {
@@ -637,19 +638,19 @@ const alumniRoutes: RouteObject = {
       children: [
         { index: true, element: page(AlumniListPage) },
         { path: 'directory', element: <Navigate to="/alumni?directory_visible=true" replace /> },
-        { path: 'mentors', handle: crumb('Mentors'), element: page(MentorsPage) },
-        { path: 'events', handle: crumb('Events'), element: page(AlumniEventsPage) },
-        { path: 'campaigns', handle: crumb('Campaigns'), element: page(CampaignsPage) },
-        { path: 'donations', handle: crumb('Donations'), element: page(DonationsPage) },
+        { path: 'mentors', handle: crumb(tr('Mentors')), element: page(MentorsPage) },
+        { path: 'events', handle: crumb(tr('Events')), element: page(AlumniEventsPage) },
+        { path: 'campaigns', handle: crumb(tr('Campaigns')), element: page(CampaignsPage) },
+        { path: 'donations', handle: crumb(tr('Donations')), element: page(DonationsPage) },
       ],
     },
-    { path: ':id', handle: crumb('Alumnus'), element: page(AlumnusPage) },
+    { path: ':id', handle: crumb(tr('Alumnus')), element: page(AlumnusPage) },
   ],
 }
 
 const hostelRoutes: RouteObject = {
   path: 'hostel',
-  handle: crumb('Hostel'),
+  handle: crumb(tr('Hostel')),
   element: (
     <PermissionRoute permission={PERMS.hostel.view}>
       <HostelLayout />
@@ -657,48 +658,48 @@ const hostelRoutes: RouteObject = {
   ),
   children: [
     { index: true, element: page(HostelBoardPage) },
-    { path: 'allocations', handle: crumb('Allocations'), element: page(HostelAllocationsPage) },
-    { path: 'rooms', handle: crumb('Rooms & beds'), element: page(HostelRoomsPage) },
+    { path: 'allocations', handle: crumb(tr('Allocations')), element: page(HostelAllocationsPage) },
+    { path: 'rooms', handle: crumb(tr('Rooms & beds')), element: page(HostelRoomsPage) },
     { path: 'beds', element: <Navigate to="/hostel" replace /> },
-    { path: 'buildings', handle: crumb('Buildings'), element: page(HostelBuildingsPage) },
-    { path: 'complaints', handle: crumb('Complaints'), element: page(HostelComplaintsPage) },
+    { path: 'buildings', handle: crumb(tr('Buildings')), element: page(HostelBuildingsPage) },
+    { path: 'complaints', handle: crumb(tr('Complaints')), element: page(HostelComplaintsPage) },
   ],
 }
 
 // The crew can run their own route's trips without transport.view; those screens come with self-service.
 const transportRoutes: RouteObject = {
   path: 'transport',
-  handle: crumb('Transport'),
+  handle: crumb(tr('Transport')),
   element: <PermissionRoute permission={PERMS.transport.view} />,
   children: [
     {
       element: <TransportLayout />,
       children: [
         { index: true, element: page(TripsPage) },
-        { path: 'routes', handle: crumb('Routes & stops'), element: page(RoutesPage) },
+        { path: 'routes', handle: crumb(tr('Routes & stops')), element: page(RoutesPage) },
         { path: 'stops', element: <Navigate to="/transport/routes" replace /> },
-        { path: 'assignments', handle: crumb('Riders'), element: page(RidersPage) },
-        { path: 'vehicles', handle: crumb('Vehicles'), element: page(VehiclesPage) },
-        { path: 'crew', handle: crumb('Crew'), element: page(CrewPage) },
+        { path: 'assignments', handle: crumb(tr('Riders')), element: page(RidersPage) },
+        { path: 'vehicles', handle: crumb(tr('Vehicles')), element: page(VehiclesPage) },
+        { path: 'crew', handle: crumb(tr('Crew')), element: page(CrewPage) },
       ],
     },
     { path: 'trips', element: <Navigate to="/transport" replace /> },
-    { path: 'trips/:id', handle: crumb('Trip'), element: page(TripPage) },
-    { path: 'routes/:id', handle: crumb('Route'), element: page(RouteDetailPage) },
-    { path: 'vehicles/:id', handle: crumb('Vehicle'), element: page(VehicleDetailPage) },
+    { path: 'trips/:id', handle: crumb(tr('Trip')), element: page(TripPage) },
+    { path: 'routes/:id', handle: crumb(tr('Route')), element: page(RouteDetailPage) },
+    { path: 'vehicles/:id', handle: crumb(tr('Vehicle')), element: page(VehicleDetailPage) },
   ],
 }
 
 const settingsRoutes: RouteObject = {
   path: 'settings',
-  handle: crumb('Settings'),
+  handle: crumb(tr('Settings')),
   children: [
     { index: true, element: page(SettingsPage) },
-    { path: 'organization', handle: crumb('Organization'), element: page(OrganizationSettingsPage, PERMS.organizations.view) },
-    { path: 'branches', handle: crumb('Branches'), element: page(BranchesPage, PERMS.campuses.view) },
-    { path: 'setup', handle: crumb('Setup'), element: page(SetupWizardPage, PERMS.organizations.update) },
-    { path: 'api-keys', handle: crumb('API keys'), element: page(ApiKeysPage, PERMS.apiKeys.manage) },
-    { path: 'templates', handle: crumb('Templates'), element: page(TemplatesPage, { any: [PERMS.grades.manage, PERMS.finance.manage, PERMS.hr.manage, PERMS.applications.manage] }) },
+    { path: 'organization', handle: crumb(tr('Organization')), element: page(OrganizationSettingsPage, PERMS.organizations.view) },
+    { path: 'branches', handle: crumb(tr('Branches')), element: page(BranchesPage, PERMS.campuses.view) },
+    { path: 'setup', handle: crumb(tr('Setup')), element: page(SetupWizardPage, PERMS.organizations.update) },
+    { path: 'api-keys', handle: crumb(tr('API keys')), element: page(ApiKeysPage, PERMS.apiKeys.manage) },
+    { path: 'templates', handle: crumb(tr('Templates')), element: page(TemplatesPage, { any: [PERMS.grades.manage, PERMS.finance.manage, PERMS.hr.manage, PERMS.applications.manage] }) },
   ],
 }
 
@@ -729,13 +730,13 @@ export const router = createBrowserRouter([
         path: '/',
         element: <ProtectedLayout />,
         errorElement: <ServerError />,
-        handle: crumb('Dashboard'),
+        handle: crumb(tr('Dashboard')),
         children: [
           { index: true, element: page(DashboardPage) },
           selfRoutes,
-          { path: 'notifications', handle: crumb('Notifications'), element: page(NotificationsPage) },
-          { path: 'audit', handle: crumb('Audit log'), element: page(AuditLogPage, PERMS.audit.view) },
-          { path: 'platform/signup-requests', handle: crumb('Signup requests'), element: page(SignupRequestsPage, PERMS.platform.admin) },
+          { path: 'notifications', handle: crumb(tr('Notifications')), element: page(NotificationsPage) },
+          { path: 'audit', handle: crumb(tr('Audit log')), element: page(AuditLogPage, PERMS.audit.view) },
+          { path: 'platform/signup-requests', handle: crumb(tr('Signup requests')), element: page(SignupRequestsPage, PERMS.platform.admin) },
           studentsRoutes,
           admissionsRoutes,
           parentsRoutes,

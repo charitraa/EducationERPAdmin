@@ -17,6 +17,7 @@ import { signupApi, signupKeys, type SignupConfig } from '../api/account.api'
 import { AuthLayout } from '../components/AuthLayout'
 import { Captcha, type CaptchaHandle } from '../components/Captcha'
 import { ORG_CODE, signupSchema, suggestCode, type SignupForm } from '../schemas/signup.schema'
+import { tr } from '@/lib/i18n'
 
 const FIELDS = ['organization_name', 'organization_code', 'organization_type', 'timezone', 'first_name', 'last_name', 'email', 'phone', 'password'] as const
 
@@ -48,9 +49,9 @@ const zones = (): string[] => {
 
 const signInLink = (
   <>
-    Already have an account?{' '}
+    {tr('Already have an account?')}{' '}
     <Link to="/login" className="font-medium text-primary hover:underline">
-      Sign in
+      {tr('Sign in')}
     </Link>
   </>
 )
@@ -68,15 +69,15 @@ function CodeStatus({ code }: { code: string }) {
     retryOnMount: false,
   })
   if (!valid || debounced !== code.trim()) return null
-  if (check.isPending) return <span className="text-muted-foreground">Checking…</span>
+  if (check.isPending) return <span className="text-muted-foreground">{tr('Checking…')}</span>
   if (check.isError || !check.data) return null
   if (check.data.available)
     return (
       <span className="inline-flex items-center gap-1 text-success">
-        <CircleCheck className="h-3.5 w-3.5" aria-hidden /> Available
+        <CircleCheck className="h-3.5 w-3.5" aria-hidden /> {tr('Available')}
       </span>
     )
-  const why = { taken: 'Another school already uses this code.', reserved: "This code is reserved; choose another.", invalid: 'Not a valid code.' }
+  const why = { taken: tr('Another school already uses this code.'), reserved: tr('This code is reserved; choose another.'), invalid: tr('Not a valid code.') }
   return <span className="text-danger">{why[check.data.reason ?? 'invalid']}</span>
 }
 
@@ -88,7 +89,7 @@ function SentPanel({ email, config }: { email: string; config: SignupConfig }) {
     try {
       const token = await (captcha.current?.token() ?? Promise.resolve(''))
       await signupApi.resend(email, token || undefined)
-      setState({ busy: false, note: 'A new link is on its way. Only the newest link works.', error: null })
+      setState({ busy: false, note: tr('A new link is on its way. Only the newest link works.'), error: null })
     } catch (err) {
       setState({ busy: false, note: null, error: err instanceof ApiError ? errorMessage(err) : (err as Error).message })
     } finally {
@@ -96,28 +97,28 @@ function SentPanel({ email, config }: { email: string; config: SignupConfig }) {
     }
   }
   return (
-    <AuthLayout title="Check your email" footer={signInLink}>
+    <AuthLayout title={tr('Check your email')} footer={signInLink}>
       <div role="status" className="flex gap-3 rounded-md border bg-muted/40 p-4 text-sm">
         <MailCheck className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
         <div className="grid gap-2">
           <p>
-            We sent a link to <strong className="break-words">{email}</strong>. Open it to confirm your email; nothing is created until you do.
+            {tr('We sent a link to')} <strong className="break-words">{email}</strong>{tr('. Open it to confirm your email; nothing is created until you do.')}
           </p>
           <p className="text-muted-foreground">
             {config.requires_approval
-              ? "After you confirm, we'll review your school and email you once it's approved."
-              : "Once you confirm, you'll be signed in and the setup guide walks you through the rest."}
+              ? tr("After you confirm, we'll review your school and email you once it's approved.")
+              : tr("Once you confirm, you'll be signed in and the setup guide walks you through the rest.")}
           </p>
         </div>
       </div>
       <div className="mt-5 grid gap-3">
-        <p className="text-sm text-muted-foreground">No email after a few minutes? Check spam, then send it again.</p>
+        <p className="text-sm text-muted-foreground">{tr('No email after a few minutes? Check spam, then send it again.')}</p>
         <Captcha provider={config.captcha_provider} siteKey={config.captcha_site_key} action="signup_resend" onReady={(h) => (captcha.current = h)} />
         {state.note && <p className="text-sm text-success">{state.note}</p>}
         <FormError message={state.error} />
         <Button type="button" variant="outline" onClick={resend} disabled={state.busy}>
           {state.busy ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />}
-          Send the link again
+          {tr('Send the link again')}
         </Button>
       </div>
     </AuthLayout>
@@ -176,19 +177,19 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
 
   return (
     <AuthLayout
-      title="Set up your school"
+      title={tr('Set up your school')}
       subtitle={
         config.requires_approval
-          ? "You'll confirm your email, then we review the request and let you know when your school is ready."
-          : "You'll confirm your email, then the setup guide walks you through the rest."
+          ? tr("You'll confirm your email, then we review the request and let you know when your school is ready.")
+          : tr("You'll confirm your email, then the setup guide walks you through the rest.")
       }
       footer={signInLink}
     >
       <form onSubmit={submit} noValidate className="grid gap-4">
         <FormError message={serverError} />
         <fieldset className="grid gap-4">
-          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your school</legend>
-          <FormField label="School or college name" required error={errors.organization_name?.message}>
+          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr('Your school')}</legend>
+          <FormField label={tr('School or college name')} required error={errors.organization_name?.message}>
             <Input
               {...nameField}
               onChange={(e) => {
@@ -199,12 +200,12 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
             />
           </FormField>
           <FormField
-            label="Short code"
+            label={tr('Short code')}
             required
             error={errors.organization_code?.message}
             description={
               <span className="flex flex-wrap justify-between gap-x-3">
-                <span>Permanent. Used in your public admission and careers links.</span>
+                <span>{tr('Permanent. Used in your public admission and careers links.')}</span>
                 <CodeStatus code={code} />
               </span>
             }
@@ -223,10 +224,10 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
             />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Type" required error={errors.organization_type?.message}>
+            <FormField label={tr('Type')} required error={errors.organization_type?.message}>
               {(p) => <Controller control={control} name="organization_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={config.organization_types} />} />}
             </FormField>
-            <FormField label="Time zone" required error={errors.timezone?.message}>
+            <FormField label={tr('Time zone')} required error={errors.timezone?.message}>
               <Input {...register('timezone')} list="signup-timezones" autoComplete="off" spellCheck={false} />
             </FormField>
           </div>
@@ -238,26 +239,26 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
         </fieldset>
 
         <fieldset className="grid gap-4">
-          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">You, the administrator</legend>
+          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr('You, the administrator')}</legend>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="First name" required error={errors.first_name?.message}>
+            <FormField label={tr('First name')} required error={errors.first_name?.message}>
               <Input {...register('first_name')} autoComplete="given-name" />
             </FormField>
-            <FormField label="Last name" error={errors.last_name?.message}>
+            <FormField label={tr('Last name')} error={errors.last_name?.message}>
               <Input {...register('last_name')} autoComplete="family-name" />
             </FormField>
           </div>
-          <FormField label="Email" required error={errors.email?.message} description="We'll send a confirmation link here. You'll sign in with it.">
+          <FormField label={tr('Email')} required error={errors.email?.message} description={tr("We'll send a confirmation link here. You'll sign in with it.")}>
             <Input {...register('email')} type="email" autoComplete="email" />
           </FormField>
-          <FormField label="Phone" error={errors.phone?.message}>
+          <FormField label={tr('Phone')} error={errors.phone?.message}>
             <Input {...register('phone')} type="tel" autoComplete="tel" />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Password" required error={errors.password?.message}>
+            <FormField label={tr('Password')} required error={errors.password?.message}>
               <Input {...register('password')} type="password" autoComplete="new-password" />
             </FormField>
-            <FormField label="Confirm password" required error={errors.confirm?.message}>
+            <FormField label={tr('Confirm password')} required error={errors.confirm?.message}>
               <Input {...register('confirm')} type="password" autoComplete="new-password" />
             </FormField>
           </div>
@@ -266,7 +267,7 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
         <Captcha provider={config.captcha_provider} siteKey={config.captcha_site_key} action="signup" onReady={(h) => (captcha.current = h)} />
         <Button type="submit" className="h-10" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-          Create account
+          {tr('Create account')}
         </Button>
       </form>
     </AuthLayout>
@@ -280,7 +281,7 @@ export default function SignupPage() {
 
   if (config.isPending)
     return (
-      <AuthLayout title="Set up your school">
+      <AuthLayout title={tr('Set up your school')}>
         <div className="grid gap-4" aria-busy="true">
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-10 w-full" />
@@ -291,23 +292,23 @@ export default function SignupPage() {
 
   if (config.isError)
     return (
-      <AuthLayout title="Set up your school" footer={signInLink}>
+      <AuthLayout title={tr('Set up your school')} footer={signInLink}>
         <div role="alert" className="mb-4 flex gap-3 rounded-md border bg-warning-soft p-4 text-sm text-warning">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <p>{errorMessage(config.error)}</p>
         </div>
         <Button variant="outline" className="w-full" onClick={() => config.refetch()}>
-          Try again
+          {tr('Try again')}
         </Button>
       </AuthLayout>
     )
 
   if (!config.data.enabled)
     return (
-      <AuthLayout title="Set up your school" footer={signInLink}>
+      <AuthLayout title={tr('Set up your school')} footer={signInLink}>
         <div className="flex gap-3 rounded-md border bg-muted/40 p-4 text-sm">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          <p>Online sign-up isn't open on this server. Contact the people who run it and they'll create your school's account for you.</p>
+          <p>{tr("Online sign-up isn't open on this server. Contact the people who run it and they'll create your school's account for you.")}</p>
         </div>
       </AuthLayout>
     )

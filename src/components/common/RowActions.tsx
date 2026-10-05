@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { usePermissions } from '@/hooks/usePermissions'
 import type { PermissionRequirement } from '@/lib/permissions'
+import { tr } from '@/lib/i18n'
 
 export interface RowAction {
   label: string
@@ -20,7 +21,7 @@ export interface RowAction {
 }
 
 /** The ⋯ menu on a table row. Shows only actions the user may take; nothing at all if none. */
-export function RowActions({ actions, label = 'Row actions' }: { actions: RowAction[]; label?: string }) {
+export function RowActions({ actions, label = tr('Row actions') }: { actions: RowAction[]; label?: string }) {
   const { can } = usePermissions()
   const visible = actions.filter((a) => !a.hidden && can(a.permission))
   if (visible.length === 0) return null

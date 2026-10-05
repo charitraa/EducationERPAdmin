@@ -8,6 +8,7 @@ import { toast } from '@/hooks/useToast'
 import { optionalIsoDate } from '@/lib/validation'
 import type { Student, StudentStatus } from '../api/students.api'
 import { useChangeStudentStatus } from '../hooks/useStudents'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({ on_date: optionalIsoDate, reason: z.string().trim().max(255) })
 
@@ -17,30 +18,30 @@ export const STATUS_CHANGES: Record<
   { verb: string; from: readonly StudentStatus[]; explain: string; datesMatter: boolean; done: string }
 > = {
   suspended: {
-    verb: 'Suspend',
+    verb: tr('Suspend'),
     from: ['active'],
-    explain: 'They keep their class and record. Reactivate them when the suspension ends.',
+    explain: tr('They keep their class and record. Reactivate them when the suspension ends.'),
     datesMatter: false,
     done: 'suspended',
   },
   active: {
-    verb: 'Reactivate',
+    verb: tr('Reactivate'),
     from: ['suspended'],
-    explain: 'They return to their class as an active student.',
+    explain: tr('They return to their class as an active student.'),
     datesMatter: false,
     done: 'reactivated',
   },
   graduated: {
-    verb: 'Graduate',
+    verb: tr('Graduate'),
     from: ['active'],
-    explain: 'Their current class is closed as completed. This is final: graduated students can’t be reactivated.',
+    explain: tr('Their current class is closed as completed. This is final: graduated students can’t be reactivated.'),
     datesMatter: true,
     done: 'graduated',
   },
   withdrawn: {
-    verb: 'Withdraw',
+    verb: tr('Withdraw'),
     from: ['active', 'suspended'],
-    explain: 'They leave the school and their class. This is final: a returning student comes back through a new admission.',
+    explain: tr('They leave the school and their class. This is final: a returning student comes back through a new admission.'),
     datesMatter: true,
     done: 'withdrawn',
   },
@@ -70,11 +71,11 @@ export function StatusChangeDialog({ student, to, onClose }: { student: Student;
       {({ register, control, formState: { errors } }) => (
         <>
           {config?.datesMatter && (
-            <FormField label="Effective date (AD)" error={errors.on_date?.message} description="Leave empty for today.">
+            <FormField label={tr('Effective date (AD)')} error={errors.on_date?.message} description={tr('Leave empty for today.')}>
               {(p) => <Controller control={control} name="on_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
             </FormField>
           )}
-          <FormField label="Reason" error={errors.reason?.message} description="Kept in the student's history.">
+          <FormField label={tr('Reason')} error={errors.reason?.message} description={tr("Kept in the student's history.")}>
             <Textarea {...register('reason')} rows={2} maxLength={255} autoFocus />
           </FormField>
         </>

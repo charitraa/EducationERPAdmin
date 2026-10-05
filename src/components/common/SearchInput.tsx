@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 interface SearchInputProps {
   value: string
@@ -12,7 +13,7 @@ interface SearchInputProps {
 }
 
 /** Debounced search box; keeps its own text so typing never waits on the URL. */
-export function SearchInput({ value, onChange, placeholder = 'Search…', className }: SearchInputProps) {
+export function SearchInput({ value, onChange, placeholder = tr('Search…'), className }: SearchInputProps) {
   const [text, setText] = useState(value)
   const debounced = useDebounce(text, 300)
 
@@ -38,7 +39,7 @@ export function SearchInput({ value, onChange, placeholder = 'Search…', classN
           type="button"
           onClick={() => setText('')}
           className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
-          aria-label="Clear search"
+          aria-label={tr('Clear search')}
         >
           <X className="h-3.5 w-3.5" />
         </button>

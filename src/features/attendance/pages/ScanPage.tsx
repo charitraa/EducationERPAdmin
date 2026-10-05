@@ -10,6 +10,7 @@ import { ApiError, toApiError } from '@/shared/api/errors'
 import { AuthLayout } from '@/features/authentication/components/AuthLayout'
 import { punchesApi, sessionsApi, type ScanInput } from '../api/attendance.api'
 import { currentPosition } from '../components/QrPresenter'
+import { tr } from '@/lib/i18n'
 
 const DEVICE_KEY = 'erp.attendance-device'
 
@@ -44,13 +45,13 @@ export default function ScanPage() {
     async (where?: Pick<ScanInput, 'latitude' | 'longitude'>): Promise<Outcome> => {
       if (kind === 'staff') {
         const punch = await punchesApi.checkIn({ token, ...where })
-        return { tone: 'success', title: 'Check-in recorded', detail: `${formatDateTime(punch.punched_at)}. Scan again when you leave.` }
+        return { tone: 'success', title: tr('Check-in recorded'), detail: tr('{dateTime}. Scan again when you leave.', { dateTime: formatDateTime(punch.punched_at) }) }
       }
       const res = await sessionsApi.scan({ token, ...where, device_id: deviceId() })
       const status = enumLabel('AttendanceStatusEnum', res.status).toLowerCase()
       return res.already_marked
-        ? { tone: 'info', title: 'Already marked', detail: `You were marked ${status} in this class before.` }
-        : { tone: 'success', title: `You're marked ${status}`, detail: 'Your teacher can see it now. You can close this page.' }
+        ? { tone: 'info', title: tr('Already marked'), detail: tr('You were marked {status} in this class before.', { status }) }
+        : { tone: 'success', title: tr("You're marked {status}", { status }), detail: tr('Your teacher can see it now. You can close this page.') }
     },
     [kind, token],
   )
@@ -85,20 +86,20 @@ export default function ScanPage() {
   const home = (
     <span className="flex flex-wrap gap-x-4">
       <Link to="/me" className="font-medium text-primary hover:underline">
-        My account
+        {tr('My account')}
       </Link>
       <Link to="/" className="hover:text-foreground">
-        Dashboard
+        {tr('Dashboard')}
       </Link>
     </span>
   )
-  const who = user ? `Signed in as ${user.full_name || user.email}.` : undefined
-  const heading = kind === 'staff' ? 'Staff check-in' : 'Class attendance'
+  const who = user ? tr('Signed in as {full_name}.', { full_name: user.full_name || user.email }) : undefined
+  const heading = kind === 'staff' ? tr('Staff check-in') : tr('Class attendance')
 
   if (!token)
     return (
       <AuthLayout title={heading} subtitle={who} footer={home}>
-        <Problem message="This link has no code in it. Scan the QR code on screen with your phone's camera." />
+        <Problem message={tr("This link has no code in it. Scan the QR code on screen with your phone's camera.")} />
       </AuthLayout>
     )
 
@@ -114,14 +115,14 @@ export default function ScanPage() {
 
   if (state.step === 'failed')
     return (
-      <AuthLayout title="That didn't work" subtitle={who} footer={home}>
+      <AuthLayout title={tr("That didn't work")} subtitle={who} footer={home}>
         <Problem message={state.message} />
         {state.needsLocation && (
           <Button className="mt-4 h-10 w-full" onClick={() => void withLocation()}>
-            <MapPin aria-hidden /> Share my location and try again
+            <MapPin aria-hidden /> {tr('Share my location and try again')}
           </Button>
         )}
-        <p className="mt-4 text-sm text-muted-foreground">Code expired? Scan the one on screen again; it changes every few seconds.</p>
+        <p className="mt-4 text-sm text-muted-foreground">{tr('Code expired? Scan the one on screen again; it changes every few seconds.')}</p>
       </AuthLayout>
     )
 
@@ -129,7 +130,7 @@ export default function ScanPage() {
     <AuthLayout title={heading} subtitle={who}>
       <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-        {state.step === 'locating' ? 'This code only works nearby. Finding where you are…' : 'Recording your scan…'}
+        {state.step === 'locating' ? tr('This code only works nearby. Finding where you are…') : tr('Recording your scan…')}
       </p>
     </AuthLayout>
   )

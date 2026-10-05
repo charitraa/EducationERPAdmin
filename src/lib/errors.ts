@@ -1,7 +1,7 @@
 import { toast } from 'sonner'
 import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 import { toApiError, type ApiError } from '@/shared/api/errors'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 
 /** The one sentence to show a person for an error, by HTTP status. */
 export function errorMessage(err: unknown): string {
@@ -49,6 +49,6 @@ export function applyServerErrors<T extends FieldValues>(
       onFields++
     } else leftovers.push(`${field.replace(/_/g, ' ')}: ${message}`)
   }
-  const hint = onFields > 0 ? 'Check the highlighted fields.' : ''
+  const hint = onFields > 0 ? tr('Check the highlighted fields.') : ''
   return [e.message, hint, ...leftovers].filter(Boolean).join(' ')
 }

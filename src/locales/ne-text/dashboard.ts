@@ -1,0 +1,21 @@
+/** Nepali for dashboard: see ../ne-text.ts. */
+export default {
+  '{count} overdue invoice{value}': 'म्याद नाघेका {count} बिल',
+  '{total} items waiting': '{total} वटा पर्खाइमा',
+  'Active staff': 'सक्रिय कर्मचारी',
+  'Active students': 'सक्रिय विद्यार्थी',
+  'all roll calls submitted': 'सबै हाजिरी पेस भयो',
+  'Applications in review': 'समीक्षामा रहेका निवेदन',
+  'Applications to decide': 'निर्णय गर्नुपर्ने निवेदन',
+  'BS': 'वि.सं.',
+  'Leave requests': 'बिदा अनुरोधहरू',
+  'Mark sheets to fill': 'भर्नुपर्ने अङ्क पानाहरू',
+  'Open support tickets': 'खुला सहयोग टिकटहरू',
+  'Overdue fees': 'म्याद नाघेको शुल्क',
+  'Pending admissions': 'बाँकी भर्ना',
+  'roll calls not yet submitted': 'हाजिरी अझै पेस भएको छैन',
+  "Today's attendance": 'आजको हाजिरी',
+  "Today's roll calls": 'आजका हाजिरीहरू',
+  'Unread notifications': 'नपढिएका जानकारी',
+  'Upcoming exams': 'आउँदै गरेका परीक्षा',
+} satisfies Record<string, string>

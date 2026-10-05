@@ -1,7 +1,7 @@
 import { ChevronRight, Inbox } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { useWaitingForMe } from '../hooks/useDashboard'
 
@@ -20,7 +20,7 @@ export function WaitingForMe() {
         ) : (
           <span
             className={cn('min-w-7 rounded-full px-2 py-0.5 text-center text-sm font-semibold tabular-nums', total > 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}
-            aria-label={`${total} items waiting`}
+            aria-label={tr('{total} items waiting', { total })}
           >
             {total}
           </span>

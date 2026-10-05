@@ -2,6 +2,7 @@ import { formatDate, toBsDate } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 import type { ReportCard, ReportLine, Transcript } from '../api/examinations.api'
 import { ResultBadge } from './ResultBits'
+import { tr } from '@/lib/i18n'
 
 const n = (v: number | null | undefined) => (v == null ? '—' : String(v))
 
@@ -10,13 +11,13 @@ function Lines({ lines, caption }: { lines: ReportLine[]; caption: string }) {
     <table className="w-full border-collapse text-sm" aria-label={caption}>
       <thead>
         <tr className="border-y bg-muted/50 text-left text-xs font-medium text-muted-foreground print:bg-transparent">
-          <th className="px-3 py-1.5">Subject</th>
-          <th className="px-2 py-1.5 text-right">Credit</th>
-          <th className="px-2 py-1.5 text-right">Marks</th>
+          <th className="px-3 py-1.5">{tr('Subject')}</th>
+          <th className="px-2 py-1.5 text-right">{tr('Credit')}</th>
+          <th className="px-2 py-1.5 text-right">{tr('Marks')}</th>
           <th className="px-2 py-1.5 text-right">%</th>
-          <th className="px-2 py-1.5 text-center">Grade</th>
-          <th className="px-2 py-1.5 text-right">GP</th>
-          <th className="px-3 py-1.5">Remark</th>
+          <th className="px-2 py-1.5 text-center">{tr('Grade')}</th>
+          <th className="px-2 py-1.5 text-right">{tr('GP')}</th>
+          <th className="px-3 py-1.5">{tr('Remark')}</th>
         </tr>
       </thead>
       <tbody className="divide-y">
@@ -24,7 +25,7 @@ function Lines({ lines, caption }: { lines: ReportLine[]; caption: string }) {
           <tr key={l.subject} className={cn(l.status === 'fail' && 'text-danger')}>
             <td className="px-3 py-1.5">
               {l.subject_name}
-              {l.absent && <span className="ml-1 text-xs">(absent)</span>}
+              {l.absent && <span className="ml-1 text-xs">{tr('(absent)')}</span>}
             </td>
             <td className="px-2 py-1.5 text-right tabular-nums">{n(l.credit_hours)}</td>
             <td className="px-2 py-1.5 text-right tabular-nums">
@@ -63,29 +64,29 @@ export function ReportCardView({ card }: { card: ReportCard }) {
         <ResultBadge status={card.result} />
       </header>
       <dl className="mb-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <Fact label="Student" value={card.student.name} />
-        <Fact label="Number" value={<span className="font-mono">{card.student.student_number}</span>} />
-        <Fact label="Class" value={`${card.level_label} ${card.section}`} />
-        <Fact label="Program" value={card.program} />
+        <Fact label={tr('Student')} value={card.student.name} />
+        <Fact label={tr('Number')} value={<span className="font-mono">{card.student.student_number}</span>} />
+        <Fact label={tr('Class')} value={`${card.level_label} ${card.section}`} />
+        <Fact label={tr('Program')} value={card.program} />
       </dl>
-      <Lines lines={card.subjects} caption={`Subjects for ${card.student.name}`} />
+      <Lines lines={card.subjects} caption={tr('Subjects for {name}', { name: card.student.name })} />
       <dl className="mt-4 grid grid-cols-2 gap-3 border-t pt-3 text-sm sm:grid-cols-5">
-        <Fact label="Total" value={`${n(card.total_obtained)} / ${n(card.total_full)}`} />
-        <Fact label="Percentage" value={`${n(card.percentage)}%`} />
+        <Fact label={tr('Total')} value={`${n(card.total_obtained)} / ${n(card.total_full)}`} />
+        <Fact label={tr('Percentage')} value={`${n(card.percentage)}%`} />
         <Fact label="GPA" value={`${n(card.grade_point)} ${card.letter}`} />
-        <Fact label="Rank" value={card.rank_in_section ? `${card.rank_in_section} of ${card.class_size} in class` : '—'} />
-        <Fact label="Attendance" value={card.attendance?.percentage != null ? `${card.attendance.percentage}% (${card.attendance.attended}/${card.attendance.total})` : '—'} />
+        <Fact label={tr('Rank')} value={card.rank_in_section ? tr('{rank} of {size} in class', { rank: card.rank_in_section, size: card.class_size }) : '—'} />
+        <Fact label={tr('Attendance')} value={card.attendance?.percentage != null ? `${card.attendance.percentage}% (${card.attendance.attended}/${card.attendance.total})` : '—'} />
       </dl>
-      {card.division && <p className="mt-2 text-sm">Division: {card.division}</p>}
+      {card.division && <p className="mt-2 text-sm">{tr('Division: {division}', { division: card.division })}</p>}
       {card.remark && (
         <p className="mt-3 rounded-md border bg-muted/30 p-3 text-sm">
-          <span className="text-xs text-muted-foreground">Class teacher’s remark: </span>
+          <span className="text-xs text-muted-foreground">{tr('Class teacher’s remark') + ':'} </span>
           {card.remark}
         </p>
       )}
       <footer className="mt-4 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
         <span>{card.grading.map((g) => `${g.letter} ${g.from}%+`).join(' · ')}</span>
-        {card.published_at && <span>Published {formatDate(card.published_at.slice(0, 10))}</span>}
+        {card.published_at && <span>{tr('Published {date}', { date: formatDate(card.published_at.slice(0, 10)) })}</span>}
       </footer>
     </article>
   )
@@ -97,20 +98,20 @@ export function TranscriptView({ t }: { t: Transcript }) {
     <article className="rounded-lg border bg-card p-5 print:rounded-none print:border-0 print:p-0">
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b pb-3">
         <div>
-          <h2 className="text-lg font-semibold">Academic transcript</h2>
+          <h2 className="text-lg font-semibold">{tr('Academic transcript')}</h2>
           <p className="text-sm">
             {t.student.name} · <span className="font-mono">{t.student.student_number}</span>
-            {t.student.date_of_birth && <span className="text-muted-foreground"> · born {formatDate(t.student.date_of_birth)} ({toBsDate(t.student.date_of_birth)} BS)</span>}
+            {t.student.date_of_birth && <span className="text-muted-foreground"> {'· ' + tr('born {date} (', { date: formatDate(t.student.date_of_birth) })}{toBsDate(t.student.date_of_birth)} {tr('BS)')}</span>}
           </p>
         </div>
         <dl className="grid grid-cols-3 gap-4 text-sm">
-          <Fact label="Cumulative GPA" value={n(t.cumulative.gpa)} />
-          <Fact label="Credits" value={n(t.cumulative.credits)} />
-          <Fact label="Credits passed" value={n(t.cumulative.credits_passed)} />
+          <Fact label={tr('Cumulative GPA')} value={n(t.cumulative.gpa)} />
+          <Fact label={tr('Credits')} value={n(t.cumulative.credits)} />
+          <Fact label={tr('Credits passed')} value={n(t.cumulative.credits_passed)} />
         </dl>
       </header>
       {t.records.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No published result is marked for the transcript yet.</p>
+        <p className="text-sm text-muted-foreground">{tr('No published result is marked for the transcript yet.')}</p>
       ) : (
         <div className="grid gap-5">
           {t.records.map((r) => (
@@ -120,7 +121,7 @@ export function TranscriptView({ t }: { t: Transcript }) {
                   {r.title} <span className="text-sm font-normal text-muted-foreground">· {r.academic_year} · {r.level_label}</span>
                 </h3>
                 <span className="text-sm">
-                  {n(r.percentage)}% · GPA {n(r.grade_point)} {r.letter} · <ResultBadge status={r.result} />
+                  {tr('{n}% · GPA {n2} {letter}', { n: n(r.percentage), n2: n(r.grade_point), letter: r.letter }) + ' ·'} <ResultBadge status={r.result} />
                 </span>
               </div>
               <Lines lines={r.subjects} caption={r.title} />

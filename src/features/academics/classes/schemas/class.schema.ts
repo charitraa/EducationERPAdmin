@@ -1,13 +1,14 @@
 import { z } from 'zod'
 import { optionalId, optionalWholeNumber, requiredId, toInt, toNullableInt } from '@/lib/validation'
 import type { SchoolClass, SchoolClassInput } from '../api/classes.api'
+import { tr } from '@/lib/i18n'
 
 export const classSchema = z.object({
-  academic_year: requiredId('Choose the academic year.'),
-  campus: requiredId('Choose the branch.'),
-  program: requiredId('Choose the program.'),
-  level: requiredId('Choose the level.'),
-  name: z.string().trim().min(1, 'Usually a letter: A, B…').max(50),
+  academic_year: requiredId(tr('Choose the academic year.')),
+  campus: requiredId(tr('Choose the branch.')),
+  program: requiredId(tr('Choose the program.')),
+  level: requiredId(tr('Choose the level.')),
+  name: z.string().trim().min(1, tr('Usually a letter: A, B…')).max(50),
   capacity: optionalWholeNumber,
   class_teacher: optionalId,
   home_room: optionalId,

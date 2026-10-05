@@ -15,15 +15,16 @@ import type { InvoiceRow } from '../api/finance.api'
 import { LateFeesDialog, RecordPaymentDialog } from '../components/InvoiceDialogs'
 import { isPositive, Money } from '../components/money'
 import { useInvoices } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 /** Paid, part paid, overdue, open or cancelled: one badge for where an invoice stands. */
 export function InvoiceStanding({ invoice }: { invoice: Pick<InvoiceRow, 'status' | 'is_paid' | 'is_overdue' | 'paid_amount'> }) {
-  if (invoice.status === 'cancelled') return <StatusBadge status="cancelled" label="Cancelled" />
-  if (invoice.status === 'draft') return <StatusBadge status="draft" label="Draft" />
-  if (invoice.is_paid) return <StatusBadge status="paid" label="Paid" />
-  if (invoice.is_overdue) return <StatusBadge status="rejected" tone="danger" label="Overdue" />
-  if (isPositive(invoice.paid_amount)) return <StatusBadge status="in_progress" label="Part paid" />
-  return <StatusBadge status="open" label="Unpaid" />
+  if (invoice.status === 'cancelled') return <StatusBadge status="cancelled" label={tr('Cancelled')} />
+  if (invoice.status === 'draft') return <StatusBadge status="draft" label={tr('Draft')} />
+  if (invoice.is_paid) return <StatusBadge status="paid" label={tr('Paid')} />
+  if (invoice.is_overdue) return <StatusBadge status="rejected" tone="danger" label={tr('Overdue')} />
+  if (isPositive(invoice.paid_amount)) return <StatusBadge status="in_progress" label={tr('Part paid')} />
+  return <StatusBadge status="open" label={tr('Unpaid')} />
 }
 
 export default function InvoicesPage() {
@@ -35,10 +36,10 @@ export default function InvoicesPage() {
   const [lateFees, setLateFees] = useState(false)
 
   const columns: Column<InvoiceRow>[] = [
-    { id: 'number', header: 'Invoice', className: 'font-mono text-xs', cell: (i) => i.invoice_number },
+    { id: 'number', header: tr('Invoice'), className: 'font-mono text-xs', cell: (i) => i.invoice_number },
     {
       id: 'student',
-      header: 'Student',
+      header: tr('Student'),
       mobile: 'title',
       cell: (i) => (
         <span>
@@ -46,38 +47,38 @@ export default function InvoicesPage() {
         </span>
       ),
     },
-    { id: 'for', header: 'For', cell: (i) => i.term_name ?? 'One-time' },
-    { id: 'issued', header: 'Issued', sortField: 'issue_date', className: 'tabular-nums whitespace-nowrap', mobile: 'hidden', cell: (i) => formatDate(i.issue_date) },
-    { id: 'due', header: 'Due', sortField: 'due_date', className: 'tabular-nums whitespace-nowrap', cell: (i) => formatDate(i.due_date) },
-    { id: 'total', header: 'Total', sortField: 'total', className: 'text-right', cell: (i) => <Money value={i.total} /> },
-    { id: 'balance', header: 'Balance', className: 'text-right', cell: (i) => <Money value={i.status === 'cancelled' ? '0' : i.balance} className={i.is_overdue ? 'font-medium text-danger' : undefined} tone="none" /> },
-    { id: 'status', header: 'Status', cell: (i) => <InvoiceStanding invoice={i} /> },
+    { id: 'for', header: tr('For'), cell: (i) => i.term_name ?? tr('One-time') },
+    { id: 'issued', header: tr('Issued'), sortField: 'issue_date', className: 'tabular-nums whitespace-nowrap', mobile: 'hidden', cell: (i) => formatDate(i.issue_date) },
+    { id: 'due', header: tr('Due'), sortField: 'due_date', className: 'tabular-nums whitespace-nowrap', cell: (i) => formatDate(i.due_date) },
+    { id: 'total', header: tr('Total'), sortField: 'total', className: 'text-right', cell: (i) => <Money value={i.total} /> },
+    { id: 'balance', header: tr('Balance'), className: 'text-right', cell: (i) => <Money value={i.status === 'cancelled' ? '0' : i.balance} className={i.is_overdue ? 'font-medium text-danger' : undefined} tone="none" /> },
+    { id: 'status', header: tr('Status'), cell: (i) => <InvoiceStanding invoice={i} /> },
   ]
 
   return (
     <>
       <DataTable
-        ariaLabel="Invoices"
+        ariaLabel={tr('Invoices')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(i) => i.id}
-        searchPlaceholder="Search invoice number, student…"
+        searchPlaceholder={tr('Search invoice number, student…')}
         onRowClick={(i) => navigate(`/finance/invoices/${i.id}`)}
         toolbar={
           <PermissionGate permission={PERMS.finance.manage}>
             <Button variant="outline" onClick={() => setLateFees(true)}>
-              <AlarmClock aria-hidden /> Late fees
+              <AlarmClock aria-hidden /> {tr('Late fees')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('InvoiceStatusEnum') },
-          { name: 'source', label: 'Billed by', options: enumOptions('InvoiceSourceEnum') },
-          { name: 'academic_year', label: 'Year', options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('InvoiceStatusEnum') },
+          { name: 'source', label: tr('Billed by'), options: enumOptions('InvoiceSourceEnum') },
+          { name: 'academic_year', label: tr('Year'), options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.name })) },
         ]}
-        rowActions={(i) => <RowActions actions={[{ label: 'Take payment', icon: Wallet, permission: PERMS.finance.collect, hidden: i.status !== 'issued' || i.is_paid, onSelect: () => setPaying(i) }]} />}
-        empty={{ title: 'No invoices yet', description: 'Invoices are generated from a fee structure, for a whole term at once or one student at a time.' }}
+        rowActions={(i) => <RowActions actions={[{ label: tr('Take payment'), icon: Wallet, permission: PERMS.finance.collect, hidden: i.status !== 'issued' || i.is_paid, onSelect: () => setPaying(i) }]} />}
+        empty={{ title: tr('No invoices yet'), description: tr('Invoices are generated from a fee structure, for a whole term at once or one student at a time.') }}
       />
       <RecordPaymentDialog invoice={paying} onClose={() => setPaying(null)} />
       <LateFeesDialog open={lateFees} onOpenChange={setLateFees} />

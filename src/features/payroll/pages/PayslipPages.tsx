@@ -24,6 +24,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Payslip, PayslipLine, PayslipRow } from '../api/payroll.api'
 import { usePayslip, usePayslips, useRuns, useSetOvertime } from '../hooks/usePayroll'
 import { RunStatus } from './RunPages'
+import { tr } from '@/lib/i18n'
 
 /** Every payslip across runs, by person or run. */
 export function PayslipsPage() {
@@ -33,28 +34,28 @@ export function PayslipsPage() {
   const runs = useRuns({ ...PICKER_PARAMS })
   const staff = useStaffOptions()
   const columns: Column<PayslipRow>[] = [
-    { id: 'number', header: 'Payslip', className: 'font-mono text-xs', cell: (p) => p.number },
-    { id: 'who', header: 'Staff member', mobile: 'title', cell: (p) => <span className="font-medium">{p.staff_name}</span> },
-    { id: 'run', header: 'Run', cell: (p) => p.run_name },
-    { id: 'gross', header: 'Gross', className: 'text-right', cell: (p) => <Money value={p.gross_pay} /> },
-    { id: 'deductions', header: 'Deductions', mobile: 'hidden', className: 'text-right', cell: (p) => <Money value={p.total_deductions} /> },
-    { id: 'net', header: 'Net pay', className: 'text-right font-medium', cell: (p) => <Money value={p.net_pay} /> },
-    { id: 'status', header: 'Run status', cell: (p) => <RunStatus status={p.run_status} /> },
+    { id: 'number', header: tr('Payslip'), className: 'font-mono text-xs', cell: (p) => p.number },
+    { id: 'who', header: tr('Staff member'), mobile: 'title', cell: (p) => <span className="font-medium">{p.staff_name}</span> },
+    { id: 'run', header: tr('Run'), cell: (p) => p.run_name },
+    { id: 'gross', header: tr('Gross'), className: 'text-right', cell: (p) => <Money value={p.gross_pay} /> },
+    { id: 'deductions', header: tr('Deductions'), mobile: 'hidden', className: 'text-right', cell: (p) => <Money value={p.total_deductions} /> },
+    { id: 'net', header: tr('Net pay'), className: 'text-right font-medium', cell: (p) => <Money value={p.net_pay} /> },
+    { id: 'status', header: tr('Run status'), cell: (p) => <RunStatus status={p.run_status} /> },
   ]
   return (
     <DataTable
-      ariaLabel="Payslips"
+      ariaLabel={tr('Payslips')}
       columns={columns}
       query={query}
       list={list}
       getRowId={(p) => p.id}
-      searchPlaceholder="Name, employee no. or payslip no.…"
+      searchPlaceholder={tr('Name, employee no. or payslip no.…')}
       onRowClick={(p) => navigate(`/payroll/payslips/${p.id}`)}
       filters={[
-        { name: 'run', label: 'Run', options: (runs.data?.results ?? []).map((r) => ({ value: String(r.id), label: r.name })) },
-        { name: 'staff', label: 'Staff member', options: staff.data ?? [], hidden: !staff.canPick },
+        { name: 'run', label: tr('Run'), options: (runs.data?.results ?? []).map((r) => ({ value: String(r.id), label: r.name })) },
+        { name: 'staff', label: tr('Staff member'), options: staff.data ?? [], hidden: !staff.canPick },
       ]}
-      empty={{ title: 'No payslips yet', description: 'They’re made when a payroll run is worked out.' }}
+      empty={{ title: tr('No payslips yet'), description: tr('They’re made when a payroll run is worked out.') }}
     />
   )
 }
@@ -67,14 +68,14 @@ function Lines({ title, lines, total }: { title: string; lines: PayslipLine[]; t
         <tbody className="divide-y">
           {lines.length === 0 ? (
             <tr>
-              <td className="py-1.5 text-muted-foreground">None</td>
+              <td className="py-1.5 text-muted-foreground">{tr('None')}</td>
             </tr>
           ) : (
             lines.map((l) => (
               <tr key={l.id}>
                 <td className="py-1.5">
                   {l.description}
-                  {l.is_pre_tax && <span className="ml-1 text-xs text-muted-foreground">before tax</span>}
+                  {l.is_pre_tax && <span className="ml-1 text-xs text-muted-foreground">{tr('before tax')}</span>}
                 </td>
                 <td className="py-1.5 text-right">
                   <Money value={l.amount} tone="none" />
@@ -85,7 +86,7 @@ function Lines({ title, lines, total }: { title: string; lines: PayslipLine[]; t
         </tbody>
         <tfoot>
           <tr className="border-t font-medium">
-            <td className="py-1.5">Total</td>
+            <td className="py-1.5">{tr('Total')}</td>
             <td className="py-1.5 text-right">
               <Money value={total} tone="none" />
             </td>
@@ -114,7 +115,7 @@ export function PayslipDocument({ p, staffHref }: { p: Payslip; staffHref?: stri
           <div>
             <p className="text-lg font-semibold">{user?.organization?.name}</p>
             <p className="text-sm text-muted-foreground">
-              Payslip · {formatDate(p.period_start)} – {formatDate(p.period_end)}
+              {tr('Payslip · {date} – {date2}', { date: formatDate(p.period_start), date2: formatDate(p.period_end) })}
             </p>
           </div>
           <div className="text-right text-sm">
@@ -134,12 +135,12 @@ export function PayslipDocument({ p, staffHref }: { p: Payslip; staffHref?: stri
         <dl className="mb-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           {(
             [
-              ['Working days', p.working_days],
-              ['Worked', p.worked_days],
-              ['Paid leave', p.paid_leave_days],
-              ['Unpaid leave', p.unpaid_leave_days],
-              ['Absent', p.absent_days],
-              ['Not employed', p.not_employed_days],
+              [tr('Working days'), p.working_days],
+              [tr('Worked'), p.worked_days],
+              [tr('Paid leave'), p.paid_leave_days],
+              [tr('Unpaid leave'), p.unpaid_leave_days],
+              [tr('Absent'), p.absent_days],
+              [tr('Not employed'), p.not_employed_days],
             ] as const
           )
             .filter(([label, v]) => label === 'Working days' || label === 'Worked' || Number(v) > 0)
@@ -151,26 +152,26 @@ export function PayslipDocument({ p, staffHref }: { p: Payslip; staffHref?: stri
             ))}
           {overtime > 0 && (
             <div>
-              <dt className="text-xs text-muted-foreground">Overtime{p.overtime_minutes_override != null ? ' (set by hand)' : ''}</dt>
+              <dt className="text-xs text-muted-foreground">{tr('Overtime')}{p.overtime_minutes_override != null ? ' ' + tr('(set by hand)') : ''}</dt>
               <dd className="tabular-nums">{hours(overtime)}</dd>
             </div>
           )}
         </dl>
         <div className="grid gap-6 sm:grid-cols-2">
-          <Lines title="Earnings" lines={earnings} total={p.gross_pay ?? '0'} />
-          <Lines title="Deductions" lines={deductions} total={p.total_deductions ?? '0'} />
+          <Lines title={tr('Earnings')} lines={earnings} total={p.gross_pay ?? '0'} />
+          <Lines title={tr('Deductions')} lines={deductions} total={p.total_deductions ?? '0'} />
         </div>
         <p className="mt-6 flex items-baseline justify-between border-y py-3">
-          <span className="text-sm text-muted-foreground">Net pay</span>
+          <span className="text-sm text-muted-foreground">{tr('Net pay')}</span>
           <Money value={p.net_pay} className="text-2xl font-semibold" tone="none" />
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          Taxable income this period <Money value={p.taxable_income} tone="none" /> · a day’s pay is the monthly amount ÷ {p.basis_days} days.
+          {tr('Taxable income this period')} <Money value={p.taxable_income} tone="none" /> {'· ' + tr('a day’s pay is the monthly amount ÷ {basis_days} days.', { basis_days: p.basis_days })}
         </p>
       </article>
       {days.length > 0 && (
         <section className="mt-6 print:hidden">
-          <h2 className="mb-2 text-sm font-semibold">Days off and absences</h2>
+          <h2 className="mb-2 text-sm font-semibold">{tr('Days off and absences')}</h2>
           <ul className="divide-y rounded-lg border bg-card text-sm">
             {days.map((d) => (
               <li key={d.date} className="flex justify-between gap-3 px-4 py-1.5">
@@ -206,7 +207,7 @@ export function PayslipPage() {
       <PageHeader
         className="print:hidden"
         backTo={`/payroll/runs/${p.run}`}
-        title={`Payslip ${p.number}`}
+        title={tr('Payslip {number}', { number: p.number })}
         description={
           <span className="inline-flex items-center gap-2">
             {p.run_name} <RunStatus status={p.run_status} />
@@ -216,11 +217,11 @@ export function PayslipPage() {
           <>
             {draft && can(PERMS.payroll.manage) && (
               <Button variant="outline" onClick={() => setEditingOvertime(true)}>
-                <Clock aria-hidden /> Overtime
+                <Clock aria-hidden /> {tr('Overtime')}
               </Button>
             )}
             <Button variant="outline" onClick={() => window.print()}>
-              <Printer aria-hidden /> Print
+              <Printer aria-hidden /> {tr('Print')}
             </Button>
           </>
         }
@@ -238,19 +239,19 @@ export function PayslipPage() {
       <FormDialog
         open={editingOvertime}
         onOpenChange={setEditingOvertime}
-        title="Overtime for this payslip"
-        description={`Counted from attendance: ${hours(p.overtime_minutes ?? 0)}. Leave empty to go back to the count.`}
+        title={tr('Overtime for this payslip')}
+        description={tr('Counted from attendance: {hours}. Leave empty to go back to the count.', { hours: hours(p.overtime_minutes ?? 0) })}
         schema={z.object({ minutes: optionalWholeNumber })}
         defaultValues={{ minutes: p.overtime_minutes_override != null ? String(p.overtime_minutes_override) : '' }}
         onSubmit={async (v) => {
           const next = await setOvertime.mutateAsync({ id: p.id, minutes: v.minutes === '' ? null : Number(v.minutes) })
-          toast.success('Overtime set; payslip recomputed.')
+          toast.success(tr('Overtime set; payslip recomputed.'))
           // The backend rebuilds the payslip (same number, new id).
           if (next.id !== p.id) navigate(`/payroll/payslips/${next.id}`, { replace: true })
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Minutes" error={errors.minutes?.message}>
+          <FormField label={tr('Minutes')} error={errors.minutes?.message}>
             <Input {...register('minutes')} inputMode="numeric" placeholder={String(p.overtime_minutes ?? 0)} />
           </FormField>
         )}

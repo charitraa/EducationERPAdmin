@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { code } from '@/lib/validation'
 import type { Campus, CampusInput } from '@/shared/types/organization'
+import { tr } from '@/lib/i18n'
 
 export const branchSchema = z.object({
-  name: z.string().trim().min(1, 'Required.').max(200),
+  name: z.string().trim().min(1, tr('Required.')).max(200),
   code,
-  email: z.union([z.literal(''), z.string().trim().email('Enter a valid email.')]),
+  email: z.union([z.literal(''), z.string().trim().email(tr('Enter a valid email.'))]),
   phone: z.string(),
   address: z.string(),
   city: z.string(),

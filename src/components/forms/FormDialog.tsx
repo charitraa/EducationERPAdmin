@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { applyServerErrors } from '@/lib/errors'
 import { FormError } from './FormError'
+import { tr } from '@/lib/i18n'
 
 interface FormDialogProps<T extends FieldValues> {
   open: boolean
@@ -36,7 +37,7 @@ export function FormDialog<T extends FieldValues>({
   schema,
   defaultValues,
   onSubmit,
-  submitLabel = 'Save',
+  submitLabel = tr('Save'),
   children,
   wide,
 }: FormDialogProps<T>) {
@@ -80,7 +81,7 @@ export function FormDialog<T extends FieldValues>({
             <div className="grid max-h-[65vh] gap-4 overflow-y-auto px-0.5 py-0.5">{children(form)}</div>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => requestClose(false)}>
-                Cancel
+                {tr('Cancel')}
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
@@ -93,9 +94,9 @@ export function FormDialog<T extends FieldValues>({
       <ConfirmDialog
         open={confirmDiscard}
         onOpenChange={setConfirmDiscard}
-        title="Discard changes?"
-        description="What you've entered in this form will be lost."
-        confirmLabel="Discard"
+        title={tr('Discard changes?')}
+        description={tr("What you've entered in this form will be lost.")}
+        confirmLabel={tr('Discard')}
         tone="destructive"
         onConfirm={() => onOpenChange(false)}
       />

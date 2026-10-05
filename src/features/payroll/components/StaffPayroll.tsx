@@ -11,6 +11,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Id } from '@/shared/types/api'
 import { usePayslips, useSalaries } from '../hooks/usePayroll'
 import { AssignSalaryDialog } from '../pages/SalaryPages'
+import { tr } from '@/lib/i18n'
 
 /** Staff → Payroll: the salary they're on and their latest payslips. Needs `payroll.view`. */
 export function StaffPayroll({ staffId }: { staffId: Id }) {
@@ -23,10 +24,10 @@ export function StaffPayroll({ staffId }: { staffId: Id }) {
   return (
     <section className="rounded-lg border bg-card p-4 sm:p-6">
       <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">Payroll</h2>
+        <h2 className="text-sm font-semibold">{tr('Payroll')}</h2>
         {can(PERMS.payroll.manage) && (
           <Button size="sm" variant="outline" className="h-7" onClick={() => setAssigning(true)}>
-            <Plus aria-hidden /> Salary
+            <Plus aria-hidden /> {tr('Salary')}
           </Button>
         )}
       </div>
@@ -34,11 +35,11 @@ export function StaffPayroll({ staffId }: { staffId: Id }) {
         <TableSkeleton rows={2} columns={1} />
       ) : current ? (
         <p className="text-sm">
-          <span className="font-medium">{current.structure_name}</span> · basic <Money value={current.monthly_basic} tone="none" />
-          <span className="block text-xs text-muted-foreground">since {formatDate(current.effective_from)}</span>
+          <span className="font-medium">{current.structure_name}</span> {'· ' + tr('basic')} <Money value={current.monthly_basic} tone="none" />
+          <span className="block text-xs text-muted-foreground">{tr('since {date}', { date: formatDate(current.effective_from) })}</span>
         </p>
       ) : (
-        <p className="text-sm text-muted-foreground">No salary assigned; payroll runs leave them out.</p>
+        <p className="text-sm text-muted-foreground">{tr('No salary assigned; payroll runs leave them out.')}</p>
       )}
       {(slips.data?.results ?? []).length > 0 && (
         <ul className="mt-3 divide-y border-t text-sm">

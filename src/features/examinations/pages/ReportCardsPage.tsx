@@ -11,6 +11,7 @@ import { useClasses } from '@/features/academics/classes/hooks/useClasses'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { ReportCardView } from '../components/ReportCardView'
 import { useExamOptions, usePlans, useReportCards } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 /** Report cards for a whole class (or one student) from one exam or term result, ready to print. */
 export default function ReportCardsPage() {
@@ -33,10 +34,10 @@ export default function ReportCardsPage() {
   const sourceValue = exam ? `exam:${exam}` : plan ? `plan:${plan}` : ''
   const sourceOptions = [
     ...(exams.data ?? []).map((e) => ({ value: `exam:${e.id}`, label: e.name })),
-    ...(plans.data?.results ?? []).filter((p) => p.status === 'published').map((p) => ({ value: `plan:${p.id}`, label: `${p.name} (term result)` })),
+    ...(plans.data?.results ?? []).filter((p) => p.status === 'published').map((p) => ({ value: `plan:${p.id}`, label: tr('{name} (term result)', { name: p.name }) })),
   ]
   // Keep an unpublished exam opened from its Results tab choosable.
-  if (chosenExam && !sourceOptions.some((o) => o.value === sourceValue)) sourceOptions.unshift({ value: sourceValue, label: `${chosenExam.name} (not published)` })
+  if (chosenExam && !sourceOptions.some((o) => o.value === sourceValue)) sourceOptions.unshift({ value: sourceValue, label: tr('{name} (not published)', { name: chosenExam.name }) })
 
   const setSource = (v: string) => {
     const [kind, id] = v.split(':')
@@ -47,11 +48,11 @@ export default function ReportCardsPage() {
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3 print:hidden">
         <div className="grid min-w-64 gap-1.5">
-          <Label htmlFor={ids.source}>Exam or term result</Label>
-          <SelectControl id={ids.source} value={sourceValue} onChange={setSource} options={sourceOptions} placeholder="Choose…" />
+          <Label htmlFor={ids.source}>{tr('Exam or term result')}</Label>
+          <SelectControl id={ids.source} value={sourceValue} onChange={setSource} options={sourceOptions} placeholder={tr('Choose…')} />
         </div>
         <div className="grid min-w-48 gap-1.5">
-          <Label htmlFor={ids.section}>Class</Label>
+          <Label htmlFor={ids.section}>{tr('Class')}</Label>
           <SelectControl
             id={ids.section}
             value={section}
@@ -68,18 +69,18 @@ export default function ReportCardsPage() {
         </div>
         {cards.data && cards.data.length > 0 && (
           <Button variant="outline" className="ml-auto" onClick={() => window.print()}>
-            <Printer aria-hidden /> Print {cards.data.length === 1 ? '' : `all ${cards.data.length}`}
+            <Printer aria-hidden /> {tr('Print')} {cards.data.length === 1 ? '' : tr('all {count}', { count: cards.data.length })}
           </Button>
         )}
       </div>
       {!ready ? (
-        <EmptyState title="Choose an exam and a class" description="Report cards come from published results. An exam’s Results tab links to single students too." icon={FileText} />
+        <EmptyState title={tr('Choose an exam and a class')} description={tr('Report cards come from published results. An exam’s Results tab links to single students too.')} icon={FileText} />
       ) : cards.isPending ? (
         <TableSkeleton rows={6} columns={6} />
       ) : cards.isError ? (
         <ErrorState error={cards.error} onRetry={() => void cards.refetch()} />
       ) : cards.data.length === 0 ? (
-        <EmptyState title="No results for this choice" description="Work out (or publish) the results first." />
+        <EmptyState title={tr('No results for this choice')} description={tr('Work out (or publish) the results first.')} />
       ) : (
         <div className="grid gap-6">
           {cards.data.map((c) => (

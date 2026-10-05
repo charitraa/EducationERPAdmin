@@ -37,6 +37,7 @@ import {
   useRsvp,
   useWho,
 } from '../hooks/useSelf'
+import { tr } from '@/lib/i18n'
 
 const TONE = { pending: 'warning', accepted: 'success', declined: 'danger', cancelled: 'muted', ended: 'muted' } as const
 
@@ -59,31 +60,31 @@ export function MyMentoringPage() {
     if (asMentor(m)) {
       if (m.status === 'pending')
         return [
-          { m, action: 'accept', label: 'Accept' },
-          { m, action: 'decline', label: 'Decline' },
+          { m, action: 'accept', label: tr('Accept') },
+          { m, action: 'decline', label: tr('Decline') },
         ]
-      return m.status === 'accepted' ? [{ m, action: 'end', label: 'End' }] : []
+      return m.status === 'accepted' ? [{ m, action: 'end', label: tr('End') }] : []
     }
-    if (m.status === 'pending') return [{ m, action: 'end', label: 'Withdraw' }]
-    return m.status === 'accepted' ? [{ m, action: 'end', label: 'End' }] : []
+    if (m.status === 'pending') return [{ m, action: 'end', label: tr('Withdraw') }]
+    return m.status === 'accepted' ? [{ m, action: 'end', label: tr('End') }] : []
   }
 
   return (
     <div className="grid gap-6">
-      <Block title="My mentoring">
+      <Block title={tr('My mentoring')}>
         <Loaded query={mine}>
           {(rows) => (
             <MiniTable
-              label="My mentoring"
+              label={tr('My mentoring')}
               rows={rows}
               rowKey={(m) => m.id}
-              empty={{ title: 'No mentoring yet', icon: HeartHandshake, description: 'Ask one of the graduates below to mentor you.' }}
+              empty={{ title: tr('No mentoring yet'), icon: HeartHandshake, description: tr('Ask one of the graduates below to mentor you.') }}
               columns={[
-                { header: 'With', cell: (m) => (asMentor(m) ? `${m.mentee_name} (your mentee)` : m.mentor_name) },
-                { header: 'Topic', cell: (m) => m.topic },
-                { header: 'Status', cell: (m) => <StatusBadge status={m.status} tone={TONE[m.status]} label={enumLabel('MentorshipStatusEnum', m.status)} /> },
-                { header: 'Since', cell: (m) => formatDate(m.responded_at ?? m.created_at) },
-                { header: 'Note', cell: (m) => m.note || (asMentor(m) && m.message ? m.message : '') },
+                { header: tr('With'), cell: (m) => (asMentor(m) ? tr('{mentee_name} (your mentee)', { mentee_name: m.mentee_name }) : m.mentor_name) },
+                { header: tr('Topic'), cell: (m) => m.topic },
+                { header: tr('Status'), cell: (m) => <StatusBadge status={m.status} tone={TONE[m.status]} label={enumLabel('MentorshipStatusEnum', m.status)} /> },
+                { header: tr('Since'), cell: (m) => formatDate(m.responded_at ?? m.created_at) },
+                { header: tr('Note'), cell: (m) => m.note || (asMentor(m) && m.message ? m.message : '') },
                 {
                   header: '',
                   className: 'text-right',
@@ -102,11 +103,11 @@ export function MyMentoringPage() {
           )}
         </Loaded>
       </Block>
-      <Block title="Find a mentor" description="Graduates who offer to guide students and younger alumni.">
+      <Block title={tr('Find a mentor')} description={tr('Graduates who offer to guide students and younger alumni.')}>
         <Loaded query={mentors}>
           {(rows) => {
             const others = rows.filter((r) => r.id !== alumnus?.id)
-            if (others.length === 0) return <EmptyState icon={Users} title="No mentors listed yet" />
+            if (others.length === 0) return <EmptyState icon={Users} title={tr('No mentors listed yet')} />
             return (
               <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {others.map((r) => (
@@ -114,7 +115,7 @@ export function MyMentoringPage() {
                     <div>
                       <p className="font-medium">{r.full_name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {[r.current_job ? `${r.current_job.title} at ${r.current_job.employer}` : null, r.program_name, [r.city, r.country].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}
+                        {[r.current_job ? tr('{title} at {employer}', { title: r.current_job.title, employer: r.current_job.employer }) : null, r.program_name, [r.city, r.country].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}
                       </p>
                     </div>
                     {r.mentor_topics && <p className="text-sm">{r.mentor_topics}</p>}
@@ -123,15 +124,15 @@ export function MyMentoringPage() {
                       <span className="text-xs text-muted-foreground">
                         {r.linkedin_url && (
                           <a href={r.linkedin_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
-                            LinkedIn <ExternalLink className="h-3 w-3" aria-hidden />
+                            {tr('LinkedIn')} <ExternalLink className="h-3 w-3" aria-hidden />
                           </a>
                         )}
                       </span>
                       {open.has(r.id) ? (
-                        <span className="text-xs text-muted-foreground">Asked</span>
+                        <span className="text-xs text-muted-foreground">{tr('Asked')}</span>
                       ) : (
                         <Button size="sm" disabled={r.places_left === 0} onClick={() => setAsking(r)}>
-                          {r.places_left === 0 ? 'No places' : 'Ask to mentor me'}
+                          {r.places_left === 0 ? tr('No places') : tr('Ask to mentor me')}
                         </Button>
                       )}
                     </div>
@@ -145,23 +146,23 @@ export function MyMentoringPage() {
       <FormDialog
         open={asking !== null}
         onOpenChange={(o) => !o && setAsking(null)}
-        title={`Ask ${asking?.full_name ?? ''}`}
-        description="They’re told and can accept or decline."
-        submitLabel="Send request"
-        schema={z.object({ topic: z.string().trim().min(1, 'What would you like help with?').max(200), message: z.string().max(2000) })}
+        title={tr('Ask {full_name}', { full_name: asking?.full_name ?? '' })}
+        description={tr('They’re told and can accept or decline.')}
+        submitLabel={tr('Send request')}
+        schema={z.object({ topic: z.string().trim().min(1, tr('What would you like help with?')).max(200), message: z.string().max(2000) })}
         defaultValues={{ topic: '', message: '' }}
         onSubmit={async (v) => {
           await ask.mutateAsync({ mentor: asking!.id, topic: v.topic, message: v.message })
-          toast.success('Request sent.')
+          toast.success(tr('Request sent.'))
         }}
       >
         {({ register, formState: { errors } }) => (
           <>
-            <FormField label="Topic" required error={errors.topic?.message}>
-              <Input {...register('topic')} placeholder="Choosing a master’s program" />
+            <FormField label={tr('Topic')} required error={errors.topic?.message}>
+              <Input {...register('topic')} placeholder={tr('Choosing a master’s program')} />
             </FormField>
-            <FormField label="Message">
-              <Textarea {...register('message')} rows={4} placeholder="A little about you and what you hope to get from it." />
+            <FormField label={tr('Message')}>
+              <Textarea {...register('message')} rows={4} placeholder={tr('A little about you and what you hope to get from it.')} />
             </FormField>
           </>
         )}
@@ -175,11 +176,11 @@ export function MyMentoringPage() {
         defaultValues={{ note: '' }}
         onSubmit={async (v) => {
           await act.mutateAsync({ id: acting!.m.id, action: acting!.action, note: v.note })
-          toast.success('Done.')
+          toast.success(tr('Done.'))
         }}
       >
         {({ register }) => (
-          <FormField label="Note (optional)">
+          <FormField label={tr('Note (optional)')}>
             <Input {...register('note')} />
           </FormField>
         )}
@@ -189,9 +190,9 @@ export function MyMentoringPage() {
 }
 
 const RESPONSES = [
-  { value: 'going', label: 'Going' },
-  { value: 'maybe', label: 'Maybe' },
-  { value: 'declined', label: 'Not going' },
+  { value: 'going', label: tr('Going') },
+  { value: 'maybe', label: tr('Maybe') },
+  { value: 'declined', label: tr('Not going') },
 ] as const
 
 function RsvpButtons({ e }: { e: UpcomingAlumniEvent }) {
@@ -201,14 +202,14 @@ function RsvpButtons({ e }: { e: UpcomingAlumniEvent }) {
   const send = async (response: UpcomingAlumniEvent['my_response'] & string) => {
     try {
       await rsvp.mutateAsync({ id: e.id, response, guests: response === 'going' ? Number(guests) || 0 : 0 })
-      toast.success(response === 'going' ? 'See you there.' : 'Answer saved.')
+      toast.success(response === 'going' ? tr('See you there.') : tr('Answer saved.'))
     } catch {
       // The mutation's error toast says why.
     }
   }
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label={`Are you coming to ${e.title}?`}>
+      <div className="inline-flex rounded-md border p-0.5" role="radiogroup" aria-label={tr('Are you coming to {title}?', { title: e.title })}>
         {RESPONSES.map((r) => (
           <button
             key={r.value}
@@ -224,7 +225,7 @@ function RsvpButtons({ e }: { e: UpcomingAlumniEvent }) {
         ))}
       </div>
       <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        Guests
+        {tr('Guests')}
         <Input
           className="h-8 w-16"
           inputMode="numeric"
@@ -246,7 +247,7 @@ export function MyAlumniEventsPage() {
     <Loaded query={q}>
       {(events) =>
         events.length === 0 ? (
-          <EmptyState icon={CalendarDays} title="No alumni events coming up" />
+          <EmptyState icon={CalendarDays} title={tr('No alumni events coming up')} />
         ) : (
           <ul className="grid gap-3 md:grid-cols-2">
             {events.map((e) => (
@@ -257,13 +258,13 @@ export function MyAlumniEventsPage() {
                     {formatDateTime(e.starts_at)}
                     {e.venue ? ` · ${e.venue}` : ''}
                     {e.campus_name ? ` · ${e.campus_name}` : ''}
-                    {e.capacity != null ? ` · ${e.places_taken}/${e.capacity} places` : ''}
+                    {e.capacity != null ? ' · ' + tr('{places_taken}/{capacity} places', { places_taken: e.places_taken, capacity: e.capacity }) : ''}
                   </p>
                 </div>
                 {e.description && <p className="line-clamp-3 text-sm text-muted-foreground">{e.description}</p>}
                 {e.online_url && (
                   <a href={e.online_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
-                    Join online <ExternalLink className="h-3 w-3" aria-hidden />
+                    {tr('Join online')} <ExternalLink className="h-3 w-3" aria-hidden />
                   </a>
                 )}
                 <div className="mt-auto pt-1">
@@ -306,7 +307,7 @@ function ApplyDialog({ vacancy, onOpenChange }: { vacancy: PublicVacancy | null;
     const gaps: Record<string, string> = missingAnswers(vacancy.form_fields, answers)
     if (vacancy.resume_required && resume == null) gaps.resume_file = 'Attach your CV.'
     setErrors(gaps)
-    if (Object.keys(gaps).length) return setMessage('Fill in the highlighted answers.')
+    if (Object.keys(gaps).length) return setMessage(tr('Fill in the highlighted answers.'))
     const data: Record<string, unknown> = {
       first_name: me?.first_name || user?.first_name || '',
       last_name: me?.last_name || user?.last_name || '',
@@ -318,7 +319,7 @@ function ApplyDialog({ vacancy, onOpenChange }: { vacancy: PublicVacancy | null;
     if (cover.trim()) data.cover_letter = cover
     try {
       await apply.mutateAsync({ id: vacancy.id, data, resume_file: resume })
-      toast.success('Application sent. Follow it under Applications.')
+      toast.success(tr('Application sent. Follow it under Applications.'))
       onOpenChange(false)
     } catch (err) {
       const { fields, message: m } = nestedErrors(err)
@@ -331,23 +332,23 @@ function ApplyDialog({ vacancy, onOpenChange }: { vacancy: PublicVacancy | null;
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
         <form onSubmit={submit} noValidate className="grid gap-4">
           <DialogHeader>
-            <DialogTitle>Apply: {vacancy?.title}</DialogTitle>
-            <DialogDescription>Your name and contact details come from your record ({me?.full_name || user?.full_name}).</DialogDescription>
+            <DialogTitle>{tr('Apply') + ':'} {vacancy?.title}</DialogTitle>
+            <DialogDescription>{tr('Your name and contact details come from your record (')}{me?.full_name || user?.full_name}).</DialogDescription>
           </DialogHeader>
           <FormError message={message} />
-          <FormField label="CV" required={vacancy?.resume_required} error={errors.resume_file} description="PDF or Word, up to 5 MB.">
+          <FormField label="CV" required={vacancy?.resume_required} error={errors.resume_file} description={tr('PDF or Word, up to 5 MB.')}>
             {(p) => <FileUpload {...p} purpose="resume" types={['pdf', 'docx']} onChange={(f) => setResume(f?.id ?? null)} />}
           </FormField>
-          <FormField label="Cover letter" error={errors.cover_letter}>
+          <FormField label={tr('Cover letter')} error={errors.cover_letter}>
             {(p) => <Textarea {...p} value={cover} onChange={(e) => setCover(e.target.value)} rows={4} />}
           </FormField>
           {vacancy && vacancy.form_fields.length > 0 && <Questions fields={vacancy.form_fields} value={answers} onChange={setAnswers} errors={errors} />}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tr('Cancel')}
             </Button>
             <Button type="submit" disabled={apply.isPending}>
-              {apply.isPending && <Loader2 className="animate-spin" aria-hidden />} Send application
+              {apply.isPending && <Loader2 className="animate-spin" aria-hidden />} {tr('Send application')}
             </Button>
           </DialogFooter>
         </form>
@@ -362,18 +363,18 @@ function RespondDialog({ offer, onOpenChange }: { offer: { o: JobOffer; accept: 
     <FormDialog
       open={offer !== null}
       onOpenChange={onOpenChange}
-      title={offer?.accept ? 'Accept the offer?' : 'Decline the offer?'}
-      description={offer ? `${offer.o.vacancy_title}, starting ${formatDate(offer.o.start_date)}.` : undefined}
-      submitLabel={offer?.accept ? 'Accept' : 'Decline'}
+      title={offer?.accept ? tr('Accept the offer?') : tr('Decline the offer?')}
+      description={offer ? tr('{vacancy_title}, starting {date}.', { vacancy_title: offer.o.vacancy_title, date: formatDate(offer.o.start_date) }) : undefined}
+      submitLabel={offer?.accept ? tr('Accept') : tr('Decline')}
       schema={z.object({ note: z.string().max(255) })}
       defaultValues={{ note: '' }}
       onSubmit={async (v) => {
         await respond.mutateAsync({ id: offer!.o.id, accept: offer!.accept, note: v.note })
-        toast.success(offer!.accept ? 'Offer accepted.' : 'Offer declined.')
+        toast.success(offer!.accept ? tr('Offer accepted.') : tr('Offer declined.'))
       }}
     >
       {({ register }) => (
-        <FormField label="Note (optional)">
+        <FormField label={tr('Note (optional)')}>
           <Input {...register('note')} />
         </FormField>
       )}
@@ -390,19 +391,19 @@ export function MyJobsPage() {
   return (
     <div className="grid gap-6">
       {(offers.data?.length ?? 0) > 0 && (
-        <Block title="Offers made to you">
+        <Block title={tr('Offers made to you')}>
           <MiniTable
-            label="My offers"
+            label={tr('My offers')}
             rows={offers.data ?? []}
             rowKey={(o) => o.id}
             empty={{ title: '' }}
             columns={[
-              { header: 'Position', cell: (o) => o.vacancy_title },
-              { header: 'Starts', cell: (o) => formatDate(o.start_date) },
-              { header: 'Contract', cell: (o) => enumLabel('ContractKindEnum', o.contract_kind) },
-              { header: 'Pay', cell: (o) => o.salary_note || '—' },
-              { header: 'Answer by', cell: (o) => formatDate(o.expires_on) },
-              { header: 'Status', cell: (o) => <OfferStatus o={o} /> },
+              { header: tr('Position'), cell: (o) => o.vacancy_title },
+              { header: tr('Starts'), cell: (o) => formatDate(o.start_date) },
+              { header: tr('Contract'), cell: (o) => enumLabel('ContractKindEnum', o.contract_kind) },
+              { header: tr('Pay'), cell: (o) => o.salary_note || '—' },
+              { header: tr('Answer by'), cell: (o) => formatDate(o.expires_on) },
+              { header: tr('Status'), cell: (o) => <OfferStatus o={o} /> },
               {
                 header: '',
                 className: 'text-right',
@@ -410,10 +411,10 @@ export function MyJobsPage() {
                   o.status === 'made' ? (
                     <span className="inline-flex gap-1">
                       <Button size="sm" onClick={() => setResponding({ o, accept: true })}>
-                        Accept
+                        {tr('Accept')}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => setResponding({ o, accept: false })}>
-                        Decline
+                        {tr('Decline')}
                       </Button>
                     </span>
                   ) : null,
@@ -422,11 +423,11 @@ export function MyJobsPage() {
           />
         </Block>
       )}
-      <Block title="Open positions" description="Vacancies taking applications now.">
+      <Block title={tr('Open positions')} description={tr('Vacancies taking applications now.')}>
         <Loaded query={vacancies}>
           {(rows) =>
             rows.length === 0 ? (
-              <EmptyState icon={Briefcase} title="No open positions" />
+              <EmptyState icon={Briefcase} title={tr('No open positions')} />
             ) : (
               <ul className="grid gap-3 md:grid-cols-2">
                 {rows.map((v) => (
@@ -437,9 +438,9 @@ export function MyJobsPage() {
                     </div>
                     {v.description && <p className="line-clamp-3 text-sm text-muted-foreground">{v.description}</p>}
                     <div className="mt-auto flex items-center justify-between gap-2 pt-1">
-                      <span className="text-xs text-muted-foreground">{v.closes_on ? `Apply by ${formatDate(v.closes_on)}` : ''}</span>
+                      <span className="text-xs text-muted-foreground">{v.closes_on ? tr('Apply by {date}', { date: formatDate(v.closes_on) }) : ''}</span>
                       <Button size="sm" onClick={() => setApplying(v)}>
-                        Apply
+                        {tr('Apply')}
                       </Button>
                     </div>
                   </li>

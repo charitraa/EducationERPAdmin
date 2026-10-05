@@ -9,6 +9,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { cn } from '@/lib/utils'
 import { PERMS } from '@/shared/constants/permissions'
 import { rememberedSubject, rememberSubject, SubjectContext, useWho, type Subject } from './hooks/useSelf'
+import { tr } from '@/lib/i18n'
 
 interface Tab {
   to: string
@@ -16,30 +17,30 @@ interface Tab {
 }
 
 const STAFF_TABS: Tab[] = [
-  { to: '/me/timetable', label: 'Timetable' },
-  { to: '/me/attendance', label: 'Attendance' },
-  { to: '/me/mark-sheets', label: 'Marking' },
-  { to: '/me/leave', label: 'Leave' },
-  { to: '/me/payslips', label: 'Payslips' },
-  { to: '/me/employment', label: 'Employment' },
-  { to: '/me/assets', label: 'Assets' },
-  { to: '/me/transport', label: 'Transport' },
-  { to: '/me/hostel', label: 'Hostel' },
-  { to: '/me/library', label: 'Library' },
-  { to: '/me/interviews', label: 'Interviews' },
+  { to: '/me/timetable', label: tr('Timetable') },
+  { to: '/me/attendance', label: tr('Attendance') },
+  { to: '/me/mark-sheets', label: tr('Marking') },
+  { to: '/me/leave', label: tr('Leave') },
+  { to: '/me/payslips', label: tr('Payslips') },
+  { to: '/me/employment', label: tr('Employment') },
+  { to: '/me/assets', label: tr('Assets') },
+  { to: '/me/transport', label: tr('Transport') },
+  { to: '/me/hostel', label: tr('Hostel') },
+  { to: '/me/library', label: tr('Library') },
+  { to: '/me/interviews', label: tr('Interviews') },
 ]
 
 const STUDENT_TABS: Tab[] = [
-  { to: '/me/timetable', label: 'Timetable' },
-  { to: '/me/attendance', label: 'Attendance' },
-  { to: '/me/exams', label: 'Exams' },
-  { to: '/me/results', label: 'Results' },
-  { to: '/me/fees', label: 'Fees' },
-  { to: '/me/library', label: 'Library' },
-  { to: '/me/hostel', label: 'Hostel' },
-  { to: '/me/transport', label: 'Transport' },
-  { to: '/me/events', label: 'Events' },
-  { to: '/me/certificates', label: 'Certificates' },
+  { to: '/me/timetable', label: tr('Timetable') },
+  { to: '/me/attendance', label: tr('Attendance') },
+  { to: '/me/exams', label: tr('Exams') },
+  { to: '/me/results', label: tr('Results') },
+  { to: '/me/fees', label: tr('Fees') },
+  { to: '/me/library', label: tr('Library') },
+  { to: '/me/hostel', label: tr('Hostel') },
+  { to: '/me/transport', label: tr('Transport') },
+  { to: '/me/events', label: tr('Events') },
+  { to: '/me/certificates', label: tr('Certificates') },
 ]
 
 const NONE: Subject = { kind: 'none' }
@@ -59,8 +60,8 @@ export function SelfLayout() {
 
   const subjects = useMemo(() => {
     const out: Array<{ value: string; label: string; subject: Subject }> = []
-    if (who.staff) out.push({ value: 'staff', label: 'My records (staff)', subject: { kind: 'staff' } })
-    if (who.student) out.push({ value: 'student', label: 'My records', subject: { kind: 'student', child: null, name: who.student.full_name } })
+    if (who.staff) out.push({ value: 'staff', label: tr('My records (staff)'), subject: { kind: 'staff' } })
+    if (who.student) out.push({ value: 'student', label: tr('My records'), subject: { kind: 'student', child: null, name: who.student.full_name } })
     for (const c of who.parent?.children ?? [])
       out.push({ value: `child-${c.student}`, label: c.full_name, subject: { kind: 'student', child: c.student, name: c.full_name } })
     return out
@@ -73,16 +74,16 @@ export function SelfLayout() {
   }
 
   const tabs = useMemo(() => {
-    const base: Tab[] = [{ to: '/me', label: 'Profile' }]
+    const base: Tab[] = [{ to: '/me', label: tr('Profile') }]
     if (current?.subject.kind === 'staff') base.push(...STAFF_TABS.filter((t) => t.to !== '/me/mark-sheets' || can(PERMS.exams.mark)))
     if (current?.subject.kind === 'student')
       // A library card belongs to the student, not to a parent looking on.
       base.push(...STUDENT_TABS.filter((t) => t.to !== '/me/library' || (current.subject.kind === 'student' && current.subject.child == null)))
-    if (who.student || who.alumnus) base.push({ to: '/me/mentoring', label: 'Mentoring' })
-    if (who.alumnus) base.push({ to: '/me/alumni-events', label: 'Alumni events' })
+    if (who.student || who.alumnus) base.push({ to: '/me/mentoring', label: tr('Mentoring') })
+    if (who.alumnus) base.push({ to: '/me/alumni-events', label: tr('Alumni events') })
     // Staff move between posts through HR; the vacancy form refuses them.
-    if (!who.staff) base.push({ to: '/me/jobs', label: 'Jobs' })
-    base.push({ to: '/me/applications', label: 'Applications' })
+    if (!who.staff) base.push({ to: '/me/jobs', label: tr('Jobs') })
+    base.push({ to: '/me/applications', label: tr('Applications') })
     return base
   }, [current, who.staff, who.student, who.alumnus, can])
 
@@ -97,17 +98,17 @@ export function SelfLayout() {
       <div>
         <PageHeader
           className="print:hidden"
-          title={user?.full_name || 'My account'}
-          description={current?.subject.kind === 'student' && current.subject.child != null ? `Viewing ${current.subject.name}’s records.` : 'Your own records, in one place.'}
+          title={user?.full_name || tr('My account')}
+          description={current?.subject.kind === 'student' && current.subject.child != null ? tr('Viewing {name}’s records.', { name: current.subject.name }) : tr('Your own records, in one place.')}
           actions={
             subjects.length > 1 ? (
               <div className="w-60">
-                <SelectControl aria-label="Whose records" value={current?.value ?? ''} onChange={pick} options={subjects.map(({ value, label }) => ({ value, label }))} />
+                <SelectControl aria-label={tr('Whose records')} value={current?.value ?? ''} onChange={pick} options={subjects.map(({ value, label }) => ({ value, label }))} />
               </div>
             ) : undefined
           }
         />
-        <nav aria-label="My account" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0 print:hidden">
+        <nav aria-label={tr('My account')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0 print:hidden">
           <ul className="flex min-w-max gap-1">
             {tabs.map((tab) => (
               <li key={tab.to}>

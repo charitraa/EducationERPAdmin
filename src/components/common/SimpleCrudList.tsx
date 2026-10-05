@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/useToast'
 import type { PermissionRequirement } from '@/lib/permissions'
 import type { Id, Paginated } from '@/shared/types/api'
+import { tr } from '@/lib/i18n'
 
 export interface FieldDef {
   name: string
@@ -53,7 +54,7 @@ export function SimpleCrudList<T extends Row>({
   const [editing, setEditing] = useState<T | 'new' | null>(null)
   const [deleting, setDeleting] = useState<T | null>(null)
   const record = editing === 'new' ? null : editing
-  const schema = z.object(Object.fromEntries(fields.map((f) => [f.name, f.required ? z.string().trim().min(1, 'Required.') : z.string()])))
+  const schema = z.object(Object.fromEntries(fields.map((f) => [f.name, f.required ? z.string().trim().min(1, tr('Required.')) : z.string()])))
   return (
     <section>
       <SectionHeader
@@ -61,7 +62,7 @@ export function SimpleCrudList<T extends Row>({
         action={
           <PermissionGate permission={permission}>
             <Button size="sm" variant="outline" onClick={() => setEditing('new')}>
-              <Plus aria-hidden /> Add {noun}
+              <Plus aria-hidden /> {tr('Add {noun}', { noun })}
             </Button>
           </PermissionGate>
         }
@@ -71,17 +72,17 @@ export function SimpleCrudList<T extends Row>({
       ) : query.isError ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : query.data.results.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">None yet.</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{tr('None yet.')}</p>
       ) : (
         <ul className="max-h-80 divide-y overflow-y-auto rounded-lg border bg-card">
           {query.data.results.map((r) => (
             <li key={r.id} className="flex items-center gap-2 px-3 py-1.5 text-sm">
               <span className="flex-1">{label(r)}</span>
               <RowActions
-                label={`Actions for ${label(r)}`}
+                label={tr('Actions for {label}', { label: label(r) })}
                 actions={[
-                  { label: 'Edit', icon: Pencil, permission: permission, onSelect: () => setEditing(r) },
-                  { label: 'Delete', icon: Trash2, permission: permission, destructive: true, onSelect: () => setDeleting(r) },
+                  { label: tr('Edit'), icon: Pencil, permission: permission, onSelect: () => setEditing(r) },
+                  { label: tr('Delete'), icon: Trash2, permission: permission, destructive: true, onSelect: () => setDeleting(r) },
                 ]}
               />
             </li>
@@ -91,14 +92,14 @@ export function SimpleCrudList<T extends Row>({
       <FormDialog
         open={editing !== null}
         onOpenChange={(o) => !o && setEditing(null)}
-        title={record ? `Edit ${noun}` : `Add ${noun}`}
+        title={record ? tr('Edit {noun}', { noun }) : tr('Add {noun}', { noun })}
         schema={schema}
         defaultValues={Object.fromEntries(fields.map((f) => [f.name, String(record?.[f.name] ?? '')]))}
         onSubmit={async (v) => {
           const input = { ...extra, ...v } as never
           if (record) await update.mutateAsync({ id: record.id, input })
           else await create.mutateAsync(input)
-          toast.success(record ? 'Saved.' : 'Added.')
+          toast.success(record ? tr('Saved.') : tr('Added.'))
         }}
       >
         {({ register, formState: { errors } }) => (
@@ -117,7 +118,7 @@ export function SimpleCrudList<T extends Row>({
         subject={deleting ? `“${label(deleting)}”` : noun}
         onConfirm={async () => {
           await remove.mutateAsync(deleting!.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
         }}
       />
     </section>

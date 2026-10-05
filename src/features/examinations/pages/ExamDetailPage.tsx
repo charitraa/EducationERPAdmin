@@ -28,17 +28,18 @@ import { resultCountsText } from '../components/ResultBits'
 import { SeatingPanel } from '../components/SeatingPanel'
 import { useExam, usePublishExam, useRemoveExam, useScheduleExam, useUnpublishExam, useUnscheduleExam } from '../hooks/useExaminations'
 import { examDates, ExamStatusBadge } from './ExamsListPage'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { value: 'papers', label: 'Papers' },
-  { value: 'seating', label: 'Rooms & seating' },
-  { value: 'cards', label: 'Admit cards' },
-  { value: 'marks', label: 'Marks' },
-  { value: 'results', label: 'Results' },
+  { value: 'papers', label: tr('Papers') },
+  { value: 'seating', label: tr('Rooms & seating') },
+  { value: 'cards', label: tr('Admit cards') },
+  { value: 'marks', label: tr('Marks') },
+  { value: 'results', label: tr('Results') },
 ] as const
 
 const STEPS = ['draft', 'scheduled', 'published'] as const
-const STEP_LABEL = { draft: 'Set up', scheduled: 'Scheduled', published: 'Published' }
+const STEP_LABEL = { draft: tr('Set up'), scheduled: tr('Scheduled'), published: tr('Published') }
 
 /** One exam end to end: papers → schedule → seats and admit cards → marks → results → publish. */
 export default function ExamDetailPage() {
@@ -81,13 +82,13 @@ export default function ExamDetailPage() {
             {e.status === 'draft' && manage && (
               <>
                 <Button variant="outline" onClick={() => setDialog('edit')}>
-                  <Pencil aria-hidden /> Edit
+                  <Pencil aria-hidden /> {tr('Edit')}
                 </Button>
-                <Button variant="outline" onClick={() => setDialog('delete')} aria-label="Delete exam">
+                <Button variant="outline" onClick={() => setDialog('delete')} aria-label={tr('Delete exam')}>
                   <Trash2 aria-hidden />
                 </Button>
                 <Button onClick={() => setDialog('schedule')}>
-                  <CalendarCheck aria-hidden /> Schedule
+                  <CalendarCheck aria-hidden /> {tr('Schedule')}
                 </Button>
               </>
             )}
@@ -95,26 +96,26 @@ export default function ExamDetailPage() {
               <>
                 {manage && (
                   <Button variant="outline" onClick={() => setDialog('unschedule')}>
-                    <Undo2 aria-hidden /> Back to set up
+                    <Undo2 aria-hidden /> {tr('Back to set up')}
                   </Button>
                 )}
                 {canPublish && (
                   <Button onClick={() => setDialog('publish')}>
-                    <Send aria-hidden /> Publish results
+                    <Send aria-hidden /> {tr('Publish results')}
                   </Button>
                 )}
               </>
             )}
             {e.status === 'published' && canPublish && (
               <Button variant="outline" onClick={() => setDialog('unpublish')}>
-                <Undo2 aria-hidden /> Unpublish
+                <Undo2 aria-hidden /> {tr('Unpublish')}
               </Button>
             )}
           </>
         }
       />
 
-      <ol className="mb-5 flex flex-wrap items-center gap-2 text-xs" aria-label="Exam progress">
+      <ol className="mb-5 flex flex-wrap items-center gap-2 text-xs" aria-label={tr('Exam progress')}>
         {STEPS.map((s, i) => {
           const reached = STEPS.indexOf(e.status) >= i
           return (
@@ -126,11 +127,11 @@ export default function ExamDetailPage() {
             </li>
           )
         })}
-        {e.published_at && <li className="text-muted-foreground">Published {formatDateTime(e.published_at)}</li>}
+        {e.published_at && <li className="text-muted-foreground">{tr('Published {dateTime}', { dateTime: formatDateTime(e.published_at) })}</li>}
       </ol>
 
       <div className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
-        <div role="tablist" aria-label="Exam" className="flex min-w-max gap-1">
+        <div role="tablist" aria-label={tr('Exam')} className="flex min-w-max gap-1">
           {TABS.map((t) => (
             <button
               key={t.value}
@@ -156,63 +157,63 @@ export default function ExamDetailPage() {
       <ConfirmDialog
         open={dialog === 'schedule'}
         onOpenChange={close}
-        title="Schedule this exam?"
-        description="Every paper needs a date, a time and its marks. Clashes and holidays are refused. The exam is put on the academic calendar, and marks can be entered once each paper is sat."
-        confirmLabel="Schedule"
+        title={tr('Schedule this exam?')}
+        description={tr('Every paper needs a date, a time and its marks. Clashes and holidays are refused. The exam is put on the academic calendar, and marks can be entered once each paper is sat.')}
+        confirmLabel={tr('Schedule')}
         onConfirm={async () => {
           await schedule.mutateAsync(e.id).catch(withProblems)
-          toast.success('Exam scheduled.')
+          toast.success(tr('Exam scheduled.'))
         }}
       />
       <ConfirmDialog
         open={dialog === 'unschedule'}
         onOpenChange={close}
-        title="Take the exam back to set up?"
-        description="Only possible before any marks are entered. It comes off the academic calendar."
-        confirmLabel="Back to set up"
+        title={tr('Take the exam back to set up?')}
+        description={tr('Only possible before any marks are entered. It comes off the academic calendar.')}
+        confirmLabel={tr('Back to set up')}
         onConfirm={async () => {
           await unschedule.mutateAsync(e.id)
-          toast.success('Exam is being set up again.')
+          toast.success(tr('Exam is being set up again.'))
         }}
       />
       <ConfirmDialog
         open={dialog === 'publish'}
         onOpenChange={close}
-        title="Publish the results?"
-        description="Every mark sheet must be verified and complete. Students and parents are notified and can see their results and report cards."
-        confirmLabel="Publish"
+        title={tr('Publish the results?')}
+        description={tr('Every mark sheet must be verified and complete. Students and parents are notified and can see their results and report cards.')}
+        confirmLabel={tr('Publish')}
         onConfirm={async () => {
           const r = (await publish.mutateAsync(e.id)) as { results: ResultCounts }
-          toast.success(`Results published: ${resultCountsText(r.results)}.`)
+          toast.success(tr('Results published: {resultCountsText}.', { resultCountsText: resultCountsText(r.results) }))
         }}
       />
       <FormDialog
         open={dialog === 'unpublish'}
         onOpenChange={close}
-        title="Withdraw the published results?"
-        description="Students and parents stop seeing them until they’re published again."
-        submitLabel="Unpublish"
-        schema={z.object({ reason: z.string().trim().min(1, 'Say why.').max(255) })}
+        title={tr('Withdraw the published results?')}
+        description={tr('Students and parents stop seeing them until they’re published again.')}
+        submitLabel={tr('Unpublish')}
+        schema={z.object({ reason: z.string().trim().min(1, tr('Say why.')).max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await unpublish.mutateAsync({ id: e.id, reason: v.reason })
-          toast.success('Results withdrawn.')
+          toast.success(tr('Results withdrawn.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Reason" required error={errors.reason?.message}>
-            <Input {...register('reason')} maxLength={255} placeholder="A marking error in Science…" />
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
+            <Input {...register('reason')} maxLength={255} placeholder={tr('A marking error in Science…')} />
           </FormField>
         )}
       </FormDialog>
       <DeleteDialog
         open={dialog === 'delete'}
         onOpenChange={close}
-        subject={`the exam “${e.name}”`}
-        description="Its papers and rooms go with it."
+        subject={tr('the exam “{name}”', { name: e.name })}
+        description={tr('Its papers and rooms go with it.')}
         onConfirm={async () => {
           await remove.mutateAsync(e.id)
-          toast.success('Exam deleted.')
+          toast.success(tr('Exam deleted.'))
           navigate('/examinations')
         }}
       />

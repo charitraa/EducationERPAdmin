@@ -30,6 +30,7 @@ import { createResourceHooks } from '@/shared/api/hooks'
 import { createQueryKeys, createResourceApi } from '@/shared/api/resource'
 import { PERMS } from '@/shared/constants/permissions'
 import type { Id, Schema } from '@/shared/types/api'
+import { tr } from '@/lib/i18n'
 
 interface Grant {
   role: Id
@@ -56,8 +57,8 @@ function useKeyAction<V, R>(fn: (v: V) => Promise<R>, form = true) {
   return useMutation({ mutationFn: fn, meta: form ? { form: true } : { silent: true }, onSuccess: () => void qc.invalidateQueries({ queryKey: keyKeys.all }) })
 }
 
-const ipList = z.string().refine((v) => v.split(/[\s,]+/).filter(Boolean).length <= 50, 'At most 50.')
-const rate = z.union([z.literal(''), z.string().regex(/^\d+\/(s|sec|m|min|h|hour|d|day)$/, 'Like 1000/hour.')])
+const ipList = z.string().refine((v) => v.split(/[\s,]+/).filter(Boolean).length <= 50, tr('At most 50.'))
+const rate = z.union([z.literal(''), z.string().regex(/^\d+\/(s|sec|m|min|h|hour|d|day)$/, tr('Like 1000/hour.'))])
 
 /** The secret, shown once after creating or rotating a key. */
 function SecretDialog({ secret, onClose }: { secret: { name: string; key: string } | null; onClose: () => void }) {
@@ -66,14 +67,14 @@ function SecretDialog({ secret, onClose }: { secret: { name: string; key: string
     <Dialog open={secret !== null} onOpenChange={(o) => !o && (onClose(), setCopied(false))}>
       <DialogContent className="sm:max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Secret for {secret?.name}</DialogTitle>
-          <DialogDescription>Send it in the <span className="font-mono">Authorization: Api-Key …</span> header.</DialogDescription>
+          <DialogTitle>{tr('Secret for')} {secret?.name}</DialogTitle>
+          <DialogDescription>{tr('Send it in the')} <span className="font-mono">{tr('Authorization: Api-Key …')}</span> {tr('header.')}</DialogDescription>
         </DialogHeader>
         <p role="alert" className="flex items-start gap-2 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm font-medium">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> Save this secret now. It will not be shown again.
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {tr('Save this secret now. It will not be shown again.')}
         </p>
         <div className="flex gap-2">
-          <Input readOnly value={secret?.key ?? ''} className="font-mono text-xs" aria-label="API key secret" onFocus={(e) => e.currentTarget.select()} />
+          <Input readOnly value={secret?.key ?? ''} className="font-mono text-xs" aria-label={tr('API key secret')} onFocus={(e) => e.currentTarget.select()} />
           <Button
             variant="outline"
             onClick={() => {
@@ -81,11 +82,11 @@ function SecretDialog({ secret, onClose }: { secret: { name: string; key: string
               setCopied(true)
             }}
           >
-            <Copy aria-hidden /> {copied ? 'Copied' : 'Copy'}
+            <Copy aria-hidden /> {copied ? tr('Copied') : tr('Copy')}
           </Button>
         </div>
         <DialogFooter>
-          <Button onClick={onClose}>I’ve saved it</Button>
+          <Button onClick={onClose}>{tr('I’ve saved it')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -102,10 +103,10 @@ function KeyDialog({ open, record, onOpenChange, onCreated }: { open: boolean; r
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? `Edit ${record.name}` : 'New API key'}
-      description={record ? undefined : 'For another system (a website, an SMS gateway) to use the API. It acts with the roles you give it, never more than yours.'}
+      title={record ? tr('Edit {name}', { name: record.name }) : tr('New API key')}
+      description={record ? undefined : tr('For another system (a website, an SMS gateway) to use the API. It acts with the roles you give it, never more than yours.')}
       wide
-      schema={z.object({ name: z.string().trim().min(1, 'Required.').max(100), description: z.string(), read_only: z.boolean(), expires_on: optionalIsoDate, allowed_ips: ipList, rate_limit: rate, role: z.string(), campus: z.string() })}
+      schema={z.object({ name: z.string().trim().min(1, tr('Required.')).max(100), description: z.string(), read_only: z.boolean(), expires_on: optionalIsoDate, allowed_ips: ipList, rate_limit: rate, role: z.string(), campus: z.string() })}
       defaultValues={{ name: record?.name ?? '', description: record?.description ?? '', read_only: record?.read_only ?? true, expires_on: expires.date, allowed_ips: (record?.allowed_ips ?? []).join('\n'), rate_limit: record?.rate_limit ?? '', role: '', campus: '' }}
       onSubmit={async (v) => {
         const input: ApiKeyInput = {
@@ -119,7 +120,7 @@ function KeyDialog({ open, record, onOpenChange, onCreated }: { open: boolean; r
         }
         if (record) {
           await update.mutateAsync({ id: record.id, input })
-          toast.success('Key saved.')
+          toast.success(tr('Key saved.'))
         } else {
           const k = await create.mutateAsync({ ...input, grants: v.role ? [{ role: Number(v.role), campus: v.campus ? Number(v.campus) : null }] : [] })
           onCreated({ name: k.name, key: k.key })
@@ -129,37 +130,37 @@ function KeyDialog({ open, record, onOpenChange, onCreated }: { open: boolean; r
       {({ register, control, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="School website" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('School website')} />
             </FormField>
-            <FormField label="Expires" error={errors.expires_on?.message} description="Empty: never.">
+            <FormField label={tr('Expires')} error={errors.expires_on?.message} description={tr('Empty: never.')}>
               {(p) => <Controller control={control} name="expires_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
             {!record && (
               <>
-                <FormField label="Role" description="What it may do. More can be added later.">
-                  {(p) => <Controller control={control} name="role" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="No role yet" options={(roles.data ?? []).map((r) => ({ value: String(r.id), label: r.name }))} />} />}
+                <FormField label={tr('Role')} description={tr('What it may do. More can be added later.')}>
+                  {(p) => <Controller control={control} name="role" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('No role yet')} options={(roles.data ?? []).map((r) => ({ value: String(r.id), label: r.name }))} />} />}
                 </FormField>
                 {isMultiBranch && (
-                  <FormField label="At">
-                    {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every branch" options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
+                  <FormField label={tr('At')}>
+                    {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every branch')} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
                   </FormField>
                 )}
               </>
             )}
-            <FormField label="Rate limit" error={errors.rate_limit?.message} description="Empty: the default.">
+            <FormField label={tr('Rate limit')} error={errors.rate_limit?.message} description={tr('Empty: the default.')}>
               <Input {...register('rate_limit')} placeholder="1000/hour" />
             </FormField>
           </div>
-          <FormField label="Allowed addresses" error={errors.allowed_ips?.message} description="One IP or network per line (e.g. 203.0.113.0/24). Empty: any.">
+          <FormField label={tr('Allowed addresses')} error={errors.allowed_ips?.message} description={tr('One IP or network per line (e.g. 203.0.113.0/24). Empty: any.')}>
             <Textarea {...register('allowed_ips')} rows={2} className="font-mono text-xs" />
           </FormField>
-          <FormField label="Description">
+          <FormField label={tr('Description')}>
             <Input {...register('description')} />
           </FormField>
           <Controller control={control} name="read_only" render={({ field }) => (
             <label className="flex items-center gap-3 text-sm">
-              <Switch checked={field.value} onCheckedChange={field.onChange} /> Read-only (can’t change anything, whatever its roles)
+              <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Read-only (can’t change anything, whatever its roles)')}
             </label>
           )} />
         </>
@@ -184,15 +185,15 @@ export default function ApiKeysPage() {
   const roleName = (id: Id) => roles.data?.find((r) => r.id === id)?.name
   const branchName = (id: Id | null) => (id == null ? null : branches.find((b) => b.id === id)?.name)
   const columns: Column<ApiKey>[] = [
-    { id: 'name', header: 'Key', mobile: 'title', cell: (k) => (
+    { id: 'name', header: tr('Key'), mobile: 'title', cell: (k) => (
       <span>
         <span className="font-medium">{k.name}</span> <span className="font-mono text-xs text-muted-foreground">{k.prefix}…</span>
         {k.description && <span className="block text-xs text-muted-foreground">{k.description}</span>}
       </span>
     ) },
-    { id: 'roles', header: 'Roles', cell: (k) => (
+    { id: 'roles', header: tr('Roles'), cell: (k) => (
       <span className="flex flex-wrap gap-1">
-        {k.roles.length === 0 && <span className="text-muted-foreground">None</span>}
+        {k.roles.length === 0 && <span className="text-muted-foreground">{tr('None')}</span>}
         {k.roles.map((g) => (
           <span key={`${g.role}-${g.campus}`} className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">
             {roleName(g.role) ?? g.role_code}
@@ -201,11 +202,11 @@ export default function ApiKeysPage() {
               <PermissionGate permission={PERMS.apiKeys.manage}>
                 <button
                   type="button"
-                  aria-label={`Take ${g.role_code} away`}
+                  aria-label={tr('Take {role_code} away', { role_code: g.role_code })}
                   className="text-muted-foreground hover:text-danger"
                   onClick={(e) => {
                     e.stopPropagation()
-                    unassign.mutateAsync({ id: k.id, role: g.role, campus: g.campus }).then(() => toast.success('Role removed.'), (err) => toast.error(errorMessage(err)))
+                    unassign.mutateAsync({ id: k.id, role: g.role, campus: g.campus }).then(() => toast.success(tr('Role removed.')), (err) => toast.error(errorMessage(err)))
                   }}
                 >
                   <X className="h-3 w-3" aria-hidden />
@@ -216,39 +217,39 @@ export default function ApiKeysPage() {
         ))}
       </span>
     ) },
-    { id: 'access', header: 'Access', mobile: 'hidden', cell: (k) => [k.read_only ? 'Read-only' : 'Read and write', k.allowed_ips.length ? `${k.allowed_ips.length} address${k.allowed_ips.length > 1 ? 'es' : ''}` : null, k.rate_limit].filter(Boolean).join(' · ') },
-    { id: 'used', header: 'Last used', mobile: 'hidden', cell: (k) => (k.last_used_at ? <span title={`${formatDateTime(k.last_used_at)}${k.last_used_ip ? ` from ${k.last_used_ip}` : ''}`}>{formatRelative(k.last_used_at)}</span> : <span className="text-muted-foreground">Never</span>) },
-    { id: 'status', header: 'Status', cell: (k) => (k.revoked_at ? <StatusBadge status="cancelled" tone="muted" label="Revoked" /> : k.is_usable ? <StatusBadge status="active" label={k.expires_at ? `Until ${formatDate(splitLocal(k.expires_at).date)}` : 'Active'} /> : <StatusBadge status="inactive" tone="danger" label="Expired" />) },
+    { id: 'access', header: tr('Access'), mobile: 'hidden', cell: (k) => [k.read_only ? tr('Read-only') : tr('Read and write'), k.allowed_ips.length ? tr('{count} address{value}', { count: k.allowed_ips.length, value: k.allowed_ips.length > 1 ? 'es' : '' }) : null, k.rate_limit].filter(Boolean).join(' · ') },
+    { id: 'used', header: tr('Last used'), mobile: 'hidden', cell: (k) => (k.last_used_at ? <span title={`${formatDateTime(k.last_used_at)}${k.last_used_ip ? ` from ${k.last_used_ip}` : ''}`}>{formatRelative(k.last_used_at)}</span> : <span className="text-muted-foreground">{tr('Never')}</span>) },
+    { id: 'status', header: tr('Status'), cell: (k) => (k.revoked_at ? <StatusBadge status="cancelled" tone="muted" label={tr('Revoked')} /> : k.is_usable ? <StatusBadge status="active" label={k.expires_at ? tr('Until {date}', { date: formatDate(splitLocal(k.expires_at).date) }) : tr('Active')} /> : <StatusBadge status="inactive" tone="danger" label={tr('Expired')} />) },
   ]
   return (
     <div>
-      <PageHeader title="API keys" description="Let another system (your website, an SMS gateway, a biometric bridge) use the API with only the roles you give it." />
+      <PageHeader title={tr('API keys')} description={tr('Let another system (your website, an SMS gateway, a biometric bridge) use the API with only the roles you give it.')} />
       <DataTable
-        ariaLabel="API keys"
+        ariaLabel={tr('API keys')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(k) => k.id}
-        searchPlaceholder="Name or prefix…"
+        searchPlaceholder={tr('Name or prefix…')}
         toolbar={
           <PermissionGate permission={PERMS.apiKeys.manage}>
             <Button onClick={() => setEditing('new')}>
-              <Plus aria-hidden /> New key
+              <Plus aria-hidden /> {tr('New key')}
             </Button>
           </PermissionGate>
         }
-        filters={[{ name: 'read_only', label: 'Access', options: [{ value: 'true', label: 'Read-only' }, { value: 'false', label: 'Read and write' }] }]}
+        filters={[{ name: 'read_only', label: tr('Access'), options: [{ value: 'true', label: tr('Read-only') }, { value: 'false', label: tr('Read and write') }] }]}
         rowActions={(k) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setEditing(k) },
-              { label: 'Give a role', icon: ShieldPlus, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setActing({ kind: 'role', k }) },
-              { label: 'Rotate secret', icon: RefreshCw, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setActing({ kind: 'rotate', k }) },
-              { label: 'Revoke', icon: Ban, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), destructive: true, onSelect: () => setActing({ kind: 'revoke', k }) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setEditing(k) },
+              { label: tr('Give a role'), icon: ShieldPlus, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setActing({ kind: 'role', k }) },
+              { label: tr('Rotate secret'), icon: RefreshCw, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), onSelect: () => setActing({ kind: 'rotate', k }) },
+              { label: tr('Revoke'), icon: Ban, permission: PERMS.apiKeys.manage, hidden: Boolean(k.revoked_at), destructive: true, onSelect: () => setActing({ kind: 'revoke', k }) },
             ]}
           />
         )}
-        empty={{ title: 'No API keys', description: 'Create one when another system needs to read or write school data.', action: <KeyRound className="h-5 w-5 text-muted-foreground" aria-hidden /> }}
+        empty={{ title: tr('No API keys'), description: tr('Create one when another system needs to read or write school data.'), action: <KeyRound className="h-5 w-5 text-muted-foreground" aria-hidden /> }}
       />
       <KeyDialog
         open={editing !== null}
@@ -263,9 +264,9 @@ export default function ApiKeysPage() {
       <ConfirmDialog
         open={acting?.kind === 'rotate'}
         onOpenChange={(o) => !o && setActing(null)}
-        title={`Rotate ${acting?.k.name}?`}
-        description="A new secret is made and shown once. The old one stops working at once, so update the system using it straight away."
-        confirmLabel="Rotate"
+        title={tr('Rotate {name}?', { name: acting?.k.name })}
+        description={tr('A new secret is made and shown once. The old one stops working at once, so update the system using it straight away.')}
+        confirmLabel={tr('Rotate')}
         tone="destructive"
         onConfirm={async () => {
           const k = await rotate.mutateAsync(acting!.k.id)
@@ -275,43 +276,43 @@ export default function ApiKeysPage() {
       <FormDialog
         open={acting?.kind === 'revoke'}
         onOpenChange={(o) => !o && setActing(null)}
-        title={`Revoke ${acting?.k.name}?`}
-        description="It stops working at once and can’t be brought back; it stays on record."
-        submitLabel="Revoke"
+        title={tr('Revoke {name}?', { name: acting?.k.name })}
+        description={tr('It stops working at once and can’t be brought back; it stays on record.')}
+        submitLabel={tr('Revoke')}
         schema={z.object({ reason: z.string().max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await revoke.mutateAsync({ id: acting!.k.id, reason: v.reason })
-          toast.success('Key revoked.')
+          toast.success(tr('Key revoked.'))
         }}
       >
         {({ register }) => (
-          <FormField label="Reason">
-            <Input {...register('reason')} placeholder="Website rebuilt" />
+          <FormField label={tr('Reason')}>
+            <Input {...register('reason')} placeholder={tr('Website rebuilt')} />
           </FormField>
         )}
       </FormDialog>
       <FormDialog
         open={acting?.kind === 'role'}
         onOpenChange={(o) => !o && setActing(null)}
-        title={`Give ${acting?.k.name} a role`}
-        description="No more than you hold yourself."
-        submitLabel="Give role"
-        schema={z.object({ role: z.string().min(1, 'Choose a role.'), campus: z.string() })}
+        title={tr('Give {name} a role', { name: acting?.k.name })}
+        description={tr('No more than you hold yourself.')}
+        submitLabel={tr('Give role')}
+        schema={z.object({ role: z.string().min(1, tr('Choose a role.')), campus: z.string() })}
         defaultValues={{ role: '', campus: '' }}
         onSubmit={async (v) => {
           await assign.mutateAsync({ id: acting!.k.id, role: Number(v.role), campus: v.campus ? Number(v.campus) : null })
-          toast.success('Role given.')
+          toast.success(tr('Role given.'))
         }}
       >
         {({ control, formState: { errors } }) => (
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Role" required error={errors.role?.message}>
+            <FormField label={tr('Role')} required error={errors.role?.message}>
               {(p) => <Controller control={control} name="role" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={(roles.data ?? []).map((r) => ({ value: String(r.id), label: r.name }))} />} />}
             </FormField>
             {isMultiBranch && (
-              <FormField label="At">
-                {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Every branch" options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
+              <FormField label={tr('At')}>
+                {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Every branch')} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
               </FormField>
             )}
           </div>

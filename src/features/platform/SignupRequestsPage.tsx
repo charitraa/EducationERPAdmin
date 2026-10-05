@@ -16,12 +16,13 @@ import { formatDateTime } from '@/lib/dates'
 import { humanize } from '@/lib/formatters'
 import type { StatusTone } from '@/shared/constants/statuses'
 import { signupKeys, signupRequestsApi, type SignupRequest, type SignupStatus } from '@/features/authentication/api/account.api'
+import { tr } from '@/lib/i18n'
 
 const STATUS: Record<SignupStatus, { label: string; tone: StatusTone }> = {
-  pending: { label: 'Email not confirmed', tone: 'neutral' },
-  awaiting_approval: { label: 'Awaiting approval', tone: 'warning' },
-  completed: { label: 'Created', tone: 'success' },
-  rejected: { label: 'Rejected', tone: 'danger' },
+  pending: { label: tr('Email not confirmed'), tone: 'neutral' },
+  awaiting_approval: { label: tr('Awaiting approval'), tone: 'warning' },
+  completed: { label: tr('Created'), tone: 'success' },
+  rejected: { label: tr('Rejected'), tone: 'danger' },
 }
 
 const name = (r: SignupRequest) => [r.admin_first_name, r.admin_last_name].filter(Boolean).join(' ')
@@ -47,21 +48,21 @@ export default function SignupRequestsPage() {
     mutationFn: (r: SignupRequest) => signupRequestsApi.approve(r.id),
     onSuccess: (r) => {
       done(r)
-      toast.success(`${r.organization_name} is created; its admin has been emailed.`)
+      toast.success(tr('{organization_name} is created; its admin has been emailed.', { organization_name: r.organization_name }))
     },
   })
   const reject = useMutation({
     mutationFn: ({ r, reason }: { r: SignupRequest; reason: string }) => signupRequestsApi.reject(r.id, reason),
     onSuccess: (r) => {
       done(r)
-      toast.success(`Rejected ${r.organization_name}; the person has been emailed.`)
+      toast.success(tr('Rejected {organization_name}; the person has been emailed.', { organization_name: r.organization_name }))
     },
   })
 
   const columns: Column<SignupRequest>[] = [
     {
       id: 'org',
-      header: 'Organization',
+      header: tr('Organization'),
       sortField: 'organization_name',
       mobile: 'title',
       cell: (r) => (
@@ -71,10 +72,10 @@ export default function SignupRequestsPage() {
         </div>
       ),
     },
-    { id: 'type', header: 'Type', className: 'text-xs', cell: (r) => humanize(r.organization_type) },
+    { id: 'type', header: tr('Type'), className: 'text-xs', cell: (r) => humanize(r.organization_type) },
     {
       id: 'admin',
-      header: 'Admin',
+      header: tr('Admin'),
       cell: (r) => (
         <div className="min-w-0 text-xs">
           <div className="truncate">{name(r) || '—'}</div>
@@ -82,16 +83,16 @@ export default function SignupRequestsPage() {
         </div>
       ),
     },
-    { id: 'status', header: 'Status', cell: (r) => <StatusBadge status={r.status} tone={STATUS[r.status]?.tone ?? 'neutral'} label={STATUS[r.status]?.label ?? humanize(r.status)} /> },
-    { id: 'created', header: 'Signed up', sortField: 'created_at', className: 'whitespace-nowrap text-xs tabular-nums', cell: (r) => formatDateTime(r.created_at) },
-    { id: 'verified', header: 'Confirmed', sortField: 'verified_at', mobile: 'hidden', className: 'whitespace-nowrap text-xs tabular-nums', cell: (r) => (r.verified_at ? formatDateTime(r.verified_at) : '—') },
+    { id: 'status', header: tr('Status'), cell: (r) => <StatusBadge status={r.status} tone={STATUS[r.status]?.tone ?? 'neutral'} label={STATUS[r.status]?.label ?? humanize(r.status)} /> },
+    { id: 'created', header: tr('Signed up'), sortField: 'created_at', className: 'whitespace-nowrap text-xs tabular-nums', cell: (r) => formatDateTime(r.created_at) },
+    { id: 'verified', header: tr('Confirmed'), sortField: 'verified_at', mobile: 'hidden', className: 'whitespace-nowrap text-xs tabular-nums', cell: (r) => (r.verified_at ? formatDateTime(r.verified_at) : '—') },
   ]
 
   const decide = (r: SignupRequest) =>
     r.status === 'awaiting_approval' ? (
       <div className="flex flex-wrap gap-2">
         <Button size="sm" onClick={() => setApproving(r)}>
-          <Check aria-hidden /> Approve
+          <Check aria-hidden /> {tr('Approve')}
         </Button>
         <Button
           size="sm"
@@ -101,7 +102,7 @@ export default function SignupRequestsPage() {
             setRejecting(r)
           }}
         >
-          <X aria-hidden /> Reject
+          <X aria-hidden /> {tr('Reject')}
         </Button>
       </div>
     ) : null
@@ -109,23 +110,23 @@ export default function SignupRequestsPage() {
   return (
     <div>
       <PageHeader
-        title="Signup requests"
-        description="Schools that signed up online. Approving one creates the organization and emails its admin; rejecting emails them your reason."
+        title={tr('Signup requests')}
+        description={tr('Schools that signed up online. Approving one creates the organization and emails its admin; rejecting emails them your reason.')}
       />
       <DataTable
-        ariaLabel="Signup requests"
+        ariaLabel={tr('Signup requests')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(r) => r.id}
-        searchPlaceholder="Name, code or email…"
+        searchPlaceholder={tr('Name, code or email…')}
         onRowClick={setOpen}
         rowActions={(r) => (
           <RowActions
             actions={[
-              { label: 'Approve', icon: Check, onSelect: () => setApproving(r), hidden: r.status !== 'awaiting_approval' },
+              { label: tr('Approve'), icon: Check, onSelect: () => setApproving(r), hidden: r.status !== 'awaiting_approval' },
               {
-                label: 'Reject',
+                label: tr('Reject'),
                 icon: X,
                 destructive: true,
                 hidden: r.status !== 'awaiting_approval',
@@ -137,8 +138,8 @@ export default function SignupRequestsPage() {
             ]}
           />
         )}
-        filters={[{ name: 'status', label: 'Status', options: (Object.keys(STATUS) as SignupStatus[]).map((s) => ({ value: s, label: STATUS[s].label })) }]}
-        empty={{ title: 'No signups', description: 'Nothing matches these filters. Signups appear here once someone fills in the form.' }}
+        filters={[{ name: 'status', label: tr('Status'), options: (Object.keys(STATUS) as SignupStatus[]).map((s) => ({ value: s, label: STATUS[s].label })) }]}
+        empty={{ title: tr('No signups'), description: tr('Nothing matches these filters. Signups appear here once someone fills in the form.') }}
       />
 
       <Sheet open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>
@@ -154,17 +155,17 @@ export default function SignupRequestsPage() {
               <dl className="mt-4 grid gap-2 text-sm">
                 {(
                   [
-                    ['Code', <span className="font-mono">{open.organization_code}</span>],
-                    ['Type', humanize(open.organization_type)],
-                    ['Time zone', open.timezone],
-                    ['Admin', name(open) || '—'],
-                    ['Email', open.admin_email],
-                    ['Phone', open.admin_phone || '—'],
-                    ['Signed up', formatDateTime(open.created_at)],
-                    ['From IP', open.ip_address ?? '—'],
-                    ['Email confirmed', open.verified_at ? formatDateTime(open.verified_at) : open.token_expires_at ? `Not yet; link expires ${formatDateTime(open.token_expires_at)}` : 'Not yet'],
-                    ['Decided', open.decided_at ? formatDateTime(open.decided_at) : '—'],
-                    ...(open.rejection_reason ? ([['Reason', open.rejection_reason]] as const) : []),
+                    [tr('Code'), <span className="font-mono">{open.organization_code}</span>],
+                    [tr('Type'), humanize(open.organization_type)],
+                    [tr('Time zone'), open.timezone],
+                    [tr('Admin'), name(open) || '—'],
+                    [tr('Email'), open.admin_email],
+                    [tr('Phone'), open.admin_phone || '—'],
+                    [tr('Signed up'), formatDateTime(open.created_at)],
+                    [tr('From IP'), open.ip_address ?? '—'],
+                    [tr('Email confirmed'), open.verified_at ? formatDateTime(open.verified_at) : open.token_expires_at ? `Not yet; link expires ${formatDateTime(open.token_expires_at)}` : 'Not yet'],
+                    [tr('Decided'), open.decided_at ? formatDateTime(open.decided_at) : '—'],
+                    ...(open.rejection_reason ? ([[tr('Reason'), open.rejection_reason]] as const) : []),
                   ] as const
                 ).map(([k, v]) => (
                   <div key={k} className="grid grid-cols-[8rem_1fr] gap-2">
@@ -173,7 +174,7 @@ export default function SignupRequestsPage() {
                   </div>
                 ))}
               </dl>
-              {open.status === 'pending' && <p className="mt-4 text-sm text-muted-foreground">Nothing to decide until the person opens the link in their email.</p>}
+              {open.status === 'pending' && <p className="mt-4 text-sm text-muted-foreground">{tr('Nothing to decide until the person opens the link in their email.')}</p>}
               <div className="mt-5">{decide(open)}</div>
             </>
           )}
@@ -183,9 +184,9 @@ export default function SignupRequestsPage() {
       <ConfirmDialog
         open={approving !== null}
         onOpenChange={(o) => !o && setApproving(null)}
-        title={`Approve ${approving?.organization_name ?? ''}?`}
-        description={`This creates the organization "${approving?.organization_code ?? ''}" with ${approving?.admin_email ?? ''} as its administrator, and emails them that they can sign in.`}
-        confirmLabel="Approve and create"
+        title={tr('Approve {organization_name}?', { organization_name: approving?.organization_name ?? '' })}
+        description={tr('This creates the organization "{organization_code}" with {admin_email} as its administrator, and emails them that they can sign in.', { organization_code: approving?.organization_code ?? '', admin_email: approving?.admin_email ?? '' })}
+        confirmLabel={tr('Approve and create')}
         onConfirm={async () => {
           if (approving) await approve.mutateAsync(approving)
           setApproving(null)
@@ -194,16 +195,16 @@ export default function SignupRequestsPage() {
       <ConfirmDialog
         open={rejecting !== null}
         onOpenChange={(o) => !o && setRejecting(null)}
-        title={`Reject ${rejecting?.organization_name ?? ''}?`}
-        description="The person is emailed that the signup wasn't approved, with your reason if you give one. They can sign up again."
-        confirmLabel="Reject"
+        title={tr('Reject {organization_name}?', { organization_name: rejecting?.organization_name ?? '' })}
+        description={tr("The person is emailed that the signup wasn't approved, with your reason if you give one. They can sign up again.")}
+        confirmLabel={tr('Reject')}
         tone="destructive"
         onConfirm={async () => {
           if (rejecting) await reject.mutateAsync({ r: rejecting, reason: reason.trim() })
           setRejecting(null)
         }}
       >
-        <FormField label="Reason" description="Optional. Sent to them as written.">
+        <FormField label={tr('Reason')} description={tr('Optional. Sent to them as written.')}>
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} rows={3} />
         </FormField>
       </ConfirmDialog>

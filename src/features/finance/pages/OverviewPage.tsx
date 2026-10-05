@@ -10,6 +10,7 @@ import { formatDate, formatDateTime, todayIso } from '@/lib/dates'
 import { enumLabel } from '@/lib/formatters'
 import { Money } from '../components/money'
 import { useCollection, useGrants, useInvoices, useOutstanding, usePayments } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 /** The finance office's day: what came in this month, what's overdue, and the latest payments. */
 export default function OverviewPage() {
@@ -27,30 +28,30 @@ export default function OverviewPage() {
     <div className="grid gap-6">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Collected this month"
+          label={tr('Collected this month')}
           icon={Wallet}
           loading={collection.isPending}
           error={collection.isError}
           value={formatMoney(collection.data?.total)}
-          hint={`${collection.data?.payments.length ?? 0} payments since ${formatDate(monthStart)}`}
+          hint={tr('{count} payments since {date}', { count: collection.data?.payments.length ?? 0, date: formatDate(monthStart) })}
           to="/finance/reports?view=collection"
         />
         <StatCard
-          label="Overdue"
+          label={tr('Overdue')}
           icon={AlertTriangle}
           loading={outstanding.isPending}
           error={outstanding.isError}
           value={formatMoney(outstanding.data?.total_outstanding)}
-          hint={`${outstanding.data?.count ?? 0} invoices past their due date`}
+          hint={tr('{count} invoices past their due date', { count: outstanding.data?.count ?? 0 })}
           to="/finance/reports"
         />
-        <StatCard label="Invoices issued" icon={FileText} loading={issued.isPending} error={issued.isError} value={issued.data?.count ?? 0} hint="Not cancelled" to="/finance/invoices?status=issued" />
-        <StatCard label="Scholarship grants" icon={HandCoins} loading={grants.isPending} error={grants.isError} value={grants.data?.count ?? 0} hint="Granted to students, past and present" to="/finance/scholarships" />
+        <StatCard label={tr('Invoices issued')} icon={FileText} loading={issued.isPending} error={issued.isError} value={issued.data?.count ?? 0} hint={tr('Not cancelled')} to="/finance/invoices?status=issued" />
+        <StatCard label={tr('Scholarship grants')} icon={HandCoins} loading={grants.isPending} error={grants.isError} value={grants.data?.count ?? 0} hint={tr('Granted to students, past and present')} to="/finance/scholarships" />
       </div>
 
       {methods.length > 0 && (
         <section className="rounded-lg border bg-card p-4">
-          <h2 className="mb-2 text-sm font-semibold">This month by method</h2>
+          <h2 className="mb-2 text-sm font-semibold">{tr('This month by method')}</h2>
           <dl className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
             {methods.map(([m, amount]) => (
               <div key={m}>
@@ -66,13 +67,13 @@ export default function OverviewPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
-          <SectionHeader title="Recent payments" description={<Link to="/finance/payments" className="underline">All payments</Link>} />
+          <SectionHeader title={tr('Recent payments')} description={<Link to="/finance/payments" className="underline">{tr('All payments')}</Link>} />
           {recent.isPending ? (
             <TableSkeleton rows={5} columns={3} />
           ) : recent.isError ? (
             <ErrorState error={recent.error} onRetry={() => void recent.refetch()} />
           ) : recent.data.results.length === 0 ? (
-            <EmptyState title="No payments yet" description="Record one from an invoice." />
+            <EmptyState title={tr('No payments yet')} description={tr('Record one from an invoice.')} />
           ) : (
             <ul className="divide-y rounded-lg border bg-card">
               {recent.data.results.map((p) => (
@@ -92,13 +93,13 @@ export default function OverviewPage() {
           )}
         </section>
         <section>
-          <SectionHeader title="Longest overdue" description={<Link to="/finance/reports" className="underline">Full list</Link>} />
+          <SectionHeader title={tr('Longest overdue')} description={<Link to="/finance/reports" className="underline">{tr('Full list')}</Link>} />
           {outstanding.isPending ? (
             <TableSkeleton rows={5} columns={3} />
           ) : outstanding.isError ? (
             <ErrorState error={outstanding.error} onRetry={() => void outstanding.refetch()} />
           ) : outstanding.data.invoices.length === 0 ? (
-            <EmptyState title="Nothing overdue" />
+            <EmptyState title={tr('Nothing overdue')} />
           ) : (
             <ul className="divide-y rounded-lg border bg-card">
               {outstanding.data.invoices.slice(0, 8).map((i) => (
@@ -109,7 +110,7 @@ export default function OverviewPage() {
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       {i.invoice_number}
-                      {i.section_name ? ` · ${i.section_name}` : ''} · {i.days_overdue} days overdue
+                      {tr('{value} · {days_overdue} days overdue', { value: i.section_name ? ` · ${i.section_name}` : '', days_overdue: i.days_overdue })}
                     </p>
                   </div>
                   <Money value={i.balance} className="font-medium text-danger" tone="none" />

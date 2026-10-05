@@ -10,6 +10,7 @@ import { ProgramsStep } from '../components/steps/ProgramsStep'
 import { SchoolStep } from '../components/steps/SchoolStep'
 import { YearStep } from '../components/steps/YearStep'
 import { useSetupProgress, type SetupStepId } from '../hooks/useSetupProgress'
+import { tr } from '@/lib/i18n'
 
 /**
  * First-login setup: seven steps, each skippable, resumable from the
@@ -39,9 +40,9 @@ export default function SetupWizardPage() {
 
   return (
     <>
-      <PageHeader title="Set up your school" description={`${setup.completed} of ${setup.total} steps done. Skip anything and come back later.`} />
+      <PageHeader title={tr('Set up your school')} description={tr('{completed} of {total} steps done. Skip anything and come back later.', { completed: setup.completed, total: setup.total })} />
       <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
-        <nav aria-label="Setup steps">
+        <nav aria-label={tr('Setup steps')}>
           <ol className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
             {setup.steps.map((s, i) => {
               const Icon = s.done ? CheckCircle2 : s.skipped ? MinusCircle : Circle
@@ -61,7 +62,7 @@ export default function SetupWizardPage() {
                     <span className="whitespace-nowrap">
                       <span className="tabular-nums">{i + 1}.</span> {s.title}
                     </span>
-                    <span className="sr-only">{s.done ? '(done)' : s.skipped ? '(skipped)' : ''}</span>
+                    <span className="sr-only">{s.done ? tr('(done)') : s.skipped ? tr('(skipped)') : ''}</span>
                   </button>
                 </li>
               )
@@ -71,9 +72,9 @@ export default function SetupWizardPage() {
         <section aria-labelledby="step-title" className="rounded-lg border bg-card">
           <header className="border-b p-4 sm:p-5">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Step {index + 1} of {ids.length}
-              {step.done && <span className="ml-2 text-success">· Done</span>}
-              {step.skipped && <span className="ml-2">· Skipped</span>}
+              {tr('Step {value} of {count}', { value: index + 1, count: ids.length })}
+              {step.done && <span className="ml-2 text-success">{'· ' + tr('Done')}</span>}
+              {step.skipped && <span className="ml-2">{'· ' + tr('Skipped')}</span>}
             </p>
             <h2 id="step-title" className="mt-0.5 text-lg font-semibold">
               {step.title}
@@ -91,17 +92,17 @@ export default function SetupWizardPage() {
           </div>
           <footer className="flex flex-wrap items-center justify-between gap-2 border-t p-4 sm:px-5">
             <Button variant="ghost" onClick={() => go(ids[index - 1]!)} disabled={index === 0}>
-              <ArrowLeft aria-hidden /> Back
+              <ArrowLeft aria-hidden /> {tr('Back')}
             </Button>
             <div className="flex gap-2">
               {!step.done && !isLast && (
                 <Button variant="outline" onClick={skip}>
-                  Skip for now
+                  {tr('Skip for now')}
                 </Button>
               )}
               {currentId !== 'school' && (
                 <Button onClick={next}>
-                  {isLast ? 'Finish' : 'Continue'} <ArrowRight aria-hidden />
+                  {isLast ? tr('Finish') : tr('Continue')} <ArrowRight aria-hidden />
                 </Button>
               )}
             </div>

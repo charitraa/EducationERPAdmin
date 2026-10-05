@@ -22,6 +22,7 @@ import { PlaceStudentDialog } from '../components/PlaceStudentDialog'
 import { STATUS_CHANGES, StatusChangeDialog } from '../components/StatusChangeDialog'
 import { TransferStudentDialog } from '../components/TransferStudentDialog'
 import { useStudent, useStudentEnrollments } from '../hooks/useStudents'
+import { tr, trc } from '@/lib/i18n'
 
 const STATUS_ICONS: Record<StudentStatus, typeof Pause> = { suspended: Pause, active: Play, graduated: GraduationCap, withdrawn: LogOut }
 const TABS = ['overview', 'history'] as const
@@ -56,8 +57,8 @@ function Attention({ student, onPlace }: { student: Student; onPlace: () => void
       <div className="mb-5 flex items-start gap-3 rounded-lg border border-info/20 bg-info-soft p-3 text-sm">
         <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-info" aria-hidden />
         <p>
-          Moves to <span className="font-medium">{upcoming.section_name}</span> on <span className="tabular-nums">{formatDate(upcoming.started_on)}</span>.
-          {enrollment?.section_name && <> Until then they stay in {enrollment.section_name}.</>}
+          {tr('Moves to')} <span className="font-medium">{upcoming.section_name}</span> {tr('on')} <span className="tabular-nums">{formatDate(upcoming.started_on)}</span>.
+          {enrollment?.section_name && <> {tr('Until then they stay in {section_name}.', { section_name: enrollment.section_name })}</>}
         </p>
       </div>
     )
@@ -67,11 +68,11 @@ function Attention({ student, onPlace }: { student: Student; onPlace: () => void
       <div className="mb-5 flex flex-col gap-3 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm sm:flex-row sm:items-center">
         <School className="hidden h-4 w-4 shrink-0 text-warning sm:block" aria-hidden />
         <p className="flex-1">
-          <span className="font-medium">Not in a class yet.</span> Until they are placed, they don’t appear on class registers, attendance or mark sheets.
+          <span className="font-medium">{tr('Not in a class yet.')}</span> {tr('Until they are placed, they don’t appear on class registers, attendance or mark sheets.')}
         </p>
         {can(PERMS.students.place) && (
           <Button size="sm" onClick={onPlace}>
-            Place in a class
+            {tr('Place in a class')}
           </Button>
         )}
       </div>
@@ -100,14 +101,14 @@ export default function StudentDetailPage() {
   const actions: WorkflowAction[] = [
     {
       id: 'place',
-      label: enrollment?.section ? 'Move class' : 'Place in class',
+      label: enrollment?.section ? tr('Move class') : tr('Place in class'),
       icon: School,
       from: enrolled,
       permission: PERMS.students.place,
       run: () => setPlacing(true),
     },
     ...(isMultiBranch
-      ? [{ id: 'transfer', label: 'Transfer', icon: ArrowRightLeft, from: enrolled, permission: PERMS.students.changeStatus, run: () => setTransferring(true) }]
+      ? [{ id: 'transfer', label: trc('student', 'Transfer'), icon: ArrowRightLeft, from: enrolled, permission: PERMS.students.changeStatus, run: () => setTransferring(true) }]
       : []),
     ...(Object.entries(STATUS_CHANGES) as Array<[StudentStatus, (typeof STATUS_CHANGES)[StudentStatus]]>).map(([to, c]) => ({
       id: to,
@@ -142,7 +143,7 @@ export default function StudentDetailPage() {
           <PermissionGate permission={PERMS.students.update}>
             <Button asChild variant="outline" size="sm">
               <Link to={`/students/${s.id}/edit`}>
-                <Pencil aria-hidden /> Edit details
+                <Pencil aria-hidden /> {tr('Edit details')}
               </Link>
             </Button>
           </PermissionGate>
@@ -157,42 +158,42 @@ export default function StudentDetailPage() {
 
       <Tabs value={tab} onValueChange={(t) => setParams(t === 'overview' ? {} : { tab: t }, { replace: true })}>
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="history">Class history</TabsTrigger>
+          <TabsTrigger value="overview">{tr('Overview')}</TabsTrigger>
+          <TabsTrigger value="history">{tr('Class history')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="grid gap-6 rounded-lg border bg-card p-4 sm:p-6 lg:col-span-2">
-              <Panel title="Personal details">
+              <Panel title={tr('Personal details')}>
                 <dl className="grid gap-4 sm:grid-cols-3">
-                  <Field label="First name">{s.first_name}</Field>
-                  <Field label="Middle name">{s.middle_name}</Field>
-                  <Field label="Last name">{s.last_name}</Field>
-                  <Field label="Date of birth">{s.date_of_birth && <BsDateDisplay value={s.date_of_birth} />}</Field>
-                  <Field label="Gender">{s.gender ? enumLabel('GenderEnum', s.gender) : ''}</Field>
+                  <Field label={tr('First name')}>{s.first_name}</Field>
+                  <Field label={tr('Middle name')}>{s.middle_name}</Field>
+                  <Field label={tr('Last name')}>{s.last_name}</Field>
+                  <Field label={tr('Date of birth')}>{s.date_of_birth && <BsDateDisplay value={s.date_of_birth} />}</Field>
+                  <Field label={tr('Gender')}>{s.gender ? enumLabel('GenderEnum', s.gender) : ''}</Field>
                 </dl>
               </Panel>
-              <Panel title="Contact">
+              <Panel title={tr('Contact')}>
                 <dl className="grid gap-4 sm:grid-cols-3">
-                  <Field label="Phone">{s.phone && <a href={`tel:${s.phone}`} className="tabular-nums hover:underline">{s.phone}</a>}</Field>
-                  <Field label="Email">{s.email && <a href={`mailto:${s.email}`} className="hover:underline">{s.email}</a>}</Field>
-                  <Field label="Address">{s.address}</Field>
+                  <Field label={tr('Phone')}>{s.phone && <a href={`tel:${s.phone}`} className="tabular-nums hover:underline">{s.phone}</a>}</Field>
+                  <Field label={tr('Email')}>{s.email && <a href={`mailto:${s.email}`} className="hover:underline">{s.email}</a>}</Field>
+                  <Field label={tr('Address')}>{s.address}</Field>
                 </dl>
               </Panel>
             </div>
             <div className="rounded-lg border bg-card p-4 sm:p-6">
-              <Panel title="Enrollment">
+              <Panel title={tr('Enrollment')}>
                 <dl className="grid gap-4">
-                  <Field label="Class">{enrollment?.section_name ?? (isEnrolled(s.status) ? 'Not placed yet' : '')}</Field>
-                  <Field label="Program">{enrollment?.program_name}</Field>
-                  <Field label="Academic year">{enrollment?.academic_year_name}</Field>
-                  {isMultiBranch && <Field label="Branch">{s.campus_name}</Field>}
-                  <Field label="In this class since">{enrollment?.section ? <span className="tabular-nums">{formatDate(enrollment.started_on)}</span> : ''}</Field>
-                  <Field label="Admitted on">
+                  <Field label={tr('Class')}>{enrollment?.section_name ?? (isEnrolled(s.status) ? tr('Not placed yet') : '')}</Field>
+                  <Field label={tr('Program')}>{enrollment?.program_name}</Field>
+                  <Field label={tr('Academic year')}>{enrollment?.academic_year_name}</Field>
+                  {isMultiBranch && <Field label={tr('Branch')}>{s.campus_name}</Field>}
+                  <Field label={tr('In this class since')}>{enrollment?.section ? <span className="tabular-nums">{formatDate(enrollment.started_on)}</span> : ''}</Field>
+                  <Field label={tr('Admitted on')}>
                     <span className="tabular-nums">{formatDate(s.admitted_on)}</span>
                   </Field>
-                  <Field label="Portal login">{s.user ? 'Linked' : 'No login account'}</Field>
+                  <Field label={tr('Portal login')}>{s.user ? tr('Linked') : tr('No login account')}</Field>
                 </dl>
               </Panel>
               <div className="mt-6 border-t pt-5">

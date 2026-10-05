@@ -10,8 +10,9 @@ import { toast } from '@/hooks/useToast'
 import { optionalIsoDate, requiredId } from '@/lib/validation'
 import type { Student } from '../api/students.api'
 import { useTransferStudent } from '../hooks/useStudents'
+import { tr, trc } from '@/lib/i18n'
 
-const schema = z.object({ campus: requiredId('Choose a branch.'), on_date: optionalIsoDate, reason: z.string().trim().max(255) })
+const schema = z.object({ campus: requiredId(tr('Choose a branch.')), on_date: optionalIsoDate, reason: z.string().trim().max(255) })
 
 /** Only reachable with two or more branches. The student arrives unplaced and needs a class at the new branch. */
 export function TransferStudentDialog({ student, open, onOpenChange }: { student: Student; open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -22,19 +23,19 @@ export function TransferStudentDialog({ student, open, onOpenChange }: { student
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={`Transfer ${student.full_name}`}
-      description={`From ${student.campus_name}. Their class there is closed; place them in a class at the new branch afterwards.`}
-      submitLabel="Transfer"
+      title={tr('Transfer {full_name}', { full_name: student.full_name })}
+      description={tr('From {campus_name}. Their class there is closed; place them in a class at the new branch afterwards.', { campus_name: student.campus_name })}
+      submitLabel={trc('student', 'Transfer')}
       schema={schema}
       defaultValues={{ campus: '', on_date: '', reason: '' }}
       onSubmit={async (v) => {
         await transfer.mutateAsync({ id: student.id, input: { campus: Number(v.campus), reason: v.reason, ...(v.on_date ? { on_date: v.on_date } : {}) } })
-        toast.success(`${student.full_name} transferred to ${branchName(Number(v.campus))}.`)
+        toast.success(tr('{full_name} transferred to {branchName}.', { full_name: student.full_name, branchName: branchName(Number(v.campus)) }))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
-          <FormField label="To branch" required error={errors.campus?.message}>
+          <FormField label={tr('To branch')} required error={errors.campus?.message}>
             {(p) => (
               <Controller
                 control={control}
@@ -50,10 +51,10 @@ export function TransferStudentDialog({ student, open, onOpenChange }: { student
               />
             )}
           </FormField>
-          <FormField label="Effective date (AD)" error={errors.on_date?.message} description="Leave empty for today.">
+          <FormField label={tr('Effective date (AD)')} error={errors.on_date?.message} description={tr('Leave empty for today.')}>
             {(p) => <Controller control={control} name="on_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
           </FormField>
-          <FormField label="Reason" error={errors.reason?.message}>
+          <FormField label={tr('Reason')} error={errors.reason?.message}>
             <Textarea {...register('reason')} rows={2} maxLength={255} />
           </FormField>
         </>

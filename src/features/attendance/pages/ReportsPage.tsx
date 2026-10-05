@@ -21,11 +21,12 @@ import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { TONE_CLASSES } from '@/shared/constants/statuses'
 import { STATUS_SHORT, STATUS_TONE, STATUSES, type Summary } from '../api/attendance.api'
 import { useDefaulters, useRegister, useStudentReport } from '../hooks/useAttendance'
+import { tr } from '@/lib/i18n'
 
 const VIEWS = [
-  { value: 'register', label: 'Class register' },
-  { value: 'defaulters', label: 'Defaulters' },
-  { value: 'student', label: 'One student' },
+  { value: 'register', label: tr('Class register') },
+  { value: 'defaulters', label: tr('Defaulters') },
+  { value: 'student', label: tr('One student') },
 ] as const
 
 const daysAgo = (n: number) => {
@@ -84,28 +85,28 @@ function RegisterView({ r }: { r: ReturnType<typeof useReportParams> }) {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3">
-        <Field label="Class" className="min-w-48">
-          {(id) => <SelectControl id={id} value={section} onChange={(v) => r.set('section', v)} options={sections} placeholder="Choose a class…" />}
+        <Field label={tr('Class')} className="min-w-48">
+          {(id) => <SelectControl id={id} value={section} onChange={(v) => r.set('section', v)} options={sections} placeholder={tr('Choose a class…')} />}
         </Field>
       </div>
       {!section ? (
-        <EmptyState title="Choose a class" description="The register shows every student against every session in the dates above." icon={CalendarRange} />
+        <EmptyState title={tr('Choose a class')} description={tr('The register shows every student against every session in the dates above.')} icon={CalendarRange} />
       ) : register.isPending ? (
         <TableSkeleton rows={8} columns={8} />
       ) : register.isError ? (
         <ErrorState error={register.error} onRetry={() => void register.refetch()} />
       ) : register.data.sessions.length === 0 ? (
-        <EmptyState title="No attendance in these dates" description={`Nothing was taken for ${register.data.section_name} between ${r.from} and ${r.to}.`} />
+        <EmptyState title={tr('No attendance in these dates')} description={tr('Nothing was taken for {section_name} between {from} and {to}.', { section_name: register.data.section_name, from: r.from, to: r.to })} />
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
-          <table className="w-full text-xs" aria-label={`Register for ${register.data.section_name}`}>
+          <table className="w-full text-xs" aria-label={tr('Register for {section_name}', { section_name: register.data.section_name })}>
             <thead className="bg-muted/50 text-muted-foreground">
               <tr>
                 <th scope="col" className="sticky left-0 z-10 min-w-44 bg-muted px-3 py-2 text-left font-medium">
-                  Student
+                  {tr('Student')}
                 </th>
                 {register.data.sessions.map((s) => (
-                  <th key={s.session} scope="col" className="px-1 py-2 text-center font-medium" title={[s.date, s.subject_name, s.status === 'open' ? 'not submitted' : null].filter(Boolean).join(' · ')}>
+                  <th key={s.session} scope="col" className="px-1 py-2 text-center font-medium" title={[s.date, s.subject_name, s.status === 'open' ? tr('not submitted') : null].filter(Boolean).join(' · ')}>
                     <Link to={`/attendance/sessions/${s.session}`} className={cn('block hover:underline', s.status === 'open' && 'italic')}>
                       <span className="block tabular-nums">{s.date.slice(5)}</span>
                       {s.subject_name && <span className="block max-w-14 truncate font-normal">{s.subject_name}</span>}
@@ -113,7 +114,7 @@ function RegisterView({ r }: { r: ReturnType<typeof useReportParams> }) {
                   </th>
                 ))}
                 <th scope="col" className="px-3 py-2 text-right font-medium">
-                  Attended
+                  {tr('Attended')}
                 </th>
               </tr>
             </thead>
@@ -131,7 +132,7 @@ function RegisterView({ r }: { r: ReturnType<typeof useReportParams> }) {
                           {STATUS_SHORT[m]}
                         </span>
                       ) : (
-                        <span className="text-muted-foreground" title="Not marked">
+                        <span className="text-muted-foreground" title={tr('Not marked')}>
                           ·
                         </span>
                       )}
@@ -145,7 +146,7 @@ function RegisterView({ r }: { r: ReturnType<typeof useReportParams> }) {
             </tbody>
           </table>
           <p className="border-t px-3 py-2 text-xs text-muted-foreground">
-            {STATUSES.map((s) => `${STATUS_SHORT[s]} ${enumLabel('AttendanceStatusEnum', s)}`).join(' · ')}. Excused, leave and medical leave don’t count against the percentage. Italic dates aren’t submitted yet.
+            {tr('{map}. Excused, leave and medical leave don’t count against the percentage. Italic dates aren’t submitted yet.', { map: STATUSES.map((s) => `${STATUS_SHORT[s]} ${enumLabel('AttendanceStatusEnum', s)}`).join(' · ') })}
           </p>
         </div>
       )}
@@ -165,10 +166,10 @@ function DefaultersView({ r }: { r: ReturnType<typeof useReportParams> }) {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3">
-        <Field label="Class" className="min-w-48">
-          {(id) => <SelectControl id={id} value={section} onChange={(v) => r.set('section', v)} options={sections} allowEmpty emptyLabel="All classes" />}
+        <Field label={tr('Class')} className="min-w-48">
+          {(id) => <SelectControl id={id} value={section} onChange={(v) => r.set('section', v)} options={sections} allowEmpty emptyLabel={tr('All classes')} />}
         </Field>
-        <Field label="Below (%)" className="w-28">
+        <Field label={tr('Below (%)')} className="w-28">
           {(id) => (
             <Input
               id={id}
@@ -188,19 +189,19 @@ function DefaultersView({ r }: { r: ReturnType<typeof useReportParams> }) {
       ) : report.isError ? (
         <ErrorState error={report.error} onRetry={() => void report.refetch()} />
       ) : report.data.students.length === 0 ? (
-        <EmptyState title={`Nobody is below ${report.data.below}%`} description="Every student with attendance in these dates is at or above the threshold." />
+        <EmptyState title={tr('Nobody is below {below}%', { below: report.data.below })} description={tr('Every student with attendance in these dates is at or above the threshold.')} />
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
-          <table className="w-full text-sm" aria-label="Defaulters">
+          <table className="w-full text-sm" aria-label={tr('Defaulters')}>
             <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
               <tr>
-                <th className="px-3 py-2">Student</th>
-                <th className="px-3 py-2">Class</th>
-                <th className="px-3 py-2 text-right">Present</th>
-                <th className="px-3 py-2 text-right">Absent</th>
-                <th className="px-3 py-2 text-right">Late</th>
-                <th className="px-3 py-2 text-right">Sessions</th>
-                <th className="px-3 py-2 text-right">Attended</th>
+                <th className="px-3 py-2">{tr('Student')}</th>
+                <th className="px-3 py-2">{tr('Class')}</th>
+                <th className="px-3 py-2 text-right">{tr('Present')}</th>
+                <th className="px-3 py-2 text-right">{tr('Absent')}</th>
+                <th className="px-3 py-2 text-right">{tr('Late')}</th>
+                <th className="px-3 py-2 text-right">{tr('Sessions')}</th>
+                <th className="px-3 py-2 text-right">{tr('Attended')}</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -238,7 +239,7 @@ function SummaryCard({ title, s }: { title: string; s: Summary }) {
         <Percent value={s.percentage} />
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        {s.attended} attended of {s.total} sessions
+        {tr('{attended} attended of {total} sessions', { attended: s.attended, total: s.total })}
         {STATUSES.filter((st) => s[st]).map((st) => ` · ${s[st]} ${enumLabel('AttendanceStatusEnum', st).toLowerCase()}`)}
       </p>
     </div>
@@ -252,7 +253,7 @@ function StudentView({ r }: { r: ReturnType<typeof useReportParams> }) {
   return (
     <>
       <div className="mb-4 max-w-md">
-        <Field label="Student">
+        <Field label={tr('Student')}>
           {(fid) => (
             <StudentPicker
               id={fid}
@@ -266,7 +267,7 @@ function StudentView({ r }: { r: ReturnType<typeof useReportParams> }) {
         </Field>
       </div>
       {id == null ? (
-        <EmptyState title="Find a student" description="Their attendance overall, for the daily roll call, and per subject." icon={UserSearch} />
+        <EmptyState title={tr('Find a student')} description={tr('Their attendance overall, for the daily roll call, and per subject.')} icon={UserSearch} />
       ) : report.isPending ? (
         <TableSkeleton rows={4} columns={4} />
       ) : report.isError ? (
@@ -275,20 +276,20 @@ function StudentView({ r }: { r: ReturnType<typeof useReportParams> }) {
         <div className="grid gap-4">
           <h2 className="text-base font-semibold">{report.data.student_name}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
-            <SummaryCard title="Overall" s={report.data.overall} />
-            <SummaryCard title="Daily roll call" s={report.data.daily} />
+            <SummaryCard title={tr('Overall')} s={report.data.overall} />
+            <SummaryCard title={tr('Daily roll call')} s={report.data.daily} />
           </div>
           {report.data.subjects.length > 0 && (
             <div className="overflow-x-auto rounded-lg border bg-card">
-              <table className="w-full text-sm" aria-label="Attendance per subject">
+              <table className="w-full text-sm" aria-label={tr('Attendance per subject')}>
                 <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
                   <tr>
-                    <th className="px-3 py-2">Subject</th>
-                    <th className="px-3 py-2 text-right">Present</th>
-                    <th className="px-3 py-2 text-right">Absent</th>
-                    <th className="px-3 py-2 text-right">Late</th>
-                    <th className="px-3 py-2 text-right">Lessons</th>
-                    <th className="px-3 py-2 text-right">Attended</th>
+                    <th className="px-3 py-2">{tr('Subject')}</th>
+                    <th className="px-3 py-2 text-right">{tr('Present')}</th>
+                    <th className="px-3 py-2 text-right">{tr('Absent')}</th>
+                    <th className="px-3 py-2 text-right">{tr('Late')}</th>
+                    <th className="px-3 py-2 text-right">{tr('Lessons')}</th>
+                    <th className="px-3 py-2 text-right">{tr('Attended')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -321,7 +322,7 @@ export default function ReportsPage() {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3">
-        <div className="inline-flex rounded-md border p-0.5" role="tablist" aria-label="Report">
+        <div className="inline-flex rounded-md border p-0.5" role="tablist" aria-label={tr('Report')}>
           {VIEWS.map((v) => (
             <button
               key={v.value}
@@ -335,11 +336,11 @@ export default function ReportsPage() {
             </button>
           ))}
         </div>
-        <Field label="From (AD)">{(id) => <DatePicker id={id} value={r.from} onChange={(v) => r.set('from', v)} />}</Field>
-        <Field label="To (AD)">{(id) => <DatePicker id={id} value={r.to} onChange={(v) => r.set('to', v)} />}</Field>
+        <Field label={tr('From (AD)')}>{(id) => <DatePicker id={id} value={r.from} onChange={(v) => r.set('from', v)} />}</Field>
+        <Field label={tr('To (AD)')}>{(id) => <DatePicker id={id} value={r.to} onChange={(v) => r.set('to', v)} />}</Field>
       </div>
       {!r.valid ? (
-        <EmptyState title="Check the dates" description="Give a from date on or before the to date (at most 400 days apart)." />
+        <EmptyState title={tr('Check the dates')} description={tr('Give a from date on or before the to date (at most 400 days apart).')} />
       ) : view === 'register' ? (
         <RegisterView r={r} />
       ) : view === 'defaulters' ? (

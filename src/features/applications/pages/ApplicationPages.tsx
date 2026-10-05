@@ -42,22 +42,23 @@ import {
   useSubmitApplication,
   useWithdrawApplication,
 } from '../hooks/useApplications'
+import { tr } from '@/lib/i18n'
 
 const TONE: Record<string, StatusTone> = { in_review: 'warning', returned: 'info', approved: 'success', rejected: 'danger', withdrawn: 'muted' }
 
 export function ApplicationStatus({ a }: { a: Pick<ApplicationRow, 'status' | 'step_name'> }) {
-  const label = a.status === 'in_review' && a.step_name ? `With ${a.step_name}` : a.status === 'returned' ? 'Sent back' : enumLabel('ApplicationStatusEnum', a.status)
+  const label = a.status === 'in_review' && a.step_name ? tr('With {step_name}', { step_name: a.step_name }) : a.status === 'returned' ? tr('Sent back') : enumLabel('ApplicationStatusEnum', a.status)
   return <StatusBadge status={a.status ?? 'in_review'} tone={TONE[a.status ?? 'in_review']} label={label} />
 }
 
 function columns(withCampus: boolean): Column<ApplicationRow>[] {
   return [
-    { id: 'number', header: 'No.', className: 'font-mono text-xs', cell: (a) => a.number },
-    { id: 'type', header: 'Form', mobile: 'title', cell: (a) => <span className="font-medium">{a.type_name}</span> },
-    { id: 'who', header: 'About', cell: (a) => a.subject_name || '—' },
-    { id: 'campus', header: 'Branch', hidden: !withCampus, cell: (a) => a.campus_name },
-    { id: 'when', header: 'Sent', mobile: 'hidden', className: 'whitespace-nowrap', cell: (a) => <span title={formatDateTime(a.submitted_at)}>{formatRelative(a.submitted_at)}</span> },
-    { id: 'status', header: 'Status', cell: (a) => <ApplicationStatus a={a} /> },
+    { id: 'number', header: tr('No.'), className: 'font-mono text-xs', cell: (a) => a.number },
+    { id: 'type', header: tr('Form'), mobile: 'title', cell: (a) => <span className="font-medium">{a.type_name}</span> },
+    { id: 'who', header: tr('About'), cell: (a) => a.subject_name || '—' },
+    { id: 'campus', header: tr('Branch'), hidden: !withCampus, cell: (a) => a.campus_name },
+    { id: 'when', header: tr('Sent'), mobile: 'hidden', className: 'whitespace-nowrap', cell: (a) => <span title={formatDateTime(a.submitted_at)}>{formatRelative(a.submitted_at)}</span> },
+    { id: 'status', header: tr('Status'), cell: (a) => <ApplicationStatus a={a} /> },
   ]
 }
 
@@ -69,14 +70,14 @@ export function PendingApplicationsPage() {
   const { isMultiBranch } = useBranches()
   return (
     <DataTable
-      ariaLabel="Waiting for me"
+      ariaLabel={tr('Waiting for me')}
       columns={columns(isMultiBranch)}
       query={query}
       list={list}
       getRowId={(a) => a.id}
       searchable={false}
       onRowClick={(a) => navigate(`/applications/${a.id}`)}
-      empty={{ title: 'Nothing waiting for you', description: 'Applications show here when their current step is one your role decides.' }}
+      empty={{ title: tr('Nothing waiting for you'), description: tr('Applications show here when their current step is one your role decides.') }}
     />
   )
 }
@@ -92,24 +93,24 @@ export function AllApplicationsPage() {
   return (
     <>
       <DataTable
-        ariaLabel="Applications"
+        ariaLabel={tr('Applications')}
         columns={columns(isMultiBranch)}
         query={query}
         list={list}
         getRowId={(a) => a.id}
-        searchPlaceholder="Number or name…"
+        searchPlaceholder={tr('Number or name…')}
         onRowClick={(a) => navigate(`/applications/${a.id}`)}
         toolbar={
           <Button onClick={() => setApplying(true)}>
-            <FilePlus2 aria-hidden /> New application
+            <FilePlus2 aria-hidden /> {tr('New application')}
           </Button>
         }
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('ApplicationStatusEnum') },
-          { name: 'application_type__kind', label: 'Kind', options: enumOptions('ApplicationKindEnum') },
-          { name: 'application_type', label: 'Form', options: (types.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('ApplicationStatusEnum') },
+          { name: 'application_type__kind', label: tr('Kind'), options: enumOptions('ApplicationKindEnum') },
+          { name: 'application_type', label: tr('Form'), options: (types.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name })) },
         ]}
-        empty={{ title: 'No applications', description: 'Requests from students, parents and staff show here as they’re sent.' }}
+        empty={{ title: tr('No applications'), description: tr('Requests from students, parents and staff show here as they’re sent.') }}
       />
       <ApplyDialog open={applying} onOpenChange={setApplying} office />
     </>
@@ -125,7 +126,7 @@ export function MyApplicationsPage() {
   return (
     <>
       <DataTable
-        ariaLabel="My applications"
+        ariaLabel={tr('My applications')}
         columns={columns(false)}
         query={query}
         list={list}
@@ -134,11 +135,11 @@ export function MyApplicationsPage() {
         onRowClick={(a) => navigate(`/applications/${a.id}`)}
         toolbar={
           <Button onClick={() => setApplying(true)}>
-            <FilePlus2 aria-hidden /> Apply
+            <FilePlus2 aria-hidden /> {tr('Apply')}
           </Button>
         }
-        filters={[{ name: 'status', label: 'Status', options: enumOptions('ApplicationStatusEnum') }]}
-        empty={{ title: 'You haven’t applied for anything', description: 'Certificates, leave, hostel, transport and other requests all start here.' }}
+        filters={[{ name: 'status', label: tr('Status'), options: enumOptions('ApplicationStatusEnum') }]}
+        empty={{ title: tr('You haven’t applied for anything'), description: tr('Certificates, leave, hostel, transport and other requests all start here.') }}
       />
       <ApplyDialog open={applying} onOpenChange={setApplying} />
     </>
@@ -183,17 +184,17 @@ export function ApplyDialog({ open, onOpenChange, office = false }: { open: bool
           setFieldErrors({})
         }
       }}
-      title={office ? 'New application' : 'Apply'}
-      description={office ? 'On a student’s or staff member’s behalf. It goes through the form’s approval steps like any other.' : undefined}
+      title={office ? tr('New application') : tr('Apply')}
+      description={office ? tr('On a student’s or staff member’s behalf. It goes through the form’s approval steps like any other.') : undefined}
       wide
-      submitLabel="Send"
-      schema={z.object({ type: z.string().min(1, 'Choose a form.'), staff: z.string(), campus: z.string() })}
+      submitLabel={tr('Send')}
+      schema={z.object({ type: z.string().min(1, tr('Choose a form.')), staff: z.string(), campus: z.string() })}
       defaultValues={{ type: '', staff: '', campus: String(selectedBranchId ?? defaultBranchId ?? '') }}
       onSubmit={async (v) => {
         const t = forms.find((f) => String(f.id) === v.type)!
         const gaps = missing(t.kind, t.fields, data)
         setFieldErrors(gaps)
-        if (Object.keys(gaps).length) throw new Error('Fill in the required answers.')
+        if (Object.keys(gaps).length) throw new Error(tr('Fill in the required answers.'))
         const who = SUBJECT[t.kind]
         const a = await submit.mutateAsync({
           application_type: t.id,
@@ -202,7 +203,7 @@ export function ApplyDialog({ open, onOpenChange, office = false }: { open: bool
           ...(office && (who === 'staff' || who === 'any') && v.staff ? { staff: Number(v.staff) } : {}),
           ...(who === 'any' && !student && !v.staff ? { campus: Number(v.campus) } : {}),
         })
-        toast.success(`Sent as ${a.number}.`)
+        toast.success(tr('Sent as {number}.', { number: a.number }))
         navigate(`/applications/${a.id}`)
       }}
     >
@@ -211,7 +212,7 @@ export function ApplyDialog({ open, onOpenChange, office = false }: { open: bool
         const who = t ? SUBJECT[t.kind] : null
         return (
           <>
-            <FormField label="Form" required error={errors.type?.message} description={t?.description || (t && `Decided by: ${t.steps.map((s) => s.name).join(' → ')}`)}>
+            <FormField label={tr('Form')} required error={errors.type?.message} description={t?.description || (t && tr('Decided by: {map}', { map: t.steps.map((s) => s.name).join(' → ') }))}>
               {(p) => (
                 <SelectControl
                   {...p}
@@ -222,23 +223,23 @@ export function ApplyDialog({ open, onOpenChange, office = false }: { open: bool
                     setData(next ? initialData(next.kind, next.fields) : {})
                     setFieldErrors({})
                   }}
-                  placeholder={forms.length ? 'Choose…' : 'No forms set up yet'}
+                  placeholder={forms.length ? tr('Choose…') : tr('No forms set up yet')}
                   options={forms.map((f) => ({ value: String(f.id), label: f.name }))}
                 />
               )}
             </FormField>
             {t && office && (who === 'student' || who === 'any') && (
-              <FormField label="Student" required={who === 'student'}>
+              <FormField label={tr('Student')} required={who === 'student'}>
                 {(p) => <StudentPicker {...p} value={student} onChange={setStudent} />}
               </FormField>
             )}
             {t && office && (who === 'staff' || (who === 'any' && !student)) && (
-              <FormField label="Staff member" required={who === 'staff'}>
-                {(p) => <SelectControl {...p} value={watch('staff')} onChange={(s) => setValue('staff', s)} allowEmpty={who === 'any'} options={staff.data ?? []} placeholder="Choose…" />}
+              <FormField label={tr('Staff member')} required={who === 'staff'}>
+                {(p) => <SelectControl {...p} value={watch('staff')} onChange={(s) => setValue('staff', s)} allowEmpty={who === 'any'} options={staff.data ?? []} placeholder={tr('Choose…')} />}
               </FormField>
             )}
             {t && who === 'any' && !student && !watch('staff') && isMultiBranch && (
-              <FormField label="Branch">
+              <FormField label={tr('Branch')}>
                 {(p) => <SelectControl {...p} value={watch('campus')} onChange={(c) => setValue('campus', c)} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
               </FormField>
             )}
@@ -275,7 +276,7 @@ function History({ a }: { a: Application }) {
             {e.step_name && <span className="text-muted-foreground"> · {e.step_name}</span>}
           </p>
           <p className="text-xs text-muted-foreground">
-            {e.by_name || 'The applicant'} · {formatDateTime(e.at)}
+            {e.by_name || tr('The applicant')} · {formatDateTime(e.at)}
           </p>
           {e.note && <p className="mt-1 rounded-md bg-muted px-2 py-1">{e.note}</p>}
         </li>
@@ -288,7 +289,7 @@ function History({ a }: { a: Application }) {
 function BedSelect({ value, onChange, ...p }: { value: string; onChange: (v: string) => void; id?: string }) {
   const beds = useBeds({ ...PICKER_PARAMS, is_active: true })
   const free = (beds.data?.results ?? []).filter((b) => b.occupant == null)
-  return <SelectControl {...p} value={value} onChange={onChange} placeholder="Choose a free bed…" options={free.map((b) => ({ value: String(b.id), label: `${b.room_label} · bed ${b.label}` }))} />
+  return <SelectControl {...p} value={value} onChange={onChange} placeholder={tr('Choose a free bed…')} options={free.map((b) => ({ value: String(b.id), label: tr('{room_label} · bed {label}', { room_label: b.room_label, label: b.label }) }))} />
 }
 
 type Acting = 'approve' | 'reject' | 'send_back' | 'withdraw' | 'resubmit' | null
@@ -330,19 +331,19 @@ export function ApplicationDetailPage() {
             {a.type_name} <span className="font-mono text-base text-muted-foreground">{a.number}</span> <ApplicationStatus a={a} />
           </span>
         }
-        description={`${a.subject_name ? `About ${a.subject_name} · ` : ''}${a.campus_name} · sent ${formatDateTime(a.submitted_at)}`}
+        description={tr('{value}{campus_name} · sent {dateTime}', { value: a.subject_name ? tr('About {subject_name}', { subject_name: a.subject_name }) + ' · ' : '', campus_name: a.campus_name, dateTime: formatDateTime(a.submitted_at) })}
         actions={
           <>
             {decides && (
               <>
                 <Button onClick={() => setActing('approve')}>
-                  <CheckCircle2 aria-hidden /> {lastStep ? 'Approve' : 'Approve step'}
+                  <CheckCircle2 aria-hidden /> {lastStep ? tr('Approve') : tr('Approve step')}
                 </Button>
                 <Button variant="outline" onClick={() => setActing('send_back')}>
-                  <CornerUpLeft aria-hidden /> Send back
+                  <CornerUpLeft aria-hidden /> {tr('Send back')}
                 </Button>
                 <Button variant="outline" onClick={() => setActing('reject')}>
-                  <XCircle aria-hidden /> Reject
+                  <XCircle aria-hidden /> {tr('Reject')}
                 </Button>
               </>
             )}
@@ -353,12 +354,12 @@ export function ApplicationDetailPage() {
                   setActing('resubmit')
                 }}
               >
-                <RotateCcw aria-hidden /> Change and resubmit
+                <RotateCcw aria-hidden /> {tr('Change and resubmit')}
               </Button>
             )}
             {open && (isApplicant || can(PERMS.applications.manage)) && (
               <Button variant="outline" onClick={() => setActing('withdraw')}>
-                <Undo2 aria-hidden /> Withdraw
+                <Undo2 aria-hidden /> {tr('Withdraw')}
               </Button>
             )}
           </>
@@ -366,34 +367,34 @@ export function ApplicationDetailPage() {
       />
       {a.status === 'returned' && (
         <p className="mb-4 rounded-lg border border-info/25 bg-info-soft p-3 text-sm">
-          Sent back for changes: {[...(a.events ?? [])].reverse().find((e) => e.action === 'returned')?.note}
+          {tr('Sent back for changes') + ':'} {[...(a.events ?? [])].reverse().find((e) => e.action === 'returned')?.note}
         </p>
       )}
       {a.status === 'approved' && a.outcome_label && (
         <p className="mb-4 rounded-lg border border-success/25 bg-success-soft p-3 text-sm">
-          Done: {a.outcome_label}
+          {tr('Done: {outcome_label}', { outcome_label: a.outcome_label })}
           {a.outcome?.type === 'applications.certificate' && (
             <>
               {' '}
-              <Link to={`/certificates/${String(a.outcome.id)}`} className="font-medium underline">View the certificate</Link>
+              <Link to={`/certificates/${String(a.outcome.id)}`} className="font-medium underline">{tr('View the certificate')}</Link>
             </>
           )}
         </p>
       )}
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="grid content-start gap-4 lg:col-span-2">
-          <Section title="Details">
+          <Section title={tr('Details')}>
             <DataView data={a.data} extra={extra} />
           </Section>
           {(a.contact_name || a.contact_email || a.contact_phone) && (
-            <Section title="Contact">
+            <Section title={tr('Contact')}>
               <p className="text-sm">{[a.contact_name, a.contact_email, a.contact_phone].filter(Boolean).join(' · ')}</p>
             </Section>
           )}
         </div>
         <div className="grid content-start gap-4">
           {type && (
-            <Section title="Approval steps">
+            <Section title={tr('Approval steps')}>
               <ol className="grid gap-1.5 text-sm">
                 {type.steps.map((s) => {
                   const done = a.status === 'approved' || (s.sequence ?? 0) < a.step!
@@ -401,14 +402,14 @@ export function ApplicationDetailPage() {
                   return (
                     <li key={s.sequence} className={now ? 'font-medium' : done ? 'text-muted-foreground line-through decoration-muted-foreground/40' : 'text-muted-foreground'}>
                       {s.sequence}. {s.name}
-                      {now && <span className="ml-2 text-xs font-normal text-warning">now</span>}
+                      {now && <span className="ml-2 text-xs font-normal text-warning">{tr('now')}</span>}
                     </li>
                   )
                 })}
               </ol>
             </Section>
           )}
-          <Section title="History">
+          <Section title={tr('History')}>
             <History a={a} />
           </Section>
         </div>
@@ -417,12 +418,12 @@ export function ApplicationDetailPage() {
       <FormDialog
         open={acting === 'approve'}
         onOpenChange={close}
-        title={lastStep ? 'Approve this application?' : `Approve the ${a.step_name ?? 'current'} step?`}
-        description={lastStep ? 'This is the last step: approving carries the request out.' : 'It moves on to the next step.'}
-        submitLabel="Approve"
+        title={lastStep ? tr('Approve this application?') : tr('Approve the {step_name} step?', { step_name: a.step_name ?? 'current' })}
+        description={lastStep ? tr('This is the last step: approving carries the request out.') : tr('It moves on to the next step.')}
+        submitLabel={tr('Approve')}
         schema={z.object({ note: z.string(), bed: z.string(), employee_number: z.string() }).superRefine((v, ctx) => {
-          if (needs.includes('bed') && !v.bed) ctx.addIssue({ code: 'custom', path: ['bed'], message: 'Choose a bed.' })
-          if (needs.includes('employee_number') && !v.employee_number.trim()) ctx.addIssue({ code: 'custom', path: ['employee_number'], message: 'Required.' })
+          if (needs.includes('bed') && !v.bed) ctx.addIssue({ code: 'custom', path: ['bed'], message: tr('Choose a bed.') })
+          if (needs.includes('employee_number') && !v.employee_number.trim()) ctx.addIssue({ code: 'custom', path: ['employee_number'], message: tr('Required.') })
         })}
         defaultValues={{ note: '', bed: '', employee_number: '' }}
         onSubmit={async (v) => {
@@ -430,22 +431,22 @@ export function ApplicationDetailPage() {
           if (needs.includes('bed')) decision.bed = Number(v.bed)
           if (needs.includes('employee_number')) decision.employee_number = v.employee_number.trim()
           await approve.mutateAsync({ id: a.id, note: v.note, decision })
-          toast.success(lastStep ? 'Approved.' : 'Step approved.')
+          toast.success(lastStep ? tr('Approved.') : tr('Step approved.'))
         }}
       >
         {({ register, watch, setValue, formState: { errors } }) => (
           <>
             {needs.includes('bed') && (
-              <FormField label="Bed" required error={errors.bed?.message}>
+              <FormField label={tr('Bed')} required error={errors.bed?.message}>
                 {(p) => <BedSelect {...p} value={watch('bed')} onChange={(b) => setValue('bed', b, { shouldValidate: true })} />}
               </FormField>
             )}
             {needs.includes('employee_number') && (
-              <FormField label="Employee number" required error={errors.employee_number?.message}>
+              <FormField label={tr('Employee number')} required error={errors.employee_number?.message}>
                 <Input {...register('employee_number')} className="font-mono" />
               </FormField>
             )}
-            <FormField label="Note">
+            <FormField label={tr('Note')}>
               <Textarea {...register('note')} rows={2} />
             </FormField>
           </>
@@ -454,20 +455,20 @@ export function ApplicationDetailPage() {
       <FormDialog
         open={acting === 'reject' || acting === 'send_back' || acting === 'withdraw'}
         onOpenChange={close}
-        title={acting === 'reject' ? 'Reject this application?' : acting === 'send_back' ? 'Send back for changes' : 'Withdraw this application?'}
-        description={acting === 'send_back' ? 'The applicant sees your note, changes their answers and resubmits.' : acting === 'reject' ? 'The applicant sees your reason.' : undefined}
-        submitLabel={acting === 'reject' ? 'Reject' : acting === 'send_back' ? 'Send back' : 'Withdraw'}
-        schema={z.object({ note: z.string().trim() }).refine((v) => acting === 'withdraw' || v.note.length > 0, { path: ['note'], message: 'Say why.' })}
+        title={acting === 'reject' ? tr('Reject this application?') : acting === 'send_back' ? tr('Send back for changes') : tr('Withdraw this application?')}
+        description={acting === 'send_back' ? tr('The applicant sees your note, changes their answers and resubmits.') : acting === 'reject' ? tr('The applicant sees your reason.') : undefined}
+        submitLabel={acting === 'reject' ? tr('Reject') : acting === 'send_back' ? tr('Send back') : tr('Withdraw')}
+        schema={z.object({ note: z.string().trim() }).refine((v) => acting === 'withdraw' || v.note.length > 0, { path: ['note'], message: tr('Say why.') })}
         defaultValues={{ note: '' }}
         onSubmit={async (v) => {
           if (acting === 'reject') await reject.mutateAsync({ id: a.id, note: v.note })
           else if (acting === 'send_back') await sendBack.mutateAsync({ id: a.id, note: v.note })
           else await withdraw.mutateAsync({ id: a.id, note: v.note })
-          toast.success(acting === 'reject' ? 'Rejected.' : acting === 'send_back' ? 'Sent back.' : 'Withdrawn.')
+          toast.success(acting === 'reject' ? tr('Rejected.') : acting === 'send_back' ? tr('Sent back.') : tr('Withdrawn.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label={acting === 'send_back' ? 'What to change' : acting === 'reject' ? 'Reason' : 'Note'} required={acting !== 'withdraw'} error={errors.note?.message}>
+          <FormField label={acting === 'send_back' ? tr('What to change') : acting === 'reject' ? tr('Reason') : tr('Note')} required={acting !== 'withdraw'} error={errors.note?.message}>
             <Textarea {...register('note')} rows={3} />
           </FormField>
         )}
@@ -475,21 +476,21 @@ export function ApplicationDetailPage() {
       <FormDialog
         open={acting === 'resubmit'}
         onOpenChange={close}
-        title="Change and resubmit"
+        title={tr('Change and resubmit')}
         wide
-        submitLabel="Resubmit"
+        submitLabel={tr('Resubmit')}
         schema={z.object({ note: z.string() })}
         defaultValues={{ note: '' }}
         onSubmit={async (v) => {
-          if (Object.keys(missing(kind, extra, data)).length) throw new Error('Fill in the required answers.')
+          if (Object.keys(missing(kind, extra, data)).length) throw new Error(tr('Fill in the required answers.'))
           await resubmit.mutateAsync({ id: a.id, data: toPayload(kind, extra, data), note: v.note })
-          toast.success('Resubmitted.')
+          toast.success(tr('Resubmitted.'))
         }}
       >
         {({ register }) => (
           <>
             <KindFields kind={kind} extra={extra} value={data} onChange={setData} errors={missing(kind, extra, data)} />
-            <FormField label="Note to the reviewer">
+            <FormField label={tr('Note to the reviewer')}>
               <Input {...register('note')} />
             </FormField>
           </>

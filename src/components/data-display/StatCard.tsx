@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { CardSkeleton } from './LoadingState'
+import { tr } from '@/lib/i18n'
 
 interface StatCardProps {
   label: string
@@ -25,7 +26,7 @@ export function StatCard({ label, value, icon: Icon, hint, to, loading, error, c
       </div>
       <p className="mt-2 text-2xl font-semibold tabular-nums">{error ? '—' : value}</p>
       {(hint || error) && (
-        <p className="mt-0.5 text-xs text-muted-foreground">{error ? "Couldn't load" : hint}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{error ? tr("Couldn't load") : hint}</p>
       )}
     </>
   )

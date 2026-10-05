@@ -12,6 +12,7 @@ import { SectionHeader } from '../../components/SectionHeader'
 import type { Department } from '../api/departments.api'
 import { DepartmentFormDialog } from '../components/DepartmentFormDialog'
 import { useDepartments, useRemoveDepartment } from '../hooks/useDepartments'
+import { tr } from '@/lib/i18n'
 
 export default function DepartmentsPage() {
   const list = useListState({ defaultOrdering: 'name' })
@@ -20,46 +21,46 @@ export default function DepartmentsPage() {
   const remove = useRemoveDepartment()
 
   const columns: Column<Department>[] = [
-    { id: 'code', header: 'Code', sortField: 'code', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (d) => d.code },
-    { id: 'name', header: 'Name', sortField: 'name', mobile: 'title', cell: (d) => <span className="font-medium">{d.name}</span> },
-    { id: 'head', header: 'Head', cell: (d) => d.head_name || <span className="text-muted-foreground">—</span> },
+    { id: 'code', header: tr('Code'), sortField: 'code', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (d) => d.code },
+    { id: 'name', header: tr('Name'), sortField: 'name', mobile: 'title', cell: (d) => <span className="font-medium">{d.name}</span> },
+    { id: 'head', header: tr('Head'), cell: (d) => d.head_name || <span className="text-muted-foreground">—</span> },
   ]
 
   return (
     <>
       <SectionHeader
-        title="Departments"
-        description="Optional. Group programs and subjects, e.g. Science, Management."
+        title={tr('Departments')}
+        description={tr('Optional. Group programs and subjects, e.g. Science, Management.')}
         action={
           <PermissionGate permission={PERMS.academics.structure}>
             <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add department
+              <Plus aria-hidden /> {tr('Add department')}
             </Button>
           </PermissionGate>
         }
       />
       <DataTable
-        ariaLabel="Departments"
+        ariaLabel={tr('Departments')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(d) => d.id}
-        searchPlaceholder="Search departments…"
+        searchPlaceholder={tr('Search departments…')}
         rowActions={(d) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(d) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(d) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(d) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(d) },
             ]}
           />
         )}
         empty={{
-          title: 'No departments',
-          description: 'Small schools often skip departments. Add them if you group subjects by faculty.',
+          title: tr('No departments'),
+          description: tr('Small schools often skip departments. Add them if you group subjects by faculty.'),
           action: (
             <PermissionGate permission={PERMS.academics.structure}>
               <Button variant="outline" onClick={crud.openCreate}>
-                Add a department
+                {tr('Add a department')}
               </Button>
             </PermissionGate>
           ),
@@ -70,10 +71,10 @@ export default function DepartmentsPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`the ${crud.deleting.name} department`}
+          subject={tr('the {name} department', { name: crud.deleting.name })}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Department deleted.')
+            toast.success(tr('Department deleted.'))
           }}
         />
       )}

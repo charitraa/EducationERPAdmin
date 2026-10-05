@@ -1,21 +1,22 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { to: '/alumni', label: 'Directory', end: true },
-  { to: '/alumni/mentors', label: 'Mentors' },
-  { to: '/alumni/events', label: 'Events' },
-  { to: '/alumni/campaigns', label: 'Campaigns' },
-  { to: '/alumni/donations', label: 'Donations' },
+  { to: '/alumni', label: tr('Directory'), end: true },
+  { to: '/alumni/mentors', label: tr('Mentors') },
+  { to: '/alumni/events', label: tr('Events') },
+  { to: '/alumni/campaigns', label: tr('Campaigns') },
+  { to: '/alumni/donations', label: tr('Donations') },
 ]
 
 /** Alumni: graduates and their records, mentoring, events and giving. */
 export function AlumniLayout() {
   return (
     <div>
-      <PageHeader title="Alumni" description="Keep in touch with graduates: where they are now, mentoring, reunions and fundraising." />
-      <nav aria-label="Alumni" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Alumni')} description={tr('Keep in touch with graduates: where they are now, mentoring, reunions and fundraising.')} />
+      <nav aria-label={tr('Alumni')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.to}>

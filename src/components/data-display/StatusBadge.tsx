@@ -1,5 +1,6 @@
 import { Circle } from 'lucide-react'
 import { humanize } from '@/lib/formatters'
+import { tr } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import { STATUS_STYLES, TONE_CLASSES, type StatusTone } from '@/shared/constants/statuses'
 
@@ -23,7 +24,7 @@ export function StatusBadge({ status, label, tone, className }: StatusBadgeProps
       )}
     >
       <Icon className="h-3 w-3" aria-hidden />
-      {label ?? humanize(status)}
+      {label ?? tr(humanize(status))}
     </span>
   )
 }

@@ -16,6 +16,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Id } from '@/shared/types/api'
 import type { Ticket } from '../api/support.api'
 import { useAssignTicket } from '../hooks/useSupport'
+import { tr } from '@/lib/i18n'
 
 /** Pick who works the ticket. The backend only accepts people who can manage support. */
 export function AssignTicketDialog({ ticket, open, onOpenChange }: { ticket: Ticket; open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -41,7 +42,7 @@ export function AssignTicketDialog({ ticket, open, onOpenChange }: { ticket: Tic
     setError(null)
     try {
       await assign.mutateAsync({ id: ticket.id, user: target.id })
-      toast.success(`Assigned to ${target.name}.`)
+      toast.success(tr('Assigned to {name}.', { name: target.name }))
       onOpenChange(false)
     } catch (err) {
       setError(errorMessage(err))
@@ -55,22 +56,22 @@ export function AssignTicketDialog({ ticket, open, onOpenChange }: { ticket: Tic
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign ticket #{ticket.id}</DialogTitle>
-          <DialogDescription>They see it in their list and can resolve it. Open tickets move to in progress.</DialogDescription>
+          <DialogTitle>{tr('Assign ticket #{id}', { id: ticket.id })}</DialogTitle>
+          <DialogDescription>{tr('They see it in their list and can resolve it. Open tickets move to in progress.')}</DialogDescription>
         </DialogHeader>
         <FormError message={error} />
         {me && (
           <Button variant="outline" onClick={() => void submit({ id: me.id, name: 'you' })} disabled={assign.isPending}>
-            <UserCheck aria-hidden /> Assign to me
+            <UserCheck aria-hidden /> {tr('Assign to me')}
           </Button>
         )}
         {canSearch && (
           <div className="grid gap-2">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Or find someone by name or email…" className="pl-9" aria-label="Find a person" />
+              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tr('Or find someone by name or email…')} className="pl-9" aria-label={tr('Find a person')} />
             </div>
-            <div role="listbox" aria-label="People" className="max-h-56 overflow-y-auto rounded-md border">
+            <div role="listbox" aria-label={tr('People')} className="max-h-56 overflow-y-auto rounded-md border">
               {users.isPending ? (
                 <div className="p-3">
                   <Spinner />
@@ -92,7 +93,7 @@ export function AssignTicketDialog({ ticket, open, onOpenChange }: { ticket: Tic
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block font-medium">{name}</span>
-                          <span className="block truncate text-xs text-muted-foreground">{u.role_assignments.map((a) => a.role_name).join(', ') || 'No role'}</span>
+                          <span className="block truncate text-xs text-muted-foreground">{u.role_assignments.map((a) => a.role_name).join(', ') || tr('No role')}</span>
                         </span>
                         {selected && <Check className="h-4 w-4 text-primary" aria-hidden />}
                       </button>
@@ -104,11 +105,11 @@ export function AssignTicketDialog({ ticket, open, onOpenChange }: { ticket: Tic
         )}
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tr('Cancel')}
           </Button>
           {canSearch && (
             <Button onClick={() => chosen && void submit(chosen)} disabled={!chosen || assign.isPending}>
-              Assign{chosen ? ` to ${chosen.name}` : ''}
+              {tr('Assign')}{chosen ? ' ' + tr('to {name}', { name: chosen.name }) : ''}
             </Button>
           )}
         </DialogFooter>

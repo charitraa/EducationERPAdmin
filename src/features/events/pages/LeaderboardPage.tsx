@@ -19,13 +19,14 @@ import { toast } from '@/hooks/useToast'
 import { cn } from '@/lib/utils'
 import { PERMS } from '@/shared/constants/permissions'
 import { useAwardPoints, useLeaderboard } from '../hooks/useEvents'
+import { tr } from '@/lib/i18n'
 
 const MEDALS = ['text-yellow-500', 'text-slate-400', 'text-amber-700']
 
 const schema = z.object({
-  student: z.custom<Student | null>().refine((s) => s != null, 'Choose a student.'),
-  points: z.string().trim().regex(/^-?[1-9]\d*$/, 'A whole number; negative to take points away.'),
-  reason: z.string().trim().min(1, 'Required: the student sees it.').max(255),
+  student: z.custom<Student | null>().refine((s) => s != null, tr('Choose a student.')),
+  points: z.string().trim().regex(/^-?[1-9]\d*$/, tr('A whole number; negative to take points away.')),
+  reason: z.string().trim().min(1, tr('Required: the student sees it.')).max(255),
 })
 
 export default function LeaderboardPage() {
@@ -37,12 +38,12 @@ export default function LeaderboardPage() {
   return (
     <>
       <SectionHeader
-        title="Leaderboard"
-        description="The 20 students with the most points across all events."
+        title={tr('Leaderboard')}
+        description={tr('The 20 students with the most points across all events.')}
         action={
           <PermissionGate permission={PERMS.events.manage}>
             <Button onClick={() => setGiving(true)}>
-              <Plus aria-hidden /> Give points
+              <Plus aria-hidden /> {tr('Give points')}
             </Button>
           </PermissionGate>
         }
@@ -53,13 +54,13 @@ export default function LeaderboardPage() {
         ) : board.isError ? (
           <ErrorState error={board.error} onRetry={() => void board.refetch()} />
         ) : board.data.length === 0 ? (
-          <EmptyState title="No points yet" description="Points come from point rules when students are checked in or win, or are given by hand." icon={Trophy} />
+          <EmptyState title={tr('No points yet')} description={tr('Points come from point rules when students are checked in or win, or are given by hand.')} icon={Trophy} />
         ) : (
           <ol className="divide-y">
             {board.data.map((r) => (
               <li key={r.student} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="w-8 text-center font-semibold tabular-nums">
-                  {r.rank <= 3 ? <Trophy className={cn('mx-auto h-5 w-5', MEDALS[r.rank - 1])} aria-label={`Rank ${r.rank}`} /> : r.rank}
+                  {r.rank <= 3 ? <Trophy className={cn('mx-auto h-5 w-5', MEDALS[r.rank - 1])} aria-label={tr('Rank {rank}', { rank: r.rank })} /> : r.rank}
                 </span>
                 <div className="min-w-0 flex-1">
                   {can(PERMS.students.view) ? (
@@ -72,7 +73,7 @@ export default function LeaderboardPage() {
                   <p className="font-mono text-xs text-muted-foreground">{r.student_number}</p>
                 </div>
                 <span className="text-lg font-semibold tabular-nums">{r.points}</span>
-                <span className="text-xs text-muted-foreground">pts</span>
+                <span className="text-xs text-muted-foreground">{tr('pts')}</span>
               </li>
             ))}
           </ol>
@@ -82,26 +83,26 @@ export default function LeaderboardPage() {
         open={giving}
         onOpenChange={setGiving}
         wide
-        title="Give points by hand"
-        description="For things outside an event: helping at the library, a good deed. Use a negative number to correct a mistake."
-        submitLabel="Give points"
+        title={tr('Give points by hand')}
+        description={tr('For things outside an event: helping at the library, a good deed. Use a negative number to correct a mistake.')}
+        submitLabel={tr('Give points')}
         schema={schema}
         defaultValues={{ student: null, points: '', reason: '' }}
         onSubmit={async (v) => {
           await award.mutateAsync({ student: v.student!.id, points: Number(v.points), reason: v.reason })
-          toast.success(`${Number(v.points) > 0 ? '+' : ''}${v.points} points for ${v.student!.full_name}.`)
+          toast.success(tr('{value}{points} points for {full_name}.', { value: Number(v.points) > 0 ? '+' : '', points: v.points, full_name: v.student!.full_name }))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
-            <FormField label="Student" required error={errors.student?.message}>
+            <FormField label={tr('Student')} required error={errors.student?.message}>
               {(p) => <Controller control={control} name="student" render={({ field }) => <StudentPicker {...p} value={field.value} onChange={field.onChange} />} />}
             </FormField>
             <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
-              <FormField label="Points" required error={errors.points?.message}>
+              <FormField label={tr('Points')} required error={errors.points?.message}>
                 <Input {...register('points')} inputMode="numeric" />
               </FormField>
-              <FormField label="Reason" required error={errors.reason?.message}>
+              <FormField label={tr('Reason')} required error={errors.reason?.message}>
                 <Input {...register('reason')} maxLength={255} />
               </FormField>
             </div>

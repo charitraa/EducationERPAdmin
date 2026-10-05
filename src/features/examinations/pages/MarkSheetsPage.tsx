@@ -18,6 +18,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { MarkSheet, MyPaper } from '../api/examinations.api'
 import { SheetBadge } from '../components/ExamMarksPanel'
 import { useExamOptions, useMyPapers, useOpenSheet, useSheets } from '../hooks/useExaminations'
+import { tr } from '@/lib/i18n'
 
 export function MyPapers() {
   const navigate = useNavigate()
@@ -38,9 +39,9 @@ export function MyPapers() {
     }
   }
   if (mine.isPending) return <TableSkeleton rows={3} columns={4} />
-  if (mine.isError && isStatus(mine.error, 404)) return <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">Your account has no staff profile, so no papers are assigned to you.</p>
+  if (mine.isError && isStatus(mine.error, 404)) return <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('Your account has no staff profile, so no papers are assigned to you.')}</p>
   if (mine.isError) return <ErrorState error={mine.error} onRetry={() => void mine.refetch()} />
-  if (mine.data.length === 0) return <EmptyState title="No papers to mark" description="Papers of scheduled exams, for subjects you teach, appear here." icon={ClipboardList} />
+  if (mine.data.length === 0) return <EmptyState title={tr('No papers to mark')} description={tr('Papers of scheduled exams, for subjects you teach, appear here.')} icon={ClipboardList} />
   return (
     <ul className="divide-y rounded-lg border bg-card">
       {mine.data.map((p) => {
@@ -60,10 +61,10 @@ export function MyPapers() {
             {p.held ? (
               <Button size="sm" variant={p.sheet ? 'outline' : 'default'} onClick={() => void go(p)} disabled={opening != null}>
                 {opening === k && <Loader2 className="animate-spin" aria-hidden />}
-                {p.status === 'open' || p.status == null ? 'Enter marks' : 'View'}
+                {p.status === 'open' || p.status == null ? tr('Enter marks') : tr('View')}
               </Button>
             ) : (
-              <span className="text-xs text-muted-foreground">Opens after the paper</span>
+              <span className="text-xs text-muted-foreground">{tr('Opens after the paper')}</span>
             )}
           </li>
         )
@@ -80,7 +81,7 @@ function AllSheets() {
   const columns: Column<MarkSheet>[] = [
     {
       id: 'paper',
-      header: 'Paper',
+      header: tr('Paper'),
       mobile: 'title',
       cell: (s) => (
         <span className="font-medium">
@@ -88,13 +89,13 @@ function AllSheets() {
         </span>
       ),
     },
-    { id: 'exam', header: 'Exam', cell: (s) => s.exam_name },
-    { id: 'date', header: 'Sat', className: 'tabular-nums', cell: (s) => formatDate(s.date) },
-    { id: 'status', header: 'Status', cell: (s) => <SheetBadge status={s.status} /> },
+    { id: 'exam', header: tr('Exam'), cell: (s) => s.exam_name },
+    { id: 'date', header: tr('Sat'), className: 'tabular-nums', cell: (s) => formatDate(s.date) },
+    { id: 'status', header: tr('Status'), cell: (s) => <SheetBadge status={s.status} /> },
   ]
   return (
     <DataTable
-      ariaLabel="Mark sheets"
+      ariaLabel={tr('Mark sheets')}
       columns={columns}
       query={query}
       list={list}
@@ -102,10 +103,10 @@ function AllSheets() {
       searchable={false}
       onRowClick={(s) => navigate(`/examinations/mark-sheets/${s.id}`)}
       filters={[
-        { name: 'status', label: 'Status', options: enumOptions('MarkSheetStatusEnum') },
-        { name: 'exam', label: 'Exam', options: (exams.data ?? []).map((e) => ({ value: String(e.id), label: e.name })) },
+        { name: 'status', label: tr('Status'), options: enumOptions('MarkSheetStatusEnum') },
+        { name: 'exam', label: tr('Exam'), options: (exams.data ?? []).map((e) => ({ value: String(e.id), label: e.name })) },
       ]}
-      empty={{ title: 'No mark sheets yet', description: 'A sheet opens when a teacher (or the office) starts entering marks for a paper that has been sat.' }}
+      empty={{ title: tr('No mark sheets yet'), description: tr('A sheet opens when a teacher (or the office) starts entering marks for a paper that has been sat.') }}
     />
   )
 }
@@ -117,13 +118,13 @@ export default function MarkSheetsPage() {
     <div className="grid gap-8">
       {can(PERMS.exams.mark) && (
         <section>
-          <SectionHeader title="My papers" description="Subjects you teach, in exams that are scheduled." />
+          <SectionHeader title={tr('My papers')} description={tr('Subjects you teach, in exams that are scheduled.')} />
           <MyPapers />
         </section>
       )}
       {can(PERMS.exams.view) && (
         <section>
-          <SectionHeader title="All mark sheets" />
+          <SectionHeader title={tr('All mark sheets')} />
           <AllSheets />
         </section>
       )}

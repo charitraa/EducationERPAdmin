@@ -15,6 +15,7 @@ import { formatDate } from '@/lib/dates'
 import { enumLabel, enumOptions } from '@/lib/formatters'
 import { publicApi, type PublicVacancy, type Receipt } from '../api/public.api'
 import { answersPayload, blankAnswers, loadError, missingAnswers, nestedErrors, PublicLayout, Questions, ReceiptCard, useOrgCode, type Answers } from '../components/PublicParts'
+import { tr } from '@/lib/i18n'
 
 function useVacancies() {
   const code = useOrgCode()
@@ -28,13 +29,13 @@ export function PublicCareersPage() {
   const code = useOrgCode()
   const vacancies = useVacancies()
   return (
-    <PublicLayout title="Work with us" description="Open positions. Apply online; no account needed.">
+    <PublicLayout title={tr('Work with us')} description={tr('Open positions. Apply online; no account needed.')}>
       {vacancies.isPending ? (
         <PageLoader />
       ) : vacancies.isError ? (
         <ErrorState error={loadError(vacancies.error)} onRetry={() => void vacancies.refetch()} />
       ) : vacancies.data.length === 0 ? (
-        <p className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">No open positions right now. Please check back later.</p>
+        <p className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">{tr('No open positions right now. Please check back later.')}</p>
       ) : (
         <ul className="grid gap-3">
           {vacancies.data.map((v) => (
@@ -44,7 +45,7 @@ export function PublicCareersPage() {
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                   <MapPin className="h-3.5 w-3.5" aria-hidden /> {meta(v)}
                 </p>
-                {v.closes_on && <p className="mt-1 text-xs text-muted-foreground">Apply by {formatDate(v.closes_on)}</p>}
+                {v.closes_on && <p className="mt-1 text-xs text-muted-foreground">{tr('Apply by {date}', { date: formatDate(v.closes_on) })}</p>}
               </Link>
             </li>
           ))}
@@ -98,19 +99,19 @@ export function PublicVacancyPage() {
   if (vacancy.isPending) return <PageLoader />
   if (vacancy.isError)
     return (
-      <PublicLayout title="Position not found">
+      <PublicLayout title={tr('Position not found')}>
         <p className="text-sm text-muted-foreground">
-          It may have closed. <Link to={`/public/${code}/careers`} className="text-primary hover:underline">See open positions</Link>.
+          {tr('It may have closed.')} <Link to={`/public/${code}/careers`} className="text-primary hover:underline">{tr('See open positions')}</Link>.
         </p>
       </PublicLayout>
     )
   const v = vacancy.data
   if (receipt)
     return (
-      <PublicLayout title="Thank you" description={`Your application for ${v.title} has been received.`}>
-        <ReceiptCard receipt={receipt} what="Application" />
+      <PublicLayout title={tr('Thank you')} description={tr('Your application for {title} has been received.', { title: v.title })}>
+        <ReceiptCard receipt={receipt} what={tr('Application')} />
         <p className="mt-4 text-sm">
-          Use them on the <Link to={`/public/${code}/application/status?number=${receipt.number}`} className="font-medium text-primary hover:underline">status page</Link> to follow your application, and to answer a job offer if we make you one.
+          {tr('Use them on the')} <Link to={`/public/${code}/application/status?number=${receipt.number}`} className="font-medium text-primary hover:underline">{tr('status page')}</Link> {tr('to follow your application, and to answer a job offer if we make you one.')}
         </p>
       </PublicLayout>
     )
@@ -123,7 +124,7 @@ export function PublicVacancyPage() {
     if (!String(answers.email ?? '').trim() && !String(answers.phone ?? '').trim()) gaps.email = 'An email or a phone number, so we can reach you.'
     if (v.resume_required && !resume) gaps.resume_file = 'Attach your CV.'
     setErrors(gaps)
-    setMessage(Object.keys(gaps).length ? 'Fill in the highlighted answers.' : null)
+    setMessage(Object.keys(gaps).length ? tr('Fill in the highlighted answers.') : null)
     if (Object.keys(gaps).length) return
     const data: Record<string, unknown> = {}
     for (const [k] of PERSONAL) if (answers[k]) data[k] = answers[k]
@@ -151,7 +152,7 @@ export function PublicVacancyPage() {
         {v.description && <p className="whitespace-pre-wrap">{v.description}</p>}
         {v.requirements.length > 0 && (
           <>
-            <h2 className="mb-1 mt-4 font-semibold">What we’re looking for</h2>
+            <h2 className="mb-1 mt-4 font-semibold">{tr('What we’re looking for')}</h2>
             <ul className="ml-5 list-disc">
               {v.requirements.map((r) => (
                 <li key={r}>{r}</li>
@@ -161,17 +162,17 @@ export function PublicVacancyPage() {
         )}
         <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
           <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" aria-hidden /> {enumLabel('ContractKindEnum', v.contract_kind)}</span>
-          {v.openings > 1 && <span>{v.openings} openings</span>}
-          {v.min_experience_years != null && <span>{v.min_experience_years}+ years’ experience</span>}
-          {v.closes_on && <span>Apply by {formatDate(v.closes_on)}</span>}
+          {v.openings > 1 && <span>{tr('{openings} openings', { openings: v.openings })}</span>}
+          {v.min_experience_years != null && <span>{tr('{min_experience_years}+ years’ experience', { min_experience_years: v.min_experience_years })}</span>}
+          {v.closes_on && <span>{tr('Apply by {date}', { date: formatDate(v.closes_on) })}</span>}
         </p>
       </section>
 
       <form onSubmit={onSubmit} noValidate className="mt-8 grid gap-6">
-        <h2 className="text-lg font-semibold">Apply</h2>
+        <h2 className="text-lg font-semibold">{tr('Apply')}</h2>
         <FormError message={message} />
         <fieldset className="grid gap-4 sm:grid-cols-3">
-          <legend className="mb-2 text-sm font-semibold">About you</legend>
+          <legend className="mb-2 text-sm font-semibold">{tr('About you')}</legend>
           {PERSONAL.map(([k, label, req]) => (
             <FormField key={k} label={label} required={req} error={errors[k]}>
               {(p) =>
@@ -187,66 +188,66 @@ export function PublicVacancyPage() {
           ))}
         </fieldset>
         <fieldset className="grid gap-4">
-          <legend className="mb-2 text-sm font-semibold">Your CV</legend>
-          <FormField label="CV file" required={v.resume_required} error={errors.resume_file} description="PDF or Word.">
+          <legend className="mb-2 text-sm font-semibold">{tr('Your CV')}</legend>
+          <FormField label={tr('CV file')} required={v.resume_required} error={errors.resume_file} description={tr('PDF or Word.')}>
             {(p) => <Input {...p} type="file" accept=".pdf,.doc,.docx,application/pdf" onChange={(e) => setResume(e.target.files?.[0] ?? null)} />}
           </FormField>
-          <FormField label="Cover letter" error={errors.cover_letter}>
+          <FormField label={tr('Cover letter')} error={errors.cover_letter}>
             <Textarea value={cover} onChange={(e) => setCover(e.target.value)} rows={4} />
           </FormField>
-          <FormField label="Summary">
-            <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={2} placeholder="A few lines about your experience." />
+          <FormField label={tr('Summary')}>
+            <Textarea value={summary} onChange={(e) => setSummary(e.target.value)} rows={2} placeholder={tr('A few lines about your experience.')} />
           </FormField>
-          <FormField label="Skills" description="Separated by commas.">
-            <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="Algebra, classroom management" />
+          <FormField label={tr('Skills')} description={tr('Separated by commas.')}>
+            <Input value={skills} onChange={(e) => setSkills(e.target.value)} placeholder={tr('Algebra, classroom management')} />
           </FormField>
           <div className="grid gap-2">
-            <p className="text-sm font-medium">Education</p>
+            <p className="text-sm font-medium">{tr('Education')}</p>
             {education.map((r, i) => (
               <div key={i} className="grid grid-cols-[1fr_1fr_6rem_auto] gap-2">
-                <Input aria-label={`Qualification ${i + 1}`} placeholder="Qualification" value={r.qualification} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, qualification: e.target.value } : x)))} />
-                <Input aria-label={`Institution ${i + 1}`} placeholder="Institution" value={r.institution} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, institution: e.target.value } : x)))} />
-                <Input aria-label={`Year ${i + 1}`} placeholder="Year" inputMode="numeric" value={r.year} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, year: e.target.value } : x)))} />
-                <Button type="button" variant="ghost" size="icon" aria-label={`Remove education ${i + 1}`} onClick={() => setEducation(education.filter((_, j) => j !== i))}>
+                <Input aria-label={tr('Qualification {value}', { value: i + 1 })} placeholder={tr('Qualification')} value={r.qualification} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, qualification: e.target.value } : x)))} />
+                <Input aria-label={tr('Institution {value}', { value: i + 1 })} placeholder={tr('Institution')} value={r.institution} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, institution: e.target.value } : x)))} />
+                <Input aria-label={tr('Year {value}', { value: i + 1 })} placeholder={tr('Year')} inputMode="numeric" value={r.year} onChange={(e) => setEducation(education.map((x, j) => (j === i ? { ...x, year: e.target.value } : x)))} />
+                <Button type="button" variant="ghost" size="icon" aria-label={tr('Remove education {value}', { value: i + 1 })} onClick={() => setEducation(education.filter((_, j) => j !== i))}>
                   <Trash2 aria-hidden />
                 </Button>
               </div>
             ))}
             <div>
               <Button type="button" size="sm" variant="outline" onClick={() => setEducation([...education, { institution: '', qualification: '', year: '' }])}>
-                <Plus aria-hidden /> Add education
+                <Plus aria-hidden /> {tr('Add education')}
               </Button>
             </div>
           </div>
           <div className="grid gap-2">
-            <p className="text-sm font-medium">Experience</p>
+            <p className="text-sm font-medium">{tr('Experience')}</p>
             {experience.map((r, i) => (
               <div key={i} className="grid gap-2 rounded-md border p-2 sm:grid-cols-[1fr_1fr_auto]">
-                <Input aria-label={`Job title ${i + 1}`} placeholder="Job title" value={r.title} onChange={(e) => setExperience(experience.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
-                <Input aria-label={`Employer ${i + 1}`} placeholder="Employer" value={r.employer} onChange={(e) => setExperience(experience.map((x, j) => (j === i ? { ...x, employer: e.target.value } : x)))} />
-                <Button type="button" variant="ghost" size="icon" aria-label={`Remove experience ${i + 1}`} onClick={() => setExperience(experience.filter((_, j) => j !== i))}>
+                <Input aria-label={tr('Job title {value}', { value: i + 1 })} placeholder={tr('Job title')} value={r.title} onChange={(e) => setExperience(experience.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)))} />
+                <Input aria-label={tr('Employer {value}', { value: i + 1 })} placeholder={tr('Employer')} value={r.employer} onChange={(e) => setExperience(experience.map((x, j) => (j === i ? { ...x, employer: e.target.value } : x)))} />
+                <Button type="button" variant="ghost" size="icon" aria-label={tr('Remove experience {value}', { value: i + 1 })} onClick={() => setExperience(experience.filter((_, j) => j !== i))}>
                   <Trash2 aria-hidden />
                 </Button>
-                <DatePicker aria-label={`From ${i + 1}`} value={r.start_date} onChange={(d) => setExperience(experience.map((x, j) => (j === i ? { ...x, start_date: d } : x)))} />
-                <DatePicker aria-label={`To ${i + 1}`} value={r.end_date} onChange={(d) => setExperience(experience.map((x, j) => (j === i ? { ...x, end_date: d } : x)))} />
+                <DatePicker aria-label={tr('From {value}', { value: i + 1 })} value={r.start_date} onChange={(d) => setExperience(experience.map((x, j) => (j === i ? { ...x, start_date: d } : x)))} />
+                <DatePicker aria-label={tr('To {value}', { value: i + 1 })} value={r.end_date} onChange={(d) => setExperience(experience.map((x, j) => (j === i ? { ...x, end_date: d } : x)))} />
               </div>
             ))}
             <div>
               <Button type="button" size="sm" variant="outline" onClick={() => setExperience([...experience, { employer: '', title: '', start_date: '', end_date: '' }])}>
-                <Plus aria-hidden /> Add experience
+                <Plus aria-hidden /> {tr('Add experience')}
               </Button>
             </div>
           </div>
         </fieldset>
         {v.form_fields.length > 0 && (
           <fieldset className="grid gap-4 sm:grid-cols-2">
-            <legend className="mb-2 text-sm font-semibold">A few more questions</legend>
+            <legend className="mb-2 text-sm font-semibold">{tr('A few more questions')}</legend>
             <Questions fields={v.form_fields} value={Object.keys(answers).length ? answers : blankAnswers(v.form_fields)} onChange={setAnswers} errors={errors} />
           </fieldset>
         )}
         <div>
           <Button type="submit" className="h-10" disabled={apply.isPending}>
-            {apply.isPending ? 'Sending…' : 'Send application'}
+            {apply.isPending ? tr('Sending…') : tr('Send application')}
           </Button>
         </div>
       </form>

@@ -24,9 +24,10 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Role } from '../api/roles.api'
 import { PermissionPicker } from '../components/PermissionPicker'
 import { useCreateRole, usePermissionCatalogue, useRemoveRole, useRole, useUpdateRole } from '../hooks/useRoles'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({
-  name: z.string().trim().min(1, 'Required.').max(150),
+  name: z.string().trim().min(1, tr('Required.')).max(150),
   code,
   description: z.string(),
   permissions: z.array(z.string()),
@@ -79,10 +80,10 @@ function RoleEditor({ record, catalogue }: { record: Role | null; catalogue: Non
       if (record) {
         const saved = await update.mutateAsync({ id: record.id, input: v })
         form.reset(defaults(saved))
-        toast.success('Role saved. Everyone holding it gets the change at their next page load.')
+        toast.success(tr('Role saved. Everyone holding it gets the change at their next page load.'))
       } else {
         const saved = await create.mutateAsync(v)
-        toast.success(`Role ${saved.name} created. Give it to users from their page.`)
+        toast.success(tr('Role {name} created. Give it to users from their page.', { name: saved.name }))
         setSavedTo(`/roles/${saved.id}`)
       }
     } catch (err) {
@@ -94,16 +95,16 @@ function RoleEditor({ record, catalogue }: { record: Role | null; catalogue: Non
     <>
       <PageHeader
         backTo="/roles"
-        title={record ? record.name : 'New role'}
+        title={record ? record.name : tr('New role')}
         description={
           record
-            ? `${record.assigned_user_count ?? 0} ${record.assigned_user_count === 1 ? 'person holds' : 'people hold'} this role.`
-            : 'A named set of permissions you can give to users, e.g. “Accountant” or “Exam coordinator”.'
+            ? (record.assigned_user_count === 1 ? tr('1 person holds this role.') : tr('{count} people hold this role.', { count: record.assigned_user_count ?? 0 }))
+            : tr('A named set of permissions you can give to users, e.g. “Accountant” or “Exam coordinator”.')
         }
         actions={
           record && !record.is_system && can(PERMS.roles.delete) ? (
             <Button variant="outline" size="sm" onClick={() => setDeleting(true)}>
-              <Trash2 aria-hidden /> Delete
+              <Trash2 aria-hidden /> {tr('Delete')}
             </Button>
           ) : undefined
         }
@@ -111,28 +112,28 @@ function RoleEditor({ record, catalogue }: { record: Role | null; catalogue: Non
       {record?.is_system && (
         <div className="mb-5 flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-sm">
           <Lock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          Built-in role, managed by the platform. To change what it allows, create your own role instead.
+          {tr('Built-in role, managed by the platform. To change what it allows, create your own role instead.')}
         </div>
       )}
       <form onSubmit={submit} noValidate className="max-w-4xl">
         <div className="rounded-lg border bg-card p-4 sm:p-6">
           <FormError message={serverError} className="mb-4" />
           <fieldset disabled={readOnly} className="contents">
-            <FormSection title="About the role">
+            <FormSection title={tr('About the role')}>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label="Name" required error={errors.name?.message}>
-                  <Input {...register('name')} autoFocus={!record} placeholder="Accountant" />
+                <FormField label={tr('Name')} required error={errors.name?.message}>
+                  <Input {...register('name')} autoFocus={!record} placeholder={tr('Accountant')} />
                 </FormField>
-                <FormField label="Code" required error={errors.code?.message} description="Short and unique; letters, numbers, - and _.">
+                <FormField label={tr('Code')} required error={errors.code?.message} description={tr('Short and unique; letters, numbers, - and _.')}>
                   <Input {...register('code')} className="font-mono" />
                 </FormField>
               </div>
-              <FormField label="Description" error={errors.description?.message}>
-                <Textarea {...register('description')} rows={2} placeholder="Who should get this role and why." />
+              <FormField label={tr('Description')} error={errors.description?.message}>
+                <Textarea {...register('description')} rows={2} placeholder={tr('Who should get this role and why.')} />
               </FormField>
             </FormSection>
-            <FormSection title="What it allows" description="Tick what people with this role may do. You can only grant permissions you hold yourself.">
-              <FormField label="Permissions" error={errors.permissions?.message}>
+            <FormSection title={tr('What it allows')} description={tr('Tick what people with this role may do. You can only grant permissions you hold yourself.')}>
+              <FormField label={tr('Permissions')} error={errors.permissions?.message}>
                 {() => (
                   <Controller
                     control={control}
@@ -147,11 +148,11 @@ function RoleEditor({ record, catalogue }: { record: Role | null; catalogue: Non
         {!readOnly && (
           <div className="sticky bottom-16 mt-4 flex justify-end gap-2 md:bottom-4">
             <Button type="button" variant="outline" onClick={() => navigate('/roles')}>
-              Cancel
+              {tr('Cancel')}
             </Button>
             <Button type="submit" disabled={formState.isSubmitting || (record != null && !formState.isDirty)}>
               {formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-              {record ? 'Save changes' : 'Create role'}
+              {record ? tr('Save changes') : tr('Create role')}
             </Button>
           </div>
         )}
@@ -161,11 +162,11 @@ function RoleEditor({ record, catalogue }: { record: Role | null; catalogue: Non
         <DeleteDialog
           open={deleting}
           onOpenChange={setDeleting}
-          subject={`the role ${record.name}`}
-          description={record.assigned_user_count ? `${record.assigned_user_count} people lose the permissions it gives them.` : undefined}
+          subject={tr('the role {name}', { name: record.name })}
+          description={record.assigned_user_count ? tr('{assigned_user_count} people lose the permissions it gives them.', { assigned_user_count: record.assigned_user_count }) : undefined}
           onConfirm={async () => {
             await remove.mutateAsync(record.id)
-            toast.success('Role deleted.')
+            toast.success(tr('Role deleted.'))
             setSavedTo('/roles')
           }}
         />

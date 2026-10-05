@@ -12,8 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
 import { useAuth } from '@/hooks/useAuth'
-import { humanize } from '@/lib/formatters'
-import { setLocale, t, useLocale } from '@/lib/i18n'
+import { enumLabel } from '@/lib/formatters'
+import { setLocale, t, useLocale, tr } from '@/lib/i18n'
 import { initials } from '@/lib/utils'
 
 export function ProfileMenu() {
@@ -22,11 +22,11 @@ export function ProfileMenu() {
   const locale = useLocale()
   const navigate = useNavigate()
   if (!user) return null
-  const roleLabel = user.roles[0]?.name ?? humanize(user.user_type)
+  const roleLabel = user.roles[0] ? tr(user.roles[0].name) : enumLabel('UserTypeEnum', user.user_type)
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-md p-1 text-left hover:bg-muted" aria-label="Account menu">
+      <DropdownMenuTrigger className="flex items-center gap-2 rounded-md p-1 text-left hover:bg-muted" aria-label={tr('Account menu')}>
         <Avatar className="h-8 w-8">
           <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">{initials(user.full_name || user.email)}</AvatarFallback>
         </Avatar>

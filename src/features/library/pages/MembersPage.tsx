@@ -26,20 +26,21 @@ import { optionalWholeNumber } from '@/lib/validation'
 import { PERMS } from '@/shared/constants/permissions'
 import type { Member, MemberInput } from '../api/library.api'
 import { useCreateMember, useDeactivateMember, useMembers, useUpdateMember } from '../hooks/useLibrary'
+import { tr } from '@/lib/i18n'
 
-const rate = z.union([z.literal(''), z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'An amount like 5 or 5.50.')])
+const rate = z.union([z.literal(''), z.string().trim().regex(/^\d+(\.\d{1,2})?$/, tr('An amount like 5 or 5.50.'))])
 
 const schema = z
   .object({
     who: z.enum(['student', 'staff']),
     student: z.custom<Student | null>(),
     staff: z.string(),
-    campus: z.string().min(1, 'Choose a branch.'),
+    campus: z.string().min(1, tr('Choose a branch.')),
     max_books: optionalWholeNumber,
     loan_period_days: optionalWholeNumber,
     daily_fine_rate: rate,
   })
-  .refine((v) => (v.who === 'student' ? v.student != null : v.staff !== ''), { path: ['staff'], message: 'Choose who this membership is for.' })
+  .refine((v) => (v.who === 'student' ? v.student != null : v.staff !== ''), { path: ['staff'], message: tr('Choose who this membership is for.') })
 
 /** New memberships take the usual limits for students or staff unless you set them. */
 function MemberDialog({ open, record, onOpenChange }: { open: boolean; record: Member | null; onOpenChange: (o: boolean) => void }) {
@@ -52,8 +53,8 @@ function MemberDialog({ open, record, onOpenChange }: { open: boolean; record: M
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? `Edit ${record.full_name}’s membership` : 'New library member'}
-      description={record ? undefined : 'Leave the limits empty to use the usual ones for students or staff.'}
+      title={record ? tr('Edit {full_name}’s membership', { full_name: record.full_name }) : tr('New library member')}
+      description={record ? undefined : tr('Leave the limits empty to use the usual ones for students or staff.')}
       schema={schema}
       defaultValues={{
         who: (record?.staff ? 'staff' : 'student') as 'student' | 'staff',
@@ -72,12 +73,12 @@ function MemberDialog({ open, record, onOpenChange }: { open: boolean; record: M
         }
         if (record) {
           await update.mutateAsync({ id: record.id, input: limits })
-          toast.success('Membership saved.')
+          toast.success(tr('Membership saved.'))
           return
         }
         const input: MemberInput = { campus: Number(v.campus), ...(v.who === 'student' ? { student: v.student!.id } : { staff: Number(v.staff) }), ...limits }
         const m = await create.mutateAsync(input)
-        toast.success(`${m.full_name} is member ${m.member_number}.`)
+        toast.success(tr('{full_name} is member {member_number}.', { full_name: m.full_name, member_number: m.member_number }))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
@@ -85,35 +86,35 @@ function MemberDialog({ open, record, onOpenChange }: { open: boolean; record: M
           {!record && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label="Member is">
+                <FormField label={tr('Member is')}>
                   {(p) => <Controller control={control} name="who" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('MembershipTypeEnum')} />} />}
                 </FormField>
                 {isMultiBranch && (
-                  <FormField label="Library (branch)" required error={errors.campus?.message}>
+                  <FormField label={tr('Library (branch)')} required error={errors.campus?.message}>
                     {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
                   </FormField>
                 )}
               </div>
               {watch('who') === 'student' ? (
-                <FormField label="Student" required error={errors.staff?.message ?? errors.student?.message}>
+                <FormField label={tr('Student')} required error={errors.staff?.message ?? errors.student?.message}>
                   {(p) => <Controller control={control} name="student" render={({ field }) => <StudentPicker {...p} value={field.value} onChange={field.onChange} />} />}
                 </FormField>
               ) : (
-                <FormField label="Staff member" required error={errors.staff?.message}>
+                <FormField label={tr('Staff member')} required error={errors.staff?.message}>
                   {(p) => <Controller control={control} name="staff" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={staff.data ?? []} loading={staff.isPending} />} />}
                 </FormField>
               )}
             </>
           )}
           <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="Books at once" error={errors.max_books?.message}>
-              <Input {...register('max_books')} inputMode="numeric" placeholder="Usual" />
+            <FormField label={tr('Books at once')} error={errors.max_books?.message}>
+              <Input {...register('max_books')} inputMode="numeric" placeholder={tr('Usual')} />
             </FormField>
-            <FormField label="Loan days" error={errors.loan_period_days?.message}>
-              <Input {...register('loan_period_days')} inputMode="numeric" placeholder="Usual" />
+            <FormField label={tr('Loan days')} error={errors.loan_period_days?.message}>
+              <Input {...register('loan_period_days')} inputMode="numeric" placeholder={tr('Usual')} />
             </FormField>
-            <FormField label="Fine per late day" error={errors.daily_fine_rate?.message}>
-              <Input {...register('daily_fine_rate')} inputMode="decimal" placeholder="Usual" />
+            <FormField label={tr('Fine per late day')} error={errors.daily_fine_rate?.message}>
+              <Input {...register('daily_fine_rate')} inputMode="decimal" placeholder={tr('Usual')} />
             </FormField>
           </div>
         </>
@@ -131,61 +132,61 @@ export default function MembersPage() {
   const [editing, setEditing] = useState<Member | 'new' | null>(null)
   const [leaving, setLeaving] = useState<Member | null>(null)
   const columns: Column<Member>[] = [
-    { id: 'number', header: 'Member no.', className: 'font-mono text-xs', cell: (m) => m.member_number },
-    { id: 'name', header: 'Name', mobile: 'title', cell: (m) => <span className="font-medium">{m.full_name}</span> },
-    { id: 'type', header: 'Type', cell: (m) => enumLabel('MembershipTypeEnum', m.membership_type) },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (m) => branchName(m.campus) },
-    { id: 'out', header: 'Books out', className: 'tabular-nums', cell: (m) => `${m.active_issues} of ${m.max_books ?? '?'}` },
-    { id: 'terms', header: 'Loan · fine', mobile: 'hidden', cell: (m) => (
+    { id: 'number', header: tr('Member no.'), className: 'font-mono text-xs', cell: (m) => m.member_number },
+    { id: 'name', header: tr('Name'), mobile: 'title', cell: (m) => <span className="font-medium">{m.full_name}</span> },
+    { id: 'type', header: tr('Type'), cell: (m) => enumLabel('MembershipTypeEnum', m.membership_type) },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (m) => branchName(m.campus) },
+    { id: 'out', header: tr('Books out'), className: 'tabular-nums', cell: (m) => tr('{active_issues} of {max_books}', { active_issues: m.active_issues, max_books: m.max_books ?? '?' }) },
+    { id: 'terms', header: tr('Loan · fine'), mobile: 'hidden', cell: (m) => (
       <span>
-        {m.loan_period_days} days · <Money value={m.daily_fine_rate} />/day
+        {m.loan_period_days} {tr('days') + ' ·'} <Money value={m.daily_fine_rate} />{tr('/day')}
       </span>
     ) },
-    { id: 'joined', header: 'Joined', mobile: 'hidden', className: 'tabular-nums', cell: (m) => formatDate(m.joined_on) },
-    { id: 'status', header: 'Status', cell: (m) => <StatusBadge status={m.is_active === false ? 'inactive' : 'active'} label={m.is_active === false ? 'Inactive' : 'Active'} /> },
+    { id: 'joined', header: tr('Joined'), mobile: 'hidden', className: 'tabular-nums', cell: (m) => formatDate(m.joined_on) },
+    { id: 'status', header: tr('Status'), cell: (m) => <StatusBadge status={m.is_active === false ? 'inactive' : 'active'} label={m.is_active === false ? tr('Inactive') : tr('Active')} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Library members"
+        ariaLabel={tr('Library members')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(m) => m.id}
-        searchPlaceholder="Name, member or student no.…"
+        searchPlaceholder={tr('Name, member or student no.…')}
         toolbar={
           <PermissionGate permission={PERMS.library.manage}>
             <Button onClick={() => setEditing('new')}>
-              <UserPlus aria-hidden /> New member
+              <UserPlus aria-hidden /> {tr('New member')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'membership_type', label: 'Type', options: enumOptions('MembershipTypeEnum') },
-          { name: 'is_active', label: 'Status', options: [{ value: 'true', label: 'Active' }, { value: 'false', label: 'Inactive' }] },
+          { name: 'membership_type', label: tr('Type'), options: enumOptions('MembershipTypeEnum') },
+          { name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('Active') }, { value: 'false', label: tr('Inactive') }] },
         ]}
         rowActions={(m) => (
           <RowActions
             actions={[
-              { label: 'Loans', icon: BookOpen, onSelect: () => navigate(`/library/loans?member=${m.id}`) },
-              { label: 'Edit limits', icon: Pencil, permission: PERMS.library.manage, onSelect: () => setEditing(m) },
-              { label: 'Deactivate', icon: UserMinus, permission: PERMS.library.manage, hidden: m.is_active === false, destructive: true, onSelect: () => setLeaving(m) },
+              { label: tr('Loans'), icon: BookOpen, onSelect: () => navigate(`/library/loans?member=${m.id}`) },
+              { label: tr('Edit limits'), icon: Pencil, permission: PERMS.library.manage, onSelect: () => setEditing(m) },
+              { label: tr('Deactivate'), icon: UserMinus, permission: PERMS.library.manage, hidden: m.is_active === false, destructive: true, onSelect: () => setLeaving(m) },
             ]}
           />
         )}
-        empty={{ title: 'No members yet', description: 'Students and staff need a membership to borrow.' }}
+        empty={{ title: tr('No members yet'), description: tr('Students and staff need a membership to borrow.') }}
       />
       <MemberDialog open={editing !== null} record={editing === 'new' ? null : editing} onOpenChange={(o) => !o && setEditing(null)} />
       <ConfirmDialog
         open={leaving != null}
         onOpenChange={(o) => !o && setLeaving(null)}
-        title={leaving ? `Deactivate ${leaving.full_name}?` : 'Deactivate'}
-        description="They can’t borrow any more. Only possible once every book is back."
-        confirmLabel="Deactivate"
+        title={leaving ? tr('Deactivate {full_name}?', { full_name: leaving.full_name }) : tr('Deactivate')}
+        description={tr('They can’t borrow any more. Only possible once every book is back.')}
+        confirmLabel={tr('Deactivate')}
         tone="destructive"
         onConfirm={async () => {
           await deactivate.mutateAsync(leaving!.id)
-          toast.success('Membership deactivated.')
+          toast.success(tr('Membership deactivated.'))
         }}
       />
     </>

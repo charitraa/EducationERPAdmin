@@ -23,6 +23,7 @@ import {
   vehiclesApi,
   type BoardingStatus,
 } from '../api/transport.api'
+import { tr } from '@/lib/i18n'
 
 export const { useList: useVehicles, useCreate: useCreateVehicle, useUpdate: useUpdateVehicle, useRemove: useRemoveVehicle } = createResourceHooks(vehiclesApi, vehicleKeys)
 export const { useList: useDocuments, useCreate: useCreateDocument, useUpdate: useUpdateDocument, useRemove: useRemoveDocument } = createResourceHooks(documentsApi, documentKeys)
@@ -38,7 +39,7 @@ export function useFleetOptions() {
   const crew = useDrivers({ ...PICKER_PARAMS, is_active: true })
   const all = crew.data?.results ?? []
   return {
-    vehicles: (vehicles.data?.results ?? []).map((v) => ({ value: String(v.id), label: `${v.name} (${v.registration_number}, ${v.capacity} seats)` })),
+    vehicles: (vehicles.data?.results ?? []).map((v) => ({ value: String(v.id), label: tr('{name} ({registration_number}, {capacity} seats)', { name: v.name, registration_number: v.registration_number, capacity: v.capacity }) })),
     drivers: all.filter((d) => d.role === 'driver').map((d) => ({ value: String(d.id), label: d.name })),
     assistants: all.map((d) => ({ value: String(d.id), label: `${d.name}${d.role === 'driver' ? ' (driver)' : ''}` })),
   }

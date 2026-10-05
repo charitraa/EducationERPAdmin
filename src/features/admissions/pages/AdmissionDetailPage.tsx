@@ -16,16 +16,16 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { toast } from '@/hooks/useToast'
 import { formatDate, formatDateTime } from '@/lib/dates'
 import { enumLabel } from '@/lib/formatters'
-import { enumLabels } from '@/shared/api/enums.gen'
 import { PERMS } from '@/shared/constants/permissions'
 import { ADMISSION_ACTIONS_FROM, ADMISSION_STEPS, ADMISSION_TERMINAL, type Admission, type AdmissionDecision } from '../api/admissions.api'
 import { AdmissionFormDialog } from '../components/AdmissionFormDialog'
 import { DecisionDialog } from '../components/DecisionDialog'
 import { EnrollDialog } from '../components/EnrollDialog'
 import { useAdmission, useRemoveAdmission } from '../hooks/useAdmissions'
+import { tr } from '@/lib/i18n'
 
 /** Pipeline wording; the backend's own labels are used for the badge. */
-const STEP_LABELS = { pending: 'Under review', approved: 'Approved', enrolled: 'Enrolled', rejected: 'Rejected', withdrawn: 'Withdrawn' }
+const STEP_LABELS = { pending: tr('Under review'), approved: tr('Approved'), enrolled: tr('Enrolled'), rejected: tr('Rejected'), withdrawn: tr('Withdrawn') }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -42,17 +42,17 @@ function NextStep({ a, onEnroll }: { a: Admission; onEnroll: () => void }) {
   const box = (tone: string, children: ReactNode) => <div className={`mb-5 flex flex-col gap-3 rounded-lg border p-3 text-sm sm:flex-row sm:items-center ${tone}`}>{children}</div>
   switch (a.status) {
     case 'pending':
-      return box('border-warning/25 bg-warning-soft', <p className="flex-1">Waiting for a decision. Approve to offer a place, or reject with a reason.</p>)
+      return box('border-warning/25 bg-warning-soft', <p className="flex-1">{tr('Waiting for a decision. Approve to offer a place, or reject with a reason.')}</p>)
     case 'approved':
       return box(
         'border-info/20 bg-info-soft',
         <>
           <p className="flex-1">
-            <span className="font-medium">Approved{a.decided_at ? ` on ${formatDate(a.decided_at)}` : ''}.</span> Enroll once the applicant confirms, to create their student record.
+            <span className="font-medium">{tr('Approved')}{a.decided_at ? ' ' + tr('on {date}', { date: formatDate(a.decided_at) }) : ''}.</span> {tr('Enroll once the applicant confirms, to create their student record.')}
           </p>
           {can({ all: [PERMS.admissions.enroll, PERMS.students.create] }) && (
             <Button size="sm" onClick={onEnroll}>
-              <UserPlus aria-hidden /> Enroll now
+              <UserPlus aria-hidden /> {tr('Enroll now')}
             </Button>
           )}
         </>,
@@ -61,11 +61,11 @@ function NextStep({ a, onEnroll }: { a: Admission; onEnroll: () => void }) {
       return box(
         'border-success/20 bg-success-soft',
         <>
-          <p className="flex-1">Enrolled. Their student record now holds their class, attendance and fees.</p>
+          <p className="flex-1">{tr('Enrolled. Their student record now holds their class, attendance and fees.')}</p>
           {a.student && can(PERMS.students.view) && (
             <Button asChild size="sm" variant="outline">
               <Link to={`/students/${a.student}`}>
-                <GraduationCap aria-hidden /> Open student record
+                <GraduationCap aria-hidden /> {tr('Open student record')}
               </Link>
             </Button>
           )}
@@ -104,17 +104,17 @@ export default function AdmissionDetailPage() {
         }
         description={
           <>
-            Application <span className="font-mono">{a.application_number}</span> · received {formatDate(a.applied_on)}
-            {a.applying_for ? ` · for ${a.applying_for}` : ''}
+            {tr('Application')} <span className="font-mono">{a.application_number}</span> {'· ' + tr('received {date}', { date: formatDate(a.applied_on) })}
+            {a.applying_for ? ' · ' + tr('for {applying_for}', { applying_for: a.applying_for }) : ''}
             {isMultiBranch ? ` · ${a.campus_name}` : ''}
           </>
         }
         actions={
           <RowActions
-            label="More actions"
+            label={tr('More actions')}
             actions={[
-              { label: 'Edit details', icon: Pencil, permission: PERMS.admissions.update, hidden: !(ADMISSION_ACTIONS_FROM.edit as readonly string[]).includes(a.status), onSelect: () => setEditing(true) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.admissions.delete, hidden: !(ADMISSION_ACTIONS_FROM.delete as readonly string[]).includes(a.status), destructive: true, onSelect: () => setDeleting(true) },
+              { label: tr('Edit details'), icon: Pencil, permission: PERMS.admissions.update, hidden: !(ADMISSION_ACTIONS_FROM.edit as readonly string[]).includes(a.status), onSelect: () => setEditing(true) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.admissions.delete, hidden: !(ADMISSION_ACTIONS_FROM.delete as readonly string[]).includes(a.status), destructive: true, onSelect: () => setDeleting(true) },
             ]}
           />
         }
@@ -126,10 +126,10 @@ export default function AdmissionDetailPage() {
           <WorkflowActions
             status={a.status}
             actions={[
-              { id: 'approve', label: 'Approve', icon: Check, variant: 'default', from: ADMISSION_ACTIONS_FROM.approve, permission: PERMS.admissions.review, run: () => setDecision('approve') },
-              { id: 'enroll', label: 'Enroll', icon: UserPlus, variant: 'default', from: ADMISSION_ACTIONS_FROM.enroll, permission: { all: [PERMS.admissions.enroll, PERMS.students.create] }, run: () => setEnrolling(true) },
-              { id: 'reject', label: 'Reject', icon: X, variant: 'destructive', from: ADMISSION_ACTIONS_FROM.reject, permission: PERMS.admissions.review, run: () => setDecision('reject') },
-              { id: 'withdraw', label: 'Withdraw', icon: Undo2, from: ADMISSION_ACTIONS_FROM.withdraw, permission: PERMS.admissions.update, run: () => setDecision('withdraw') },
+              { id: 'approve', label: tr('Approve'), icon: Check, variant: 'default', from: ADMISSION_ACTIONS_FROM.approve, permission: PERMS.admissions.review, run: () => setDecision('approve') },
+              { id: 'enroll', label: tr('Enroll'), icon: UserPlus, variant: 'default', from: ADMISSION_ACTIONS_FROM.enroll, permission: { all: [PERMS.admissions.enroll, PERMS.students.create] }, run: () => setEnrolling(true) },
+              { id: 'reject', label: tr('Reject'), icon: X, variant: 'destructive', from: ADMISSION_ACTIONS_FROM.reject, permission: PERMS.admissions.review, run: () => setDecision('reject') },
+              { id: 'withdraw', label: tr('Withdraw'), icon: Undo2, from: ADMISSION_ACTIONS_FROM.withdraw, permission: PERMS.admissions.update, run: () => setDecision('withdraw') },
             ]}
           />
         </div>
@@ -140,43 +140,43 @@ export default function AdmissionDetailPage() {
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="grid gap-6 rounded-lg border bg-card p-4 sm:p-6 lg:col-span-2">
           <div>
-            <h2 className="mb-3 text-sm font-semibold">Applicant</h2>
+            <h2 className="mb-3 text-sm font-semibold">{tr('Applicant')}</h2>
             <dl className="grid gap-4 sm:grid-cols-3">
-              <Field label="Full name">{a.full_name}</Field>
-              <Field label="Date of birth">{a.date_of_birth && <BsDateDisplay value={a.date_of_birth} />}</Field>
-              <Field label="Gender">{a.gender ? enumLabel('GenderEnum', a.gender) : ''}</Field>
-              <Field label="Phone">{a.phone && <a href={`tel:${a.phone}`} className="tabular-nums hover:underline">{a.phone}</a>}</Field>
-              <Field label="Email">{a.email && <a href={`mailto:${a.email}`} className="hover:underline">{a.email}</a>}</Field>
-              <Field label="Previous school">{a.previous_school}</Field>
-              <Field label="Address">{a.address}</Field>
+              <Field label={tr('Full name')}>{a.full_name}</Field>
+              <Field label={tr('Date of birth')}>{a.date_of_birth && <BsDateDisplay value={a.date_of_birth} />}</Field>
+              <Field label={tr('Gender')}>{a.gender ? enumLabel('GenderEnum', a.gender) : ''}</Field>
+              <Field label={tr('Phone')}>{a.phone && <a href={`tel:${a.phone}`} className="tabular-nums hover:underline">{a.phone}</a>}</Field>
+              <Field label={tr('Email')}>{a.email && <a href={`mailto:${a.email}`} className="hover:underline">{a.email}</a>}</Field>
+              <Field label={tr('Previous school')}>{a.previous_school}</Field>
+              <Field label={tr('Address')}>{a.address}</Field>
             </dl>
           </div>
           <div>
-            <h2 className="mb-3 text-sm font-semibold">Guardian</h2>
+            <h2 className="mb-3 text-sm font-semibold">{tr('Guardian')}</h2>
             {a.guardian_first_name ? (
               <dl className="grid gap-4 sm:grid-cols-3">
-                <Field label="Name">{`${a.guardian_first_name} ${a.guardian_last_name}`.trim()}</Field>
-                <Field label="Relationship">{relationship}</Field>
-                <Field label="Phone">{a.guardian_phone && <a href={`tel:${a.guardian_phone}`} className="tabular-nums hover:underline">{a.guardian_phone}</a>}</Field>
-                <Field label="Email">{a.guardian_email}</Field>
+                <Field label={tr('Name')}>{`${a.guardian_first_name} ${a.guardian_last_name}`.trim()}</Field>
+                <Field label={tr('Relationship')}>{relationship}</Field>
+                <Field label={tr('Phone')}>{a.guardian_phone && <a href={`tel:${a.guardian_phone}`} className="tabular-nums hover:underline">{a.guardian_phone}</a>}</Field>
+                <Field label={tr('Email')}>{a.guardian_email}</Field>
               </dl>
             ) : (
-              <p className="text-sm text-muted-foreground">No guardian recorded. Add one under Parents after enrollment.</p>
+              <p className="text-sm text-muted-foreground">{tr('No guardian recorded. Add one under Parents after enrollment.')}</p>
             )}
           </div>
         </section>
         <section className="rounded-lg border bg-card p-4 sm:p-6">
-          <h2 className="mb-3 text-sm font-semibold">Decision</h2>
+          <h2 className="mb-3 text-sm font-semibold">{tr('Decision')}</h2>
           {a.decided_at ? (
             <dl className="grid gap-4">
-              <Field label="Decision">{enumLabels.AdmissionStatusEnum[a.status === 'enrolled' ? 'approved' : a.status]}</Field>
-              <Field label="Decided at">
+              <Field label={tr('Decision')}>{enumLabel('AdmissionStatusEnum', a.status === 'enrolled' ? 'approved' : a.status)}</Field>
+              <Field label={tr('Decided at')}>
                 <span className="tabular-nums">{formatDateTime(a.decided_at)}</span>
               </Field>
-              <Field label="Note">{a.decision_note}</Field>
+              <Field label={tr('Note')}>{a.decision_note}</Field>
             </dl>
           ) : (
-            <p className="text-sm text-muted-foreground">Not decided yet.</p>
+            <p className="text-sm text-muted-foreground">{tr('Not decided yet.')}</p>
           )}
         </section>
       </div>
@@ -187,11 +187,11 @@ export default function AdmissionDetailPage() {
       <DeleteDialog
         open={deleting}
         onOpenChange={setDeleting}
-        subject={`application ${a.application_number}`}
-        description="For applications recorded by mistake. To close a real one, reject or withdraw it instead."
+        subject={tr('application {application_number}', { application_number: a.application_number })}
+        description={tr('For applications recorded by mistake. To close a real one, reject or withdraw it instead.')}
         onConfirm={async () => {
           await remove.mutateAsync(a.id)
-          toast.success('Application deleted.')
+          toast.success(tr('Application deleted.'))
           navigate('/admissions', { replace: true })
         }}
       />

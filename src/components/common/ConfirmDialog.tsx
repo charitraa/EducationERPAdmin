@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { FormError } from '@/components/forms/FormError'
 import { errorMessage } from '@/lib/errors'
+import { tr } from '@/lib/i18n'
 
 export interface ConfirmDialogProps {
   open: boolean
@@ -30,7 +31,7 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
+  confirmLabel = tr('Confirm'),
   tone = 'default',
   onConfirm,
   children,
@@ -67,7 +68,7 @@ export function ConfirmDialog({
         {children}
         <FormError message={error} />
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{tr('Cancel')}</AlertDialogCancel>
           <Button variant={tone === 'destructive' ? 'destructive' : 'default'} onClick={handleConfirm} disabled={pending}>
             {pending && <Loader2 className="animate-spin" aria-hidden />}
             {confirmLabel}

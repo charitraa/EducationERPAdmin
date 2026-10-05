@@ -18,6 +18,7 @@ import type { Id } from '@/shared/types/api'
 import type { Thread } from '../api/communication.api'
 import { NewConversationDialog } from '../components/NewConversationDialog'
 import { useCloseThread, useMessages, useSendMessage, useThread, useThreads } from '../hooks/useCommunication'
+import { tr } from '@/lib/i18n'
 
 /** The person on the other side of a thread, from my point of view. */
 function otherParty(t: Thread, me: Id | undefined) {
@@ -25,9 +26,9 @@ function otherParty(t: Thread, me: Id | undefined) {
 }
 
 const FILTERS = [
-  { value: 'false', label: 'Open' },
-  { value: 'true', label: 'Closed' },
-  { value: '', label: 'All' },
+  { value: 'false', label: tr('Open') },
+  { value: 'true', label: tr('Closed') },
+  { value: '', label: tr('All') },
 ]
 
 function ThreadList({ activeId }: { activeId: Id | null }) {
@@ -38,7 +39,7 @@ function ThreadList({ activeId }: { activeId: Id | null }) {
 
   return (
     <div className="flex min-h-0 flex-col">
-      <div className="flex gap-1 border-b p-2" role="tablist" aria-label="Show conversations">
+      <div className="flex gap-1 border-b p-2" role="tablist" aria-label={tr('Show conversations')}>
         {FILTERS.map((f) => (
           <button
             key={f.label}
@@ -58,7 +59,7 @@ function ThreadList({ activeId }: { activeId: Id | null }) {
       ) : threads.isError ? (
         <ErrorState error={threads.error} onRetry={() => void threads.refetch()} />
       ) : threads.data.results.length === 0 ? (
-        <p className="p-4 text-sm text-muted-foreground">No {closed === 'true' ? 'closed ' : closed === 'false' ? 'open ' : ''}conversations.</p>
+        <p className="p-4 text-sm text-muted-foreground">{tr('No')} {closed === 'true' ? 'closed ' : closed === 'false' ? 'open ' : ''}{tr('conversations.')}</p>
       ) : (
         <ul className="min-h-0 flex-1 divide-y overflow-y-auto">
           {threads.data.results.map((t) => (
@@ -73,8 +74,8 @@ function ThreadList({ activeId }: { activeId: Id | null }) {
                   <span className="shrink-0 text-[11px] text-muted-foreground">{formatRelative(t.last_message_at ?? t.created_at)}</span>
                 </span>
                 <span className="flex items-center gap-1 truncate text-xs text-muted-foreground">
-                  {t.is_closed && <Lock className="h-3 w-3 shrink-0" aria-label="Closed" />}
-                  {t.subject || 'No subject'}
+                  {t.is_closed && <Lock className="h-3 w-3 shrink-0" aria-label={tr('Closed')} />}
+                  {t.subject || tr('No subject')}
                 </span>
               </Link>
             </li>
@@ -120,12 +121,12 @@ function Conversation({ id }: { id: Id }) {
   return (
     <div className="flex min-h-0 flex-col">
       <div className="flex items-center gap-2 border-b px-3 py-2.5">
-        <Link to="/messages" className="rounded p-1 text-muted-foreground hover:bg-muted md:hidden" aria-label="Back to conversations">
+        <Link to="/messages" className="rounded p-1 text-muted-foreground hover:bg-muted md:hidden" aria-label={tr('Back to conversations')}>
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{otherParty(t, user?.id)}</p>
-          <p className="truncate text-xs text-muted-foreground">{t.subject || 'No subject'}</p>
+          <p className="truncate text-xs text-muted-foreground">{t.subject || tr('No subject')}</p>
         </div>
         {!t.is_closed && (
           <Button
@@ -134,13 +135,13 @@ function Conversation({ id }: { id: Id }) {
             onClick={async () => {
               try {
                 await close.mutateAsync(t.id)
-                toast.success('Conversation closed. A new message re-opens it.')
+                toast.success(tr('Conversation closed. A new message re-opens it.'))
               } catch (err) {
                 toast.error(errorMessage(err))
               }
             }}
           >
-            <Lock aria-hidden /> Close
+            <Lock aria-hidden /> {tr('Close')}
           </Button>
         )}
       </div>
@@ -150,7 +151,7 @@ function Conversation({ id }: { id: Id }) {
         ) : messages.isError ? (
           <ErrorState error={messages.error} onRetry={() => void messages.refetch()} />
         ) : messages.data.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">No messages yet. Say hello.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{tr('No messages yet. Say hello.')}</p>
         ) : (
           <ol className="grid gap-2">
             {messages.data.map((m) => {
@@ -160,7 +161,7 @@ function Conversation({ id }: { id: Id }) {
                   <div className={cn('max-w-[85%] rounded-lg px-3 py-2 text-sm sm:max-w-[70%]', mine ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                     <p className="whitespace-pre-wrap break-words">{m.body}</p>
                     <p className={cn('mt-1 text-[10px]', mine ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
-                      {mine ? 'You' : m.sender_name} · <time dateTime={m.created_at}>{formatDateTime(m.created_at)}</time>
+                      {mine ? tr('You') : m.sender_name} · <time dateTime={m.created_at}>{formatDateTime(m.created_at)}</time>
                     </p>
                   </div>
                 </li>
@@ -177,15 +178,15 @@ function Conversation({ id }: { id: Id }) {
           void submit()
         }}
       >
-        {t.is_closed && <p className="text-xs text-muted-foreground">This conversation is closed. Sending a message re-opens it.</p>}
+        {t.is_closed && <p className="text-xs text-muted-foreground">{tr('This conversation is closed. Sending a message re-opens it.')}</p>}
         <FormError message={error} />
         <div className="flex items-end gap-2">
           <Textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={2}
-            placeholder="Write a message…"
-            aria-label="Message"
+            placeholder={tr('Write a message…')}
+            aria-label={tr('Message')}
             className="min-h-0 flex-1 resize-none"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -194,11 +195,11 @@ function Conversation({ id }: { id: Id }) {
               }
             }}
           />
-          <Button type="submit" size="icon" disabled={!body.trim() || send.isPending} aria-label="Send">
+          <Button type="submit" size="icon" disabled={!body.trim() || send.isPending} aria-label={tr('Send')}>
             {send.isPending ? <Loader2 className="animate-spin" /> : <Send />}
           </Button>
         </div>
-        <p className="text-[11px] text-muted-foreground">Enter to send, Shift+Enter for a new line.</p>
+        <p className="text-[11px] text-muted-foreground">{tr('Enter to send, Shift+Enter for a new line.')}</p>
       </form>
     </div>
   )
@@ -216,28 +217,28 @@ export default function MessagesPage() {
   return (
     <>
       <PageHeader
-        title="Messages"
-        description="Conversations between staff and families."
+        title={tr('Messages')}
+        description={tr('Conversations between staff and families.')}
         actions={
           <>
             <Button asChild variant="outline">
               <Link to="/messages/appointments">
-                <CalendarClock aria-hidden /> Appointments
+                <CalendarClock aria-hidden /> {tr('Appointments')}
               </Link>
             </Button>
             <Button
               onClick={() => setStarting(true)}
               disabled={!isStaff}
-              title={isStaff ? undefined : staff.isPending ? 'Checking…' : 'Only staff members can start a conversation. Link your login to a staff record first.'}
+              title={isStaff ? undefined : staff.isPending ? tr('Checking…') : tr('Only staff members can start a conversation. Link your login to a staff record first.')}
             >
-              <MessageSquarePlus aria-hidden /> New conversation
+              <MessageSquarePlus aria-hidden /> {tr('New conversation')}
             </Button>
           </>
         }
       />
       {!staff.isPending && !isStaff && (
         <p className="-mt-3 mb-4 text-xs text-muted-foreground">
-          Your login isn’t linked to a staff record, so you can reply to conversations but not start one.
+          {tr('Your login isn’t linked to a staff record, so you can reply to conversations but not start one.')}
         </p>
       )}
       <div className="grid h-[calc(100dvh-14rem)] min-h-[420px] overflow-hidden rounded-lg border bg-card md:grid-cols-[18rem_1fr]">
@@ -248,7 +249,7 @@ export default function MessagesPage() {
           {id != null ? (
             <Conversation key={id} id={id} />
           ) : (
-            <EmptyState title="Pick a conversation" description="Choose one on the left, or start a new one." className="m-auto" />
+            <EmptyState title={tr('Pick a conversation')} description={tr('Choose one on the left, or start a new one.')} className="m-auto" />
           )}
         </div>
       </div>

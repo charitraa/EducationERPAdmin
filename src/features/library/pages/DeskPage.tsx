@@ -15,6 +15,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Copy, Loan, Member } from '../api/library.api'
 import { CopyPicker, LoanPicker, MemberPicker } from '../components/Pickers'
 import { useIssueBook, useLoans, useReturnBook } from '../hooks/useLibrary'
+import { tr } from '@/lib/i18n'
 
 function IssueCard() {
   const [member, setMember] = useState<Member | null>(null)
@@ -26,7 +27,7 @@ function IssueCard() {
     setError(null)
     try {
       const loan = await issue.mutateAsync({ copy: copy!.id, member: member!.id })
-      toast.success(`${loan.book_title} issued to ${loan.member_name}, due ${formatDate(loan.due_at.slice(0, 10))}.`)
+      toast.success(tr('{book_title} issued to {member_name}, due {date}.', { book_title: loan.book_title, member_name: loan.member_name, date: formatDate(loan.due_at.slice(0, 10)) }))
       setCopy(null)
     } catch (err) {
       setError(errorMessage(err))
@@ -35,19 +36,19 @@ function IssueCard() {
   return (
     <section className="grid content-start gap-3 rounded-lg border bg-card p-4">
       <h2 className="flex items-center gap-2 font-semibold">
-        <BookUp className="h-4 w-4" aria-hidden /> Issue a book
+        <BookUp className="h-4 w-4" aria-hidden /> {tr('Issue a book')}
       </h2>
       <div className="grid gap-1.5">
-        <Label htmlFor={ids.member}>Member</Label>
+        <Label htmlFor={ids.member}>{tr('Member')}</Label>
         <MemberPicker id={ids.member} value={member} onChange={setMember} />
       </div>
       <div className="grid gap-1.5">
-        <Label htmlFor={ids.copy}>Copy</Label>
+        <Label htmlFor={ids.copy}>{tr('Copy')}</Label>
         <CopyPicker id={ids.copy} value={copy} onChange={setCopy} />
       </div>
       <FormError message={error} />
       <Button onClick={() => void submit()} disabled={!member || !copy || issue.isPending}>
-        {issue.isPending && <Loader2 className="animate-spin" aria-hidden />} Issue
+        {issue.isPending && <Loader2 className="animate-spin" aria-hidden />} {tr('Issue')}
       </Button>
     </section>
   )
@@ -62,7 +63,7 @@ function ReturnCard() {
     setError(null)
     try {
       const done = await ret.mutateAsync({ id: loan!.id, outcome })
-      toast.success(outcome === 'returned' ? `${done.book_title} returned${loan!.is_overdue ? '; an overdue fine was raised' : ''}.` : `${done.book_title} reported ${outcome}; a fine for its price was raised.`)
+      toast.success(outcome === 'returned' ? tr('{book_title} returned{value}.', { book_title: done.book_title, value: loan!.is_overdue ? '; ' + tr('an overdue fine was raised') : '' }) : tr('{book_title} reported {outcome}; a fine for its price was raised.', { book_title: done.book_title, outcome }))
       setLoan(null)
     } catch (err) {
       setError(errorMessage(err))
@@ -71,23 +72,23 @@ function ReturnCard() {
   return (
     <section className="grid content-start gap-3 rounded-lg border bg-card p-4">
       <h2 className="flex items-center gap-2 font-semibold">
-        <BookDown className="h-4 w-4" aria-hidden /> Return a book
+        <BookDown className="h-4 w-4" aria-hidden /> {tr('Return a book')}
       </h2>
       <div className="grid gap-1.5">
-        <Label htmlFor={id}>Loan</Label>
+        <Label htmlFor={id}>{tr('Loan')}</Label>
         <LoanPicker id={id} value={loan} onChange={setLoan} />
       </div>
-      <p className="text-xs text-muted-foreground">Late returns raise an overdue fine. Damaged or lost copies are fined at their price. A returned copy goes to the next reservation, if anyone is waiting.</p>
+      <p className="text-xs text-muted-foreground">{tr('Late returns raise an overdue fine. Damaged or lost copies are fined at their price. A returned copy goes to the next reservation, if anyone is waiting.')}</p>
       <FormError message={error} />
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => void submit('returned')} disabled={!loan || ret.isPending}>
-          {ret.isPending && <Loader2 className="animate-spin" aria-hidden />} Return
+          {ret.isPending && <Loader2 className="animate-spin" aria-hidden />} {tr('Return')}
         </Button>
         <Button variant="outline" onClick={() => void submit('damaged')} disabled={!loan || ret.isPending}>
-          Damaged
+          {tr('Damaged')}
         </Button>
         <Button variant="outline" onClick={() => void submit('lost')} disabled={!loan || ret.isPending}>
-          Lost
+          {tr('Lost')}
         </Button>
       </div>
     </section>
@@ -100,7 +101,7 @@ export default function DeskPage() {
   const desk = can(PERMS.library.circulate)
   const out = useLoans({ ...PICKER_PARAMS, status: 'issued' }, desk)
   const overdue = (out.data?.results ?? []).filter((l) => l.is_overdue).sort((a, b) => a.due_at.localeCompare(b.due_at))
-  if (!desk) return <EmptyState title="The desk is for library staff" description="Browse the catalog under Books." />
+  if (!desk) return <EmptyState title={tr('The desk is for library staff')} description={tr('Browse the catalog under Books.')} />
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 lg:grid-cols-2">
@@ -108,9 +109,9 @@ export default function DeskPage() {
         <ReturnCard />
       </div>
       <section>
-        <SectionHeader title="Overdue" description={`${out.data?.count ?? 0} books out in all.`} />
+        <SectionHeader title={tr('Overdue')} description={tr('{count} books out in all.', { count: out.data?.count ?? 0 })} />
         {overdue.length === 0 ? (
-          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">Nothing overdue.</p>
+          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('Nothing overdue.')}</p>
         ) : (
           <ul className="divide-y rounded-lg border bg-card">
             {overdue.map((l) => (
@@ -121,7 +122,7 @@ export default function DeskPage() {
                 <Link to={`/library/loans?member=${l.member}`} className="hover:underline">
                   {l.member_name}
                 </Link>
-                <span className="tabular-nums text-danger">due {formatDate(l.due_at.slice(0, 10))}</span>
+                <span className="tabular-nums text-danger">{tr('due {date}', { date: formatDate(l.due_at.slice(0, 10)) })}</span>
               </li>
             ))}
           </ul>

@@ -1,4 +1,5 @@
 import { ConfirmDialog, type ConfirmDialogProps } from './ConfirmDialog'
+import { tr } from '@/lib/i18n'
 
 interface DeleteDialogProps extends Omit<ConfirmDialogProps, 'title' | 'tone' | 'confirmLabel'> {
   /** What is being deleted, e.g. `the program "+2 Science"`. */
@@ -11,13 +12,13 @@ interface DeleteDialogProps extends Omit<ConfirmDialogProps, 'title' | 'tone' | 
  * explanation, which is shown in the dialog. Prefer an archive/deactivate
  * action wherever the API offers one.
  */
-export function DeleteDialog({ subject, confirmLabel = 'Delete', description, ...props }: DeleteDialogProps) {
+export function DeleteDialog({ subject, confirmLabel = tr('Delete'), description, ...props }: DeleteDialogProps) {
   return (
     <ConfirmDialog
       {...props}
       tone="destructive"
-      title={`Delete ${subject}?`}
-      description={description ?? 'This cannot be undone.'}
+      title={tr('Delete {subject}?', { subject })}
+      description={description ?? tr('This cannot be undone.')}
       confirmLabel={confirmLabel}
     />
   )

@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react'
 import { Link, useMatches } from 'react-router-dom'
+import { tr } from '@/lib/i18n'
 
 export interface RouteHandle {
   /** Shown in the breadcrumb trail for this route. */
@@ -15,7 +16,7 @@ export function Breadcrumbs() {
   if (trail.length === 0) return null
 
   return (
-    <nav aria-label="Breadcrumb" className="min-w-0">
+    <nav aria-label={tr('Breadcrumb')} className="min-w-0">
       <ol className="flex items-center gap-1 text-sm text-muted-foreground">
         {trail.map((c, i) => {
           const last = i === trail.length - 1

@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 interface PageHeaderProps {
   title: ReactNode
@@ -21,7 +22,7 @@ export function PageHeader({ title, description, actions, backTo, className }: P
             to={backTo}
             className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Back
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> {tr('Back')}
           </Link>
         )}
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>

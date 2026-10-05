@@ -10,6 +10,7 @@ import { enumLabel } from '@/lib/formatters'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { Money } from '../components/money'
 import { usePayment, useReceipts, useRefunds } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 /** A payment's numbered receipt, laid out to print, with any refunds against it. */
 export default function ReceiptPage() {
@@ -29,10 +30,10 @@ export default function ReceiptPage() {
       <PageHeader
         className="print:hidden"
         backTo={`/finance/invoices/${p.invoice}`}
-        title={receipt ? `Receipt ${receipt.receipt_number}` : 'Payment'}
+        title={receipt ? tr('Receipt {receipt_number}', { receipt_number: receipt.receipt_number }) : tr('Payment')}
         actions={
           <Button variant="outline" onClick={() => window.print()}>
-            <Printer aria-hidden /> Print
+            <Printer aria-hidden /> {tr('Print')}
           </Button>
         }
       />
@@ -40,7 +41,7 @@ export default function ReceiptPage() {
         <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b pb-3">
           <div>
             <p className="text-lg font-semibold">{user?.organization?.name}</p>
-            <p className="text-sm text-muted-foreground">Payment receipt</p>
+            <p className="text-sm text-muted-foreground">{tr('Payment receipt')}</p>
           </div>
           <div className="text-right text-sm">
             <p className="font-mono font-medium">{receipt?.receipt_number ?? '—'}</p>
@@ -49,11 +50,11 @@ export default function ReceiptPage() {
         </header>
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-xs text-muted-foreground">Received from</dt>
+            <dt className="text-xs text-muted-foreground">{tr('Received from')}</dt>
             <dd className="font-medium">{p.student_name}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Against invoice</dt>
+            <dt className="text-xs text-muted-foreground">{tr('Against invoice')}</dt>
             <dd>
               <Link to={`/finance/invoices/${p.invoice}`} className="font-mono hover:underline">
                 {p.invoice_number}
@@ -61,25 +62,25 @@ export default function ReceiptPage() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Method</dt>
+            <dt className="text-xs text-muted-foreground">{tr('Method')}</dt>
             <dd>
               {enumLabel('PaymentMethodEnum', p.method)}
               {p.reference ? ` · ${p.reference}` : ''}
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted-foreground">Paid on</dt>
+            <dt className="text-xs text-muted-foreground">{tr('Paid on')}</dt>
             <dd className="tabular-nums">{formatDateTime(p.paid_at)}</dd>
           </div>
         </dl>
         <p className="mt-6 flex items-baseline justify-between border-y py-3">
-          <span className="text-sm text-muted-foreground">Amount received</span>
+          <span className="text-sm text-muted-foreground">{tr('Amount received')}</span>
           <Money value={p.amount} className="text-2xl font-semibold" />
         </p>
         {p.note && <p className="mt-3 text-sm">{p.note}</p>}
         {(refunds.data?.results ?? []).length > 0 && (
           <section className="mt-4">
-            <h2 className="mb-1 text-sm font-semibold">Refunded</h2>
+            <h2 className="mb-1 text-sm font-semibold">{tr('Refunded')}</h2>
             <ul className="divide-y text-sm">
               {refunds.data!.results.map((r) => (
                 <li key={r.id} className="flex justify-between gap-3 py-1.5">

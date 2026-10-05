@@ -4,6 +4,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { PERMS } from '@/shared/constants/permissions'
 import type { Id } from '@/shared/types/api'
 import { useStudentParents } from '../hooks/useParents'
+import { tr } from '@/lib/i18n'
 
 /** Who to call about a student. Links are managed from the parent's page. */
 export function StudentParentsPanel({ studentId }: { studentId: Id }) {
@@ -14,14 +15,14 @@ export function StudentParentsPanel({ studentId }: { studentId: Id }) {
 
   return (
     <div>
-      <h2 className="mb-3 text-sm font-semibold">Parents</h2>
+      <h2 className="mb-3 text-sm font-semibold">{tr('Parents')}</h2>
       {parents.isPending ? (
         <Spinner />
       ) : parents.isError ? (
-        <p className="text-sm text-danger">Couldn’t load parents.</p>
+        <p className="text-sm text-danger">{tr('Couldn’t load parents.')}</p>
       ) : parents.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          None linked. <Link to="/parents" className="underline">Find or add a parent</Link> and link this student from their page.
+          {tr('None linked.')} <Link to="/parents" className="underline">{tr('Find or add a parent')}</Link> {tr('and link this student from their page.')}
         </p>
       ) : (
         <ul className="grid gap-3">

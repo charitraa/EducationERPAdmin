@@ -11,6 +11,7 @@ import { errorMessage } from '@/lib/errors'
 import type { Id } from '@/shared/types/api'
 import type { Subject } from '../../subjects/api/subjects.api'
 import { useAddCurriculumSubjects } from '../hooks/useCurriculum'
+import { tr } from '@/lib/i18n'
 
 interface Props {
   open: boolean
@@ -56,7 +57,7 @@ export function AddSubjectsDialog({ open, onOpenChange, program, level, levelNam
     setError(null)
     try {
       await add.mutateAsync({ program, level, subjects: [...chosen], isElective: elective })
-      toast.success(`${chosen.size} subject${chosen.size === 1 ? '' : 's'} added to ${levelName}.`)
+      toast.success(tr('{size} subject{value} added to {levelName}.', { size: chosen.size, value: chosen.size === 1 ? '' : 's', levelName }))
       close(false)
     } catch (err) {
       setError(errorMessage(err))
@@ -67,13 +68,13 @@ export function AddSubjectsDialog({ open, onOpenChange, program, level, levelNam
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add subjects to {levelName}</DialogTitle>
-          <DialogDescription>Pick the subjects this level takes.</DialogDescription>
+          <DialogTitle>{tr('Add subjects to {levelName}', { levelName })}</DialogTitle>
+          <DialogDescription>{tr('Pick the subjects this level takes.')}</DialogDescription>
         </DialogHeader>
         <FormError message={error} />
-        <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter subjects…" aria-label="Filter subjects" />
+        <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={tr('Filter subjects…')} aria-label={tr('Filter subjects')} />
         <ul className="max-h-72 divide-y overflow-y-auto rounded-md border">
-          {shown.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted-foreground">No more subjects to add.</li>}
+          {shown.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted-foreground">{tr('No more subjects to add.')}</li>}
           {shown.map((s) => (
             <li key={s.id}>
               <label className="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm hover:bg-muted/50">
@@ -86,15 +87,15 @@ export function AddSubjectsDialog({ open, onOpenChange, program, level, levelNam
         </ul>
         <label className="flex items-center gap-3 text-sm">
           <Switch checked={elective} onCheckedChange={setElective} />
-          Students choose these (electives)
+          {tr('Students choose these (electives)')}
         </label>
         <DialogFooter>
           <Button variant="outline" onClick={() => close(false)}>
-            Cancel
+            {tr('Cancel')}
           </Button>
           <Button onClick={() => void submit()} disabled={chosen.size === 0 || add.isPending}>
             {add.isPending && <Loader2 className="animate-spin" aria-hidden />}
-            Add {chosen.size > 0 ? chosen.size : ''} subject{chosen.size === 1 ? '' : 's'}
+            {tr('Add {value} subject{value2}', { value: chosen.size > 0 ? chosen.size : '', value2: chosen.size === 1 ? '' : 's' })}
           </Button>
         </DialogFooter>
       </DialogContent>

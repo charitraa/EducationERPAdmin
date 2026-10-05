@@ -14,6 +14,7 @@ import { enumLabel, enumOptions } from '@/lib/formatters'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { Session } from '../api/attendance.api'
 import { useSessions } from '../hooks/useAttendance'
+import { tr } from '@/lib/i18n'
 
 /** Every roll call taken or started, newest first. Missing ones are on the Today tab. */
 export default function SessionsPage() {
@@ -26,25 +27,25 @@ export default function SessionsPage() {
   const classes = useClasses({ ...PICKER_PARAMS, academic_year: current.data?.id, campus: selectedBranchId ?? undefined, ordering: 'level' })
 
   const columns: Column<Session>[] = [
-    { id: 'date', header: 'Date', sortField: 'date', className: 'whitespace-nowrap tabular-nums', cell: (s) => formatDate(s.date) },
+    { id: 'date', header: tr('Date'), sortField: 'date', className: 'whitespace-nowrap tabular-nums', cell: (s) => formatDate(s.date) },
     {
       id: 'what',
-      header: 'Class',
+      header: tr('Class'),
       mobile: 'title',
       cell: (s) => (
         <span className="font-medium">
-          {s.kind === 'lesson' ? s.subject_name : 'Roll call'} <span className="font-normal text-muted-foreground">· {s.section_name}</span>
+          {s.kind === 'lesson' ? s.subject_name : tr('Roll call')} <span className="font-normal text-muted-foreground">· {s.section_name}</span>
         </span>
       ),
     },
-    { id: 'time', header: 'Time', className: 'tabular-nums', cell: (s) => (s.start_time ? hhmm(s.start_time) : 'Daily') },
-    { id: 'teacher', header: 'Teacher', cell: (s) => s.teacher_name || <span className="text-muted-foreground">—</span> },
-    { id: 'status', header: 'Status', cell: (s) => <StatusBadge status={s.status} label={enumLabel('AttendanceSessionStatusEnum', s.status)} /> },
+    { id: 'time', header: tr('Time'), className: 'tabular-nums', cell: (s) => (s.start_time ? hhmm(s.start_time) : tr('Daily')) },
+    { id: 'teacher', header: tr('Teacher'), cell: (s) => s.teacher_name || <span className="text-muted-foreground">—</span> },
+    { id: 'status', header: tr('Status'), cell: (s) => <StatusBadge status={s.status} label={enumLabel('AttendanceSessionStatusEnum', s.status)} /> },
   ]
 
   return (
     <DataTable
-      ariaLabel="Attendance sessions"
+      ariaLabel={tr('Attendance sessions')}
       columns={columns}
       query={query}
       list={list}
@@ -54,17 +55,17 @@ export default function SessionsPage() {
       toolbar={
         <div className="flex items-center gap-2">
           <Label htmlFor={dateId} className="text-muted-foreground">
-            Date
+            {tr('Date')}
           </Label>
           <DatePicker id={dateId} value={list.filters.date ?? ''} onChange={(v) => list.setFilter('date', v || undefined)} />
         </div>
       }
       filters={[
-        { name: 'status', label: 'Status', options: enumOptions('AttendanceSessionStatusEnum') },
-        { name: 'kind', label: 'Kind', options: enumOptions('SessionKindEnum') },
-        { name: 'section', label: 'Class', options: (classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name })) },
+        { name: 'status', label: tr('Status'), options: enumOptions('AttendanceSessionStatusEnum') },
+        { name: 'kind', label: tr('Kind'), options: enumOptions('SessionKindEnum') },
+        { name: 'section', label: tr('Class'), options: (classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name })) },
       ]}
-      empty={{ title: 'No attendance taken yet', description: 'Sessions appear here once a teacher or the office opens one from the Today tab.' }}
+      empty={{ title: tr('No attendance taken yet'), description: tr('Sessions appear here once a teacher or the office opens one from the Today tab.') }}
     />
   )
 }

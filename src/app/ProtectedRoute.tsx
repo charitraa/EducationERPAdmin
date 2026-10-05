@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { errorMessage } from '@/lib/errors'
 import { StatusPage } from '@/pages/StatusPage'
+import { tr } from '@/lib/i18n'
 
 /** Signed-in users only; everyone else goes to /login and comes back after. */
 export function ProtectedRoute() {
@@ -24,8 +25,8 @@ export function ProtectedRoute() {
   if (status === 'unreachable' || !user) {
     return (
       <div className="min-h-dvh">
-        <StatusPage icon={CloudOff} title="Can't reach the server" actions={<Button onClick={() => (status === 'unreachable' ? retry() : window.location.reload())}>Try again</Button>}>
-          {bootError ? errorMessage(bootError) : 'Check your connection and try again.'}
+        <StatusPage icon={CloudOff} title={tr("Can't reach the server")} actions={<Button onClick={() => (status === 'unreachable' ? retry() : window.location.reload())}>{tr('Try again')}</Button>}>
+          {bootError ? errorMessage(bootError) : tr('Check your connection and try again.')}
         </StatusPage>
       </div>
     )

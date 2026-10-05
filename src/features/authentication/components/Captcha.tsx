@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SignupConfig } from '../api/account.api'
+import { tr } from '@/lib/i18n'
 
 type Provider = SignupConfig['captcha_provider']
 
@@ -33,7 +34,7 @@ function loadScript(src: string): Promise<void> {
       s.onload = () => resolve()
       s.onerror = () => {
         loading.delete(src)
-        reject(new Error('CAPTCHA failed to load'))
+        reject(new Error(tr('CAPTCHA failed to load')))
       }
       document.head.appendChild(s)
     })
@@ -49,7 +50,7 @@ async function waitFor<T>(get: () => T | undefined): Promise<T> {
     if (v) return v
     await new Promise((r) => setTimeout(r, 50))
   }
-  throw new Error('CAPTCHA failed to load')
+  throw new Error(tr('CAPTCHA failed to load'))
 }
 
 export interface CaptchaHandle {
@@ -92,7 +93,7 @@ export function Captcha({ provider, siteKey, action, onReady }: { provider: Prov
         })
         onReady({
           token: async () => {
-            if (!current) throw new Error('Complete the check above first.')
+            if (!current) throw new Error(tr('Complete the check above first.'))
             return current
           },
           reset: () => {
@@ -112,7 +113,7 @@ export function Captcha({ provider, siteKey, action, onReady }: { provider: Prov
   return (
     <div>
       <div ref={box} />
-      {failed && <p className="text-sm text-danger">The anti-spam check didn't load. Turn off content blockers for this page and reload.</p>}
+      {failed && <p className="text-sm text-danger">{tr("The anti-spam check didn't load. Turn off content blockers for this page and reload.")}</p>}
     </div>
   )
 }

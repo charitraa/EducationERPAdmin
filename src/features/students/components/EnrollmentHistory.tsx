@@ -6,6 +6,7 @@ import { formatDate, todayIso } from '@/lib/dates'
 import type { Id } from '@/shared/types/api'
 import { ENROLLMENT_STATUS_LABELS, type Enrollment } from '../api/students.api'
 import { useStudentEnrollments } from '../hooks/useStudents'
+import { tr } from '@/lib/i18n'
 
 /** A move recorded ahead of time: open, but not started yet. */
 export const isUpcoming = (e: Enrollment) => e.status === 'active' && e.started_on > todayIso()
@@ -17,7 +18,7 @@ export function EnrollmentHistory({ studentId }: { studentId: Id }) {
 
   if (history.isPending) return <TableSkeleton rows={3} columns={4} />
   if (history.isError) return <ErrorState error={history.error} onRetry={() => void history.refetch()} />
-  if (history.data.length === 0) return <p className="p-4 text-sm text-muted-foreground">No enrollment history.</p>
+  if (history.data.length === 0) return <p className="p-4 text-sm text-muted-foreground">{tr('No enrollment history.')}</p>
 
   return (
     <ol className="divide-y">
@@ -25,7 +26,7 @@ export function EnrollmentHistory({ studentId }: { studentId: Id }) {
         <li key={e.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-start">
           <div className="min-w-0">
             <p className="font-medium">
-              {e.section_name ?? <span className="text-muted-foreground">Not placed in a class</span>}
+              {e.section_name ?? <span className="text-muted-foreground">{tr('Not placed in a class')}</span>}
               {e.academic_year_name && <span className="font-normal text-muted-foreground"> · {e.academic_year_name}</span>}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -38,7 +39,7 @@ export function EnrollmentHistory({ studentId }: { studentId: Id }) {
               {formatDate(e.started_on)} → {e.ended_on ? formatDate(e.ended_on) : 'now'}
             </span>
             {isUpcoming(e) ? (
-              <StatusBadge status="scheduled" label={`Starts ${formatDate(e.started_on)}`} />
+              <StatusBadge status="scheduled" label={tr('Starts {date}', { date: formatDate(e.started_on) })} />
             ) : (
               <StatusBadge status={e.status === 'active' ? 'current' : e.status} label={ENROLLMENT_STATUS_LABELS[e.status]} />
             )}

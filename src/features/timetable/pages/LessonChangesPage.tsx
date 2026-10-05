@@ -11,11 +11,12 @@ import { formatDate, todayIso } from '@/lib/dates'
 import { PERMS } from '@/shared/constants/permissions'
 import { hhmm, type LessonChange } from '../api/timetable.api'
 import { useLessonChanges, useRemoveLessonChange } from '../hooks/useTimetable'
+import { tr } from '@/lib/i18n'
 
 const describe = (c: LessonChange) =>
   c.is_cancelled
     ? 'Cancelled'
-    : [c.substitute_teacher_name ? `Covered by ${c.substitute_teacher_name}` : null, c.room_name ? `In ${c.room_name}` : null].filter(Boolean).join(' · ')
+    : [c.substitute_teacher_name ? tr('Covered by {substitute_teacher_name}', { substitute_teacher_name: c.substitute_teacher_name }) : null, c.room_name ? tr('In {room_name}', { room_name: c.room_name }) : null].filter(Boolean).join(' · ')
 
 /** Every one-day change, upcoming first. Make new ones from the Day view. */
 export default function LessonChangesPage() {
@@ -27,7 +28,7 @@ export default function LessonChangesPage() {
   const columns: Column<LessonChange>[] = [
     {
       id: 'date',
-      header: 'Date',
+      header: tr('Date'),
       mobile: 'title',
       className: 'tabular-nums whitespace-nowrap',
       cell: (c) => (
@@ -36,39 +37,39 @@ export default function LessonChangesPage() {
         </Link>
       ),
     },
-    { id: 'period', header: 'When', className: 'tabular-nums', cell: (c) => `${c.period_name} · ${hhmm(c.start_time)}` },
-    { id: 'lesson', header: 'Lesson', cell: (c) => `${c.subject_name} · ${c.section_name}` },
-    { id: 'teacher', header: 'Usual teacher', mobile: 'hidden', cell: (c) => c.regular_teacher_name },
-    { id: 'change', header: 'Change', cell: (c) => (c.is_cancelled ? <StatusBadge status="cancelled" label="Cancelled" /> : describe(c)) },
-    { id: 'note', header: 'Note', mobile: 'hidden', cell: (c) => c.note || <span className="text-muted-foreground">—</span> },
+    { id: 'period', header: tr('When'), className: 'tabular-nums', cell: (c) => `${c.period_name} · ${hhmm(c.start_time)}` },
+    { id: 'lesson', header: tr('Lesson'), cell: (c) => `${c.subject_name} · ${c.section_name}` },
+    { id: 'teacher', header: tr('Usual teacher'), mobile: 'hidden', cell: (c) => c.regular_teacher_name },
+    { id: 'change', header: tr('Change'), cell: (c) => (c.is_cancelled ? <StatusBadge status="cancelled" label={tr('Cancelled')} /> : describe(c)) },
+    { id: 'note', header: tr('Note'), mobile: 'hidden', cell: (c) => c.note || <span className="text-muted-foreground">—</span> },
   ]
 
   return (
     <>
       <p className="mb-3 text-sm text-muted-foreground">
-        Substitutions, room moves and cancellations from today on. To make one, open the <Link to="/timetable/day" className="underline">Day</Link> view and click Change on the lesson.
+        {tr('Substitutions, room moves and cancellations from today on. To make one, open the')} <Link to="/timetable/day" className="underline">{tr('Day')}</Link> {tr('view and click Change on the lesson.')}
       </p>
       <DataTable
-        ariaLabel="Lesson changes"
+        ariaLabel={tr('Lesson changes')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(c) => c.id}
         searchable={false}
-        filters={[{ name: 'is_cancelled', label: 'Kind', options: [{ value: 'true', label: 'Cancellations' }, { value: 'false', label: 'Cover and room moves' }] }]}
-        rowActions={(c) => <RowActions actions={[{ label: 'Undo change', icon: Trash2, permission: PERMS.timetable.manage, destructive: true, onSelect: () => crud.openDelete(c) }]} />}
-        empty={{ title: 'No changes coming up', description: 'Every lesson runs as timetabled.' }}
+        filters={[{ name: 'is_cancelled', label: tr('Kind'), options: [{ value: 'true', label: tr('Cancellations') }, { value: 'false', label: tr('Cover and room moves') }] }]}
+        rowActions={(c) => <RowActions actions={[{ label: tr('Undo change'), icon: Trash2, permission: PERMS.timetable.manage, destructive: true, onSelect: () => crud.openDelete(c) }]} />}
+        empty={{ title: tr('No changes coming up'), description: tr('Every lesson runs as timetabled.') }}
       />
       {crud.deleting && (
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject="this change"
-          confirmLabel="Undo change"
-          description={`${crud.deleting.subject_name} for ${crud.deleting.section_name} runs as usual on ${formatDate(crud.deleting.date)}.`}
+          subject={tr('this change')}
+          confirmLabel={tr('Undo change')}
+          description={tr('{subject_name} for {section_name} runs as usual on {date}.', { subject_name: crud.deleting.subject_name, section_name: crud.deleting.section_name, date: formatDate(crud.deleting.date) })}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Change undone.')
+            toast.success(tr('Change undone.'))
           }}
         />
       )}

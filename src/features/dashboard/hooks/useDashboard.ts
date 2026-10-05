@@ -5,6 +5,7 @@ import { toApiError } from '@/shared/api/errors'
 import { PERMS } from '@/shared/constants/permissions'
 import { useUnreadCount } from '@/features/notifications/hooks/useNotifications'
 import { dashboardApi, dashboardKeys } from '../api/dashboard.api'
+import { tr } from '@/lib/i18n'
 
 /** 404 here means "no staff profile linked": nothing to do, not an error. */
 const zeroOn404 = async <T,>(fn: () => Promise<T>, empty: T): Promise<T> => {
@@ -52,17 +53,17 @@ export function useWaitingForMe() {
   const notifications = useUnreadCount()
 
   const sources: InboxSource[] = [
-    { key: 'applications', label: 'Applications to decide', count: applications.data, loading: applications.isLoading, error: applications.isError, to: '/applications/pending' },
+    { key: 'applications', label: tr('Applications to decide'), count: applications.data, loading: applications.isLoading, error: applications.isError, to: '/applications/pending' },
     ...(canApproveLeave
-      ? [{ key: 'leave', label: 'Leave requests', count: leave.data, loading: leave.isLoading, error: leave.isError, to: '/hr/leave-requests' }]
+      ? [{ key: 'leave', label: tr('Leave requests'), count: leave.data, loading: leave.isLoading, error: leave.isError, to: '/hr/leave-requests' }]
       : []),
     ...(canMark
-      ? [{ key: 'marks', label: 'Mark sheets to fill', count: markSheets.data, loading: markSheets.isLoading, error: markSheets.isError, to: '/examinations/mark-sheets' }]
+      ? [{ key: 'marks', label: tr('Mark sheets to fill'), count: markSheets.data, loading: markSheets.isLoading, error: markSheets.isError, to: '/examinations/mark-sheets' }]
       : []),
     ...(canRollCall
-      ? [{ key: 'rollcall', label: "Today's roll calls", count: rollCalls.data, loading: rollCalls.isLoading, error: rollCalls.isError, to: '/attendance' }]
+      ? [{ key: 'rollcall', label: tr("Today's roll calls"), count: rollCalls.data, loading: rollCalls.isLoading, error: rollCalls.isError, to: '/attendance' }]
       : []),
-    { key: 'notifications', label: 'Unread notifications', count: notifications.data, loading: notifications.isLoading, error: notifications.isError, to: '/notifications' },
+    { key: 'notifications', label: tr('Unread notifications'), count: notifications.data, loading: notifications.isLoading, error: notifications.isError, to: '/notifications' },
   ]
 
   return {

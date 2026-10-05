@@ -5,6 +5,7 @@ import { useCount } from '@/shared/api/count'
 import { PERMS } from '@/shared/constants/permissions'
 import { useMyOrganization } from '../../organization/hooks/useOrganization'
 import { hasSchoolDetails } from '../../organization/schemas/organization.schema'
+import { tr } from '@/lib/i18n'
 
 export type SetupStepId = 'school' | 'year' | 'programs' | 'classes' | 'staff' | 'students' | 'modules'
 
@@ -85,19 +86,19 @@ export function useSetupProgress() {
       skipped: !done && stored.skipped.includes(id),
     })
     return [
-      step('school', 'School details', 'Name, address and how to reach you', hasSchoolDetails(org.data), org.isLoading),
-      step('year', 'Academic year', 'The year you teach now, and its terms', (years.data ?? 0) > 0, years.isLoading),
+      step('school', tr('School details'), tr('Name, address and how to reach you'), hasSchoolDetails(org.data), org.isLoading),
+      step('year', tr('Academic year'), tr('The year you teach now, and its terms'), (years.data ?? 0) > 0, years.isLoading),
       step(
         'programs',
-        'Programs & subjects',
-        'What you teach, and which level takes which subject',
+        tr('Programs & subjects'),
+        tr('What you teach, and which level takes which subject'),
         (programs.data ?? 0) > 0 && (subjects.data ?? 0) > 0 && (curriculum.data ?? 0) > 0,
         programs.isLoading || subjects.isLoading || curriculum.isLoading,
       ),
-      step('classes', 'Classes', 'Grade 11 A, Grade 11 B… for this year', (classes.data ?? 0) > 0, classes.isLoading),
-      step('staff', 'Staff & logins', 'Your teachers and office, and who can sign in', (staff.data ?? 0) > 0, staff.isLoading),
-      step('students', 'Students & parents', 'Admit students or add them directly', (students.data ?? 0) > 0, students.isLoading),
-      step('modules', 'Turn on more', 'Fees, exams, timetable, library and more', stored.modulesReviewed, false),
+      step('classes', tr('Classes'), tr('Grade 11 A, Grade 11 B… for this year'), (classes.data ?? 0) > 0, classes.isLoading),
+      step('staff', tr('Staff & logins'), tr('Your teachers and office, and who can sign in'), (staff.data ?? 0) > 0, staff.isLoading),
+      step('students', tr('Students & parents'), tr('Admit students or add them directly'), (students.data ?? 0) > 0, students.isLoading),
+      step('modules', tr('Turn on more'), tr('Fees, exams, timetable, library and more'), stored.modulesReviewed, false),
     ]
   }, [org.data, org.isLoading, years, programs, subjects, curriculum, classes, staff, students, stored])
 

@@ -36,16 +36,17 @@ import type { StatusTone } from '@/shared/constants/statuses'
 import type { Vacancy } from '../api/careers.api'
 import { useCloseVacancy, useCreateVacancy, useOpenVacancy, useRemoveVacancy, useUpdateVacancy, useVacancies, useVacancy } from '../hooks/useCareers'
 import { CandidatesTable } from './CandidatePages'
+import { tr, trc } from '@/lib/i18n'
 
 const TONE: Record<string, StatusTone> = { draft: 'neutral', open: 'success', closed: 'muted', filled: 'info' }
 export const VacancyStatus = ({ v }: { v: Pick<Vacancy, 'status'> }) => <StatusBadge status={v.status ?? 'draft'} tone={TONE[v.status ?? 'draft']} label={enumLabel('VacancyStatusEnum', v.status)} />
 
 const schema = z
   .object({
-    campus: z.string().min(1, 'Choose a branch.'),
-    application_type: z.string().min(1, 'Choose the job form.'),
-    code: z.string().trim().min(1, 'Required.').max(50).regex(/^[a-z0-9_-]+$/i, 'Letters, numbers, - and _ only.'),
-    title: z.string().trim().min(1, 'Required.').max(200),
+    campus: z.string().min(1, tr('Choose a branch.')),
+    application_type: z.string().min(1, tr('Choose the job form.')),
+    code: z.string().trim().min(1, tr('Required.')).max(50).regex(/^[a-z0-9_-]+$/i, tr('Letters, numbers, - and _ only.')),
+    title: z.string().trim().min(1, tr('Required.')).max(200),
     position: z.string(),
     department: z.string(),
     staff_type: z.string(),
@@ -59,7 +60,7 @@ const schema = z
     is_public: z.boolean(),
     resume_required: z.boolean(),
   })
-  .refine((v) => Number(v.openings) >= 1, { path: ['openings'], message: 'At least one.' })
+  .refine((v) => Number(v.openings) >= 1, { path: ['openings'], message: tr('At least one.') })
 
 function VacancyDialog({ open, record, onOpenChange }: { open: boolean; record: Vacancy | null; onOpenChange: (o: boolean) => void }) {
   const navigate = useNavigate()
@@ -74,8 +75,8 @@ function VacancyDialog({ open, record, onOpenChange }: { open: boolean; record: 
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? `Edit ${record.title}` : 'New vacancy'}
-      description={record ? undefined : 'Saved as a draft; open it when it’s ready for applications.'}
+      title={record ? tr('Edit {title}', { title: record.title }) : tr('New vacancy')}
+      description={record ? undefined : tr('Saved as a draft; open it when it’s ready for applications.')}
       wide
       schema={schema}
       defaultValues={{
@@ -115,63 +116,63 @@ function VacancyDialog({ open, record, onOpenChange }: { open: boolean; record: 
           const created = await create.mutateAsync(input)
           navigate(`/careers/vacancies/${created.id}`)
         }
-        toast.success(record ? 'Vacancy saved.' : 'Vacancy drafted.')
+        toast.success(record ? tr('Vacancy saved.') : tr('Vacancy drafted.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           {jobForms.length === 0 && !forms.isPending && (
             <p className="rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">
-              No job application form yet. <Link to="/applications/types?kind=job" className="font-medium underline">Set one up</Link> (kind “Job application”, last step decided by careers.hire), then come back.
+              {tr('No job application form yet.')} <Link to="/applications/types?kind=job" className="font-medium underline">{tr('Set one up')}</Link> {tr('(kind “Job application”, last step decided by careers.hire), then come back.')}
             </p>
           )}
           <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-            <FormField label="Title" required error={errors.title?.message}>
-              <Input {...register('title')} placeholder="Lecturer in Mathematics" />
+            <FormField label={tr('Title')} required error={errors.title?.message}>
+              <Input {...register('title')} placeholder={tr('Lecturer in Mathematics')} />
             </FormField>
-            <FormField label="Code" required error={errors.code?.message}>
+            <FormField label={tr('Code')} required error={errors.code?.message}>
               <Input {...register('code')} className="font-mono" />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Job form" required error={errors.application_type?.message} description="Its steps decide candidates.">
+            <FormField label={tr('Job form')} required error={errors.application_type?.message} description={tr('Its steps decide candidates.')}>
               {(p) => <Controller control={control} name="application_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={jobForms.map((f) => ({ value: String(f.id), label: f.name }))} />} />}
             </FormField>
             {isMultiBranch && (
-              <FormField label="Branch" required error={errors.campus?.message}>
+              <FormField label={tr('Branch')} required error={errors.campus?.message}>
                 {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
               </FormField>
             )}
-            <FormField label="Position">
+            <FormField label={tr('Position')}>
               {(p) => <Controller control={control} name="position" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty options={positions} />} />}
             </FormField>
-            <FormField label="Department">
+            <FormField label={tr('Department')}>
               {(p) => <Controller control={control} name="department" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty options={departments.data ?? []} />} />}
             </FormField>
-            <FormField label="Staff type">
+            <FormField label={tr('Staff type')}>
               {(p) => <Controller control={control} name="staff_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('StaffTypeEnum')} />} />}
             </FormField>
-            <FormField label="Contract on hiring">
+            <FormField label={tr('Contract on hiring')}>
               {(p) => <Controller control={control} name="contract_kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('ContractKindEnum')} />} />}
             </FormField>
-            <FormField label="Openings" required error={errors.openings?.message}>
+            <FormField label={tr('Openings')} required error={errors.openings?.message}>
               <Input {...register('openings')} inputMode="numeric" />
             </FormField>
-            <FormField label="Last day to apply" error={errors.closes_on?.message}>
+            <FormField label={tr('Last day to apply')} error={errors.closes_on?.message}>
               {(p) => <Controller control={control} name="closes_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
-            <FormField label="Salary (as advertised)" error={errors.salary_range?.message}>
+            <FormField label={tr('Salary (as advertised)')} error={errors.salary_range?.message}>
               <Input {...register('salary_range')} placeholder="40,000–55,000" />
             </FormField>
-            <FormField label="Experience (years, at least)" error={errors.min_experience_years?.message}>
+            <FormField label={tr('Experience (years, at least)')} error={errors.min_experience_years?.message}>
               <Input {...register('min_experience_years')} inputMode="numeric" />
             </FormField>
           </div>
-          <FormField label="Description">
+          <FormField label={tr('Description')}>
             <Textarea {...register('description')} rows={3} />
           </FormField>
-          <FormField label="Requirements" description="One per line.">
-            <Textarea {...register('requirements')} rows={3} placeholder={'Master’s in Mathematics\nTwo years’ teaching'} />
+          <FormField label={tr('Requirements')} description={tr('One per line.')}>
+            <Textarea {...register('requirements')} rows={3} placeholder={tr('Master’s in Mathematics\nTwo years’ teaching')} />
           </FormField>
           <div className="grid gap-3 text-sm sm:grid-cols-2">
             {([['is_public', 'On the public careers page'], ['resume_required', 'Résumé required']] as const).map(([name, label]) => (
@@ -196,35 +197,35 @@ export function VacanciesPage() {
   const [creating, setCreating] = useState(false)
   const { isMultiBranch } = useBranches()
   const columns: Column<Vacancy>[] = [
-    { id: 'title', header: 'Vacancy', mobile: 'title', cell: (v) => <span className="font-medium">{v.title}</span> },
-    { id: 'where', header: 'Department', cell: (v) => [v.department_name, isMultiBranch && v.campus_name].filter(Boolean).join(' · ') || '—' },
-    { id: 'openings', header: 'Filled', className: 'tabular-nums', cell: (v) => `${v.hired_count ?? 0} of ${v.openings}` },
-    { id: 'candidates', header: 'Candidates', className: 'tabular-nums', cell: (v) => v.candidates ?? 0 },
-    { id: 'closes', header: 'Closes', mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (v) => (v.closes_on ? formatDate(v.closes_on) : '—') },
-    { id: 'status', header: 'Status', cell: (v) => <VacancyStatus v={v} /> },
+    { id: 'title', header: tr('Vacancy'), mobile: 'title', cell: (v) => <span className="font-medium">{v.title}</span> },
+    { id: 'where', header: tr('Department'), cell: (v) => [v.department_name, isMultiBranch && v.campus_name].filter(Boolean).join(' · ') || '—' },
+    { id: 'openings', header: tr('Filled'), className: 'tabular-nums', cell: (v) => tr('{hired_count} of {openings}', { hired_count: v.hired_count ?? 0, openings: v.openings }) },
+    { id: 'candidates', header: tr('Candidates'), className: 'tabular-nums', cell: (v) => v.candidates ?? 0 },
+    { id: 'closes', header: tr('Closes'), mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (v) => (v.closes_on ? formatDate(v.closes_on) : '—') },
+    { id: 'status', header: tr('Status'), cell: (v) => <VacancyStatus v={v} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Vacancies"
+        ariaLabel={tr('Vacancies')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(v) => v.id}
-        searchPlaceholder="Title or code…"
+        searchPlaceholder={tr('Title or code…')}
         onRowClick={(v) => navigate(`/careers/vacancies/${v.id}`)}
         toolbar={
           <PermissionGate permission={PERMS.careers.manage}>
             <Button onClick={() => setCreating(true)}>
-              <Plus aria-hidden /> New vacancy
+              <Plus aria-hidden /> {tr('New vacancy')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('VacancyStatusEnum') },
-          { name: 'staff_type', label: 'Staff type', options: enumOptions('StaffTypeEnum') },
+          { name: 'status', label: tr('Status'), options: enumOptions('VacancyStatusEnum') },
+          { name: 'staff_type', label: tr('Staff type'), options: enumOptions('StaffTypeEnum') },
         ]}
-        empty={{ title: 'No vacancies', description: 'Draft a vacancy, open it, and candidates apply from the careers page or their account.' }}
+        empty={{ title: tr('No vacancies'), description: tr('Draft a vacancy, open it, and candidates apply from the careers page or their account.') }}
       />
       <VacancyDialog open={creating} record={null} onOpenChange={setCreating} />
     </>
@@ -254,7 +255,7 @@ export function VacancyDetailPage() {
             {v.title} <VacancyStatus v={v} />
           </span>
         }
-        description={[v.position_name, v.department_name, v.campus_name, enumLabel('StaffTypeEnum', v.staff_type), `${v.hired_count ?? 0} of ${v.openings} filled`].filter(Boolean).join(' · ')}
+        description={[v.position_name, v.department_name, v.campus_name, enumLabel('StaffTypeEnum', v.staff_type), tr('{hired_count} of {openings} filled', { hired_count: v.hired_count ?? 0, openings: v.openings })].filter(Boolean).join(' · ')}
         actions={
           manage && (
             <>
@@ -262,25 +263,25 @@ export function VacancyDetailPage() {
                 <Button
                   onClick={() =>
                     open.mutateAsync(v.id).then(
-                      () => toast.success('Open for applications.'),
+                      () => toast.success(tr('Open for applications.')),
                       (e) => toast.error(errorMessage(e)),
                     )
                   }
                   disabled={open.isPending}
                 >
-                  <Send aria-hidden /> Open
+                  <Send aria-hidden /> {trc('verb', 'Open')}
                 </Button>
               )}
               {v.status === 'open' && (
                 <Button variant="outline" onClick={() => setDialog('close')}>
-                  <Lock aria-hidden /> Close
+                  <Lock aria-hidden /> {tr('Close')}
                 </Button>
               )}
               <Button variant="outline" onClick={() => setDialog('edit')}>
-                <Pencil aria-hidden /> Edit
+                <Pencil aria-hidden /> {tr('Edit')}
               </Button>
               {v.status === 'draft' && (
-                <Button variant="outline" onClick={() => setDialog('delete')} aria-label="Delete vacancy">
+                <Button variant="outline" onClick={() => setDialog('delete')} aria-label={tr('Delete vacancy')}>
                   <Trash2 aria-hidden />
                 </Button>
               )}
@@ -290,11 +291,11 @@ export function VacancyDetailPage() {
       />
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
         <section className="rounded-lg border bg-card p-4 text-sm sm:p-6 lg:col-span-2">
-          <h2 className="mb-2 text-sm font-semibold">About the role</h2>
-          <p className="whitespace-pre-wrap">{v.description || <span className="text-muted-foreground">No description.</span>}</p>
+          <h2 className="mb-2 text-sm font-semibold">{tr('About the role')}</h2>
+          <p className="whitespace-pre-wrap">{v.description || <span className="text-muted-foreground">{tr('No description.')}</span>}</p>
           {v.requirements.length > 0 && (
             <>
-              <h3 className="mb-1 mt-4 text-sm font-semibold">Requirements</h3>
+              <h3 className="mb-1 mt-4 text-sm font-semibold">{tr('Requirements')}</h3>
               <ul className="ml-5 list-disc">
                 {v.requirements.map((r) => (
                   <li key={r}>{r}</li>
@@ -307,12 +308,12 @@ export function VacancyDetailPage() {
           <dl className="grid gap-2">
             {(
               [
-                ['Contract', enumLabel('ContractKindEnum', v.contract_kind)],
-                ['Salary', v.salary_range || '—'],
-                ['Experience', v.min_experience_years != null ? `${v.min_experience_years}+ years` : '—'],
-                ['Opened', v.opens_on ? formatDate(v.opens_on) : '—'],
-                ['Last day to apply', v.closes_on ? formatDate(v.closes_on) : '—'],
-                ['Listed publicly', v.is_public ? 'Yes' : 'No'],
+                [tr('Contract'), enumLabel('ContractKindEnum', v.contract_kind)],
+                [tr('Salary'), v.salary_range || '—'],
+                [tr('Experience'), v.min_experience_years != null ? `${v.min_experience_years}+ years` : '—'],
+                [tr('Opened'), v.opens_on ? formatDate(v.opens_on) : '—'],
+                [tr('Last day to apply'), v.closes_on ? formatDate(v.closes_on) : '—'],
+                [tr('Listed publicly'), v.is_public ? 'Yes' : 'No'],
               ] as const
             ).map(([k, val]) => (
               <div key={k} className="flex justify-between gap-2">
@@ -323,18 +324,18 @@ export function VacancyDetailPage() {
           </dl>
         </section>
       </div>
-      <h2 className="mb-2 text-sm font-semibold">Candidates</h2>
+      <h2 className="mb-2 text-sm font-semibold">{tr('Candidates')}</h2>
       <CandidatesTable vacancy={v.id} />
       <VacancyDialog open={dialog === 'edit'} record={v} onOpenChange={(o) => !o && setDialog(null)} />
       <ConfirmDialog
         open={dialog === 'close'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Stop taking applications?"
-        description="Candidates already in stay in the process. You can open it again."
-        confirmLabel="Close"
+        title={tr('Stop taking applications?')}
+        description={tr('Candidates already in stay in the process. You can open it again.')}
+        confirmLabel={tr('Close')}
         onConfirm={async () => {
           await close.mutateAsync(v.id)
-          toast.success('Closed.')
+          toast.success(tr('Closed.'))
         }}
       />
       <DeleteDialog
@@ -343,7 +344,7 @@ export function VacancyDetailPage() {
         subject={v.title}
         onConfirm={async () => {
           await remove.mutateAsync(v.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
           navigate('/careers')
         }}
       />

@@ -10,25 +10,26 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { errorMessage } from '@/lib/errors'
 import type { QrOptions, QrToken } from '../api/attendance.api'
+import { tr } from '@/lib/i18n'
 
 const TTLS = [
-  { value: '20', label: 'Every 20 seconds' },
-  { value: '30', label: 'Every 30 seconds' },
-  { value: '60', label: 'Every minute' },
+  { value: '20', label: tr('Every 20 seconds') },
+  { value: '30', label: tr('Every 30 seconds') },
+  { value: '60', label: tr('Every minute') },
 ]
 const RADII = [
-  { value: '50', label: 'Within 50 m' },
-  { value: '100', label: 'Within 100 m' },
-  { value: '200', label: 'Within 200 m' },
-  { value: '500', label: 'Within 500 m' },
+  { value: '50', label: tr('Within 50 m') },
+  { value: '100', label: tr('Within 100 m') },
+  { value: '200', label: tr('Within 200 m') },
+  { value: '500', label: tr('Within 500 m') },
 ]
 /** Ask for the next code this long before the current one stops working. */
 const RENEW_EARLY_S = 6
 
 export function currentPosition(): Promise<GeolocationPosition> {
   return new Promise((resolve, reject) => {
-    if (!('geolocation' in navigator)) return reject(new Error("This browser can't share its location."))
-    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === e.PERMISSION_DENIED ? "Location is blocked for this site. Allow it in the browser's site settings." : "Couldn't find where you are. Try again near a window.")), {
+    if (!('geolocation' in navigator)) return reject(new Error(tr("This browser can't share its location.")))
+    navigator.geolocation.getCurrentPosition(resolve, (e) => reject(new Error(e.code === e.PERMISSION_DENIED ? tr("Location is blocked for this site. Allow it in the browser's site settings.") : tr("Couldn't find where you are. Try again near a window."))), {
       enableHighAccuracy: true,
       timeout: 15_000,
       maximumAge: 60_000,
@@ -92,28 +93,28 @@ function Showing({ issue, options, path, label, live, onStop }: { issue: (o: QrO
         <div className="h-full bg-primary transition-[width] duration-500 ease-linear" style={{ width: code ? `${(left / ttl) * 100}%` : '0%' }} />
       </div>
       <p className="text-center text-sm text-muted-foreground" aria-live="polite">
-        {error ? '' : !code ? 'Getting a code…' : expired ? 'This code has expired.' : `Scan with your phone's camera. The code changes in ${left} s.`}
+        {error ? '' : !code ? tr('Getting a code…') : expired ? tr('This code has expired.') : tr("Scan with your phone's camera. The code changes in {left} s.", { left })}
       </p>
       {options.radius && (
         <p className="flex items-center gap-1 text-xs text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" aria-hidden /> Scans from further than {options.radius} m are refused.
+          <MapPin className="h-3.5 w-3.5" aria-hidden /> {tr('Scans from further than {radius} m are refused.', { radius: options.radius })}
         </p>
       )}
       {error && (
         <div className="grid w-full max-w-md gap-2">
           <FormError message={error} />
           <Button variant="outline" onClick={() => setAttempt((n) => n + 1)}>
-            <RefreshCw aria-hidden /> Try again
+            <RefreshCw aria-hidden /> {tr('Try again')}
           </Button>
         </div>
       )}
       {live}
       <div className="flex flex-wrap justify-center gap-2 [:fullscreen_&]:hidden">
         <Button variant="outline" onClick={() => void box.current?.requestFullscreen?.()}>
-          <Maximize2 aria-hidden /> Full screen
+          <Maximize2 aria-hidden /> {tr('Full screen')}
         </Button>
         <Button variant="outline" onClick={onStop}>
-          <Square aria-hidden /> Stop
+          <Square aria-hidden /> {tr('Stop')}
         </Button>
       </div>
     </div>
@@ -171,7 +172,7 @@ export function QrPresenter({
         const { coords } = await currentPosition()
         Object.assign(options, { latitude: Number(coords.latitude.toFixed(6)), longitude: Number(coords.longitude.toFixed(6)), radius: Number(radius) })
       } catch (err) {
-        setError(`${(err as Error).message} Or turn the distance check off.`)
+        setError(tr('{message} Or turn the distance check off.', { message: (err as Error).message }))
         return
       } finally {
         setLocating(false)
@@ -195,24 +196,24 @@ export function QrPresenter({
           <Showing issue={issue} options={running} path={path} label={title} live={live} onStop={stop} />
         ) : (
           <div className="grid gap-4">
-            <FormField label="Change the code" description="A photo of the code shared in a group chat stops working when it changes.">
+            <FormField label={tr('Change the code')} description={tr('A photo of the code shared in a group chat stops working when it changes.')}>
               {(p) => <SelectControl {...p} value={ttl} onChange={setTtl} options={TTLS} />}
             </FormField>
             {settings}
             <div className="grid gap-3 rounded-md border p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="grid gap-0.5">
-                  <Label htmlFor={switchId}>Only accept scans from nearby</Label>
-                  <p className="text-xs text-muted-foreground">Uses this device's location now; phones must share theirs to scan.</p>
+                  <Label htmlFor={switchId}>{tr('Only accept scans from nearby')}</Label>
+                  <p className="text-xs text-muted-foreground">{tr("Uses this device's location now; phones must share theirs to scan.")}</p>
                 </div>
                 <Switch id={switchId} checked={nearby} onCheckedChange={setNearby} />
               </div>
-              {nearby && <SelectControl aria-label="Distance" value={radius} onChange={setRadius} options={RADII} />}
+              {nearby && <SelectControl aria-label={tr('Distance')} value={radius} onChange={setRadius} options={RADII} />}
             </div>
             <FormError message={error} />
             <Button className="h-10" onClick={() => void start()} disabled={locating}>
               {locating ? <Loader2 className="animate-spin" aria-hidden /> : <QrIcon aria-hidden />}
-              {locating ? 'Finding this location…' : 'Show the code'}
+              {locating ? tr('Finding this location…') : tr('Show the code')}
             </Button>
           </div>
         )}

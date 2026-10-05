@@ -15,11 +15,12 @@ import { useClasses } from '../../classes/hooks/useClasses'
 import { useProgramCurriculum } from '../../curriculum/hooks/useCurriculum'
 import type { TeachingAssignment } from '../api/teaching.api'
 import { useCreateTeachingAssignment, useUpdateTeachingAssignment } from '../hooks/useTeaching'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({
-  section: requiredId('Choose a class.'),
-  subject: requiredId('Choose a subject.'),
-  teacher: requiredId('Choose a teacher.'),
+  section: requiredId(tr('Choose a class.')),
+  subject: requiredId(tr('Choose a subject.')),
+  teacher: requiredId(tr('Choose a teacher.')),
   role: z.enum(['lecture', 'practical', 'tutorial', 'co_teaching']),
   periods_per_week: optionalWholeNumber,
   is_active: z.boolean(),
@@ -36,7 +37,7 @@ function ClassAndSubject({ control, errors, academicYear, locked }: { control: C
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <FormField label="Class" required error={errors.section?.message}>
+      <FormField label={tr('Class')} required error={errors.section?.message}>
         {(p) => (
           <Controller
             control={control}
@@ -48,10 +49,10 @@ function ClassAndSubject({ control, errors, academicYear, locked }: { control: C
         )}
       </FormField>
       <FormField
-        label="Subject"
+        label={tr('Subject')}
         required
         error={errors.subject?.message}
-        description={section && curriculum.data && subjects.length === 0 ? `No subjects in the curriculum for ${section.display_name} yet. Add them under Curriculum.` : undefined}
+        description={section && curriculum.data && subjects.length === 0 ? tr('No subjects in the curriculum for {display_name} yet. Add them under Curriculum.', { display_name: section.display_name }) : undefined}
       >
         {(p) => (
           <Controller
@@ -64,7 +65,7 @@ function ClassAndSubject({ control, errors, academicYear, locked }: { control: C
                 onChange={field.onChange}
                 disabled={locked || !section}
                 loading={Boolean(section) && curriculum.isPending}
-                placeholder={section ? 'Choose…' : 'Choose a class first'}
+                placeholder={section ? tr('Choose…') : tr('Choose a class first')}
                 options={subjects.map((c) => ({ value: String(c.subject), label: `${c.subject_name}${c.is_elective ? ' (elective)' : ''}` }))}
               />
             )}
@@ -85,8 +86,8 @@ export function TeachingAssignmentDialog({ open, onOpenChange, record, academicY
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? `${record.subject_name} · ${record.section_name}` : 'Assign a teacher'}
-      description="Who teaches which subject to which class. Timetable lessons and lesson attendance are built on this."
+      title={record ? `${record.subject_name} · ${record.section_name}` : tr('Assign a teacher')}
+      description={tr('Who teaches which subject to which class. Timetable lessons and lesson attendance are built on this.')}
       schema={schema}
       defaultValues={{
         section: record ? String(record.section) : '',
@@ -107,20 +108,20 @@ export function TeachingAssignmentDialog({ open, onOpenChange, record, academicY
         }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Saved.' : 'Teacher assigned.')
+        toast.success(record ? tr('Saved.') : tr('Teacher assigned.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           <ClassAndSubject control={control} errors={errors} academicYear={academicYear} locked={record != null} />
           <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="Teacher" required error={errors.teacher?.message} className="sm:col-span-1">
+            <FormField label={tr('Teacher')} required error={errors.teacher?.message} className="sm:col-span-1">
               {(p) => <Controller control={control} name="teacher" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} loading={staff.isPending} options={staff.data ?? []} />} />}
             </FormField>
-            <FormField label="Teaches" error={errors.role?.message}>
+            <FormField label={tr('Teaches')} error={errors.role?.message}>
               {(p) => <Controller control={control} name="role" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('TeachingAssignmentRoleEnum')} />} />}
             </FormField>
-            <FormField label="Periods a week" error={errors.periods_per_week?.message} description="Used by the timetable generator.">
+            <FormField label={tr('Periods a week')} error={errors.periods_per_week?.message} description={tr('Used by the timetable generator.')}>
               <Input {...register('periods_per_week')} inputMode="numeric" />
             </FormField>
           </div>
@@ -130,7 +131,7 @@ export function TeachingAssignmentDialog({ open, onOpenChange, record, academicY
               name="is_active"
               render={({ field }) => (
                 <label className="flex items-center gap-3 text-sm">
-                  <Switch checked={field.value} onCheckedChange={field.onChange} /> Active
+                  <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Active')}
                 </label>
               )}
             />

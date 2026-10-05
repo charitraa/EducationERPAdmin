@@ -11,6 +11,7 @@ import { useDepartmentOptions } from '../../departments/hooks/useDepartments'
 import type { Program } from '../api/programs.api'
 import { useCreateProgram, useUpdateProgram } from '../hooks/usePrograms'
 import { programDefaults, programSchema, toProgramInput } from '../schemas/program.schema'
+import { tr } from '@/lib/i18n'
 
 export function ProgramFormDialog({ open, onOpenChange, record }: { open: boolean; onOpenChange: (o: boolean) => void; record: Program | null }) {
   const create = useCreateProgram()
@@ -22,47 +23,47 @@ export function ProgramFormDialog({ open, onOpenChange, record }: { open: boolea
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? 'Edit program' : 'Add program'}
-      description='A course of study with levels, e.g. "+2 Science" running Grade 11 to Grade 12.'
+      title={record ? tr('Edit program') : tr('Add program')}
+      description={tr('A course of study with levels, e.g. "+2 Science" running Grade 11 to Grade 12.')}
       schema={programSchema}
       defaultValues={programDefaults(record)}
       onSubmit={async (values) => {
         const input = toProgramInput(values)
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Program updated.' : 'Program added.')
+        toast.success(record ? tr('Program updated.') : tr('Program added.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-            <FormField label="Code" required error={errors.code?.message}>
+            <FormField label={tr('Code')} required error={errors.code?.message}>
               <Input {...register('code')} placeholder="SCI" autoFocus />
             </FormField>
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="+2 Science" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('+2 Science')} />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="Levels are" error={errors.level_type?.message}>
+            <FormField label={tr('Levels are')} error={errors.level_type?.message}>
               {(p) => (
                 <Controller control={control} name="level_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('LevelTypeEnum')} />} />
               )}
             </FormField>
-            <FormField label="First level" required error={errors.first_level?.message}>
+            <FormField label={tr('First level')} required error={errors.first_level?.message}>
               <Input {...register('first_level')} inputMode="numeric" />
             </FormField>
-            <FormField label="Last level" required error={errors.last_level?.message}>
+            <FormField label={tr('Last level')} required error={errors.last_level?.message}>
               <Input {...register('last_level')} inputMode="numeric" />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Roll call" error={errors.attendance_mode?.message} description="Schools usually take one a day; colleges take it every lesson.">
+            <FormField label={tr('Roll call')} error={errors.attendance_mode?.message} description={tr('Schools usually take one a day; colleges take it every lesson.')}>
               {(p) => (
                 <Controller control={control} name="attendance_mode" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('AttendanceModeEnum')} />} />
               )}
             </FormField>
-            <FormField label="Department" error={errors.department?.message}>
+            <FormField label={tr('Department')} error={errors.department?.message}>
               {(p) => (
                 <Controller
                   control={control}
@@ -72,7 +73,7 @@ export function ProgramFormDialog({ open, onOpenChange, record }: { open: boolea
               )}
             </FormField>
           </div>
-          <FormField label="Description" error={errors.description?.message}>
+          <FormField label={tr('Description')} error={errors.description?.message}>
             <Textarea {...register('description')} rows={2} />
           </FormField>
           <Controller
@@ -81,7 +82,7 @@ export function ProgramFormDialog({ open, onOpenChange, record }: { open: boolea
             render={({ field }) => (
               <label className="flex items-center gap-3 text-sm">
                 <Switch checked={field.value} onCheckedChange={field.onChange} />
-                Accepting students (active)
+                {tr('Accepting students (active)')}
               </label>
             )}
           />

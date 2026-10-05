@@ -16,6 +16,7 @@ import { useProgramOptions } from '../../programs/hooks/usePrograms'
 import type { SchoolClass } from '../api/classes.api'
 import { ClassFormDialog } from '../components/ClassFormDialog'
 import { useClasses, useRemoveClass } from '../hooks/useClasses'
+import { tr } from '@/lib/i18n'
 
 function Occupancy({ count, capacity }: { count: number; capacity: number | null | undefined }) {
   const full = capacity != null && count >= capacity
@@ -23,7 +24,7 @@ function Occupancy({ count, capacity }: { count: number; capacity: number | null
     <span className={cn('tabular-nums', full && 'font-medium text-warning')}>
       {count}
       {capacity != null && <span className="text-muted-foreground"> / {capacity}</span>}
-      {full && <span className="sr-only"> (full)</span>}
+      {full && <span className="sr-only"> {tr('(full)')}</span>}
     </span>
   )
 }
@@ -41,61 +42,61 @@ export default function ClassesPage() {
   const remove = useRemoveClass()
 
   const columns: Column<SchoolClass>[] = [
-    { id: 'name', header: 'Class', sortField: 'name', mobile: 'title', cell: (c) => <span className="font-medium">{c.display_name}</span> },
-    { id: 'program', header: 'Program', cell: (c) => c.program_name },
-    { id: 'year', header: 'Year', cell: (c) => c.academic_year_name },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (c) => c.campus_name },
-    { id: 'teacher', header: 'Class teacher', cell: (c) => c.class_teacher_name || <span className="text-muted-foreground">Not assigned</span> },
-    { id: 'students', header: 'Students', cell: (c) => <Occupancy count={c.student_count} capacity={c.capacity} /> },
+    { id: 'name', header: tr('Class'), sortField: 'name', mobile: 'title', cell: (c) => <span className="font-medium">{c.display_name}</span> },
+    { id: 'program', header: tr('Program'), cell: (c) => c.program_name },
+    { id: 'year', header: tr('Year'), cell: (c) => c.academic_year_name },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (c) => c.campus_name },
+    { id: 'teacher', header: tr('Class teacher'), cell: (c) => c.class_teacher_name || <span className="text-muted-foreground">{tr('Not assigned')}</span> },
+    { id: 'students', header: tr('Students'), cell: (c) => <Occupancy count={c.student_count} capacity={c.capacity} /> },
   ]
 
   return (
     <>
       <SectionHeader
-        title="Classes"
-        description="Each year's classes. Students are placed into a class; attendance and marks follow it."
+        title={tr('Classes')}
+        description={tr("Each year's classes. Students are placed into a class; attendance and marks follow it.")}
         action={
           <PermissionGate permission={PERMS.academics.classes}>
             <Button onClick={crud.openCreate} disabled={!years.data?.length || !programs.data?.length}>
-              <Plus aria-hidden /> Add class
+              <Plus aria-hidden /> {tr('Add class')}
             </Button>
           </PermissionGate>
         }
       />
       <DataTable
-        ariaLabel="Classes"
+        ariaLabel={tr('Classes')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(c) => c.id}
-        searchPlaceholder="Search classes or programs…"
+        searchPlaceholder={tr('Search classes or programs…')}
         filters={[
           {
             name: 'academic_year',
-            label: 'Academic year',
-            options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? `${y.name} (current)` : y.name })),
+            label: tr('Academic year'),
+            options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? tr('{name} (current)', { name: y.name }) : y.name })),
           },
-          { name: 'program', label: 'Program', options: (programs.data ?? []).map((p) => ({ value: String(p.id), label: p.name })) },
-          { name: 'campus', label: 'Branch', hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
+          { name: 'program', label: tr('Program'), options: (programs.data ?? []).map((p) => ({ value: String(p.id), label: p.name })) },
+          { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
         ]}
         rowActions={(c) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(c) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(c) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(c) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(c) },
             ]}
           />
         )}
         empty={{
-          title: current.data ? `No classes in ${current.data.name} yet` : 'No classes yet',
+          title: current.data ? tr('No classes in {name} yet', { name: current.data.name }) : tr('No classes yet'),
           description:
             !years.data?.length || !programs.data?.length
-              ? 'Add an academic year and a program first; classes belong to both.'
-              : 'Add a class for each group of students, e.g. Grade 11 A and Grade 11 B.',
+              ? tr('Add an academic year and a program first; classes belong to both.')
+              : tr('Add a class for each group of students, e.g. Grade 11 A and Grade 11 B.'),
           action: (
             <PermissionGate permission={PERMS.academics.classes}>
               <Button onClick={crud.openCreate} disabled={!years.data?.length || !programs.data?.length}>
-                <Plus aria-hidden /> Add the first class
+                <Plus aria-hidden /> {tr('Add the first class')}
               </Button>
             </PermissionGate>
           ),
@@ -107,10 +108,10 @@ export default function ClassesPage() {
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
           subject={crud.deleting.display_name}
-          description="A class with students or history can't be deleted."
+          description={tr("A class with students or history can't be deleted.")}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Class deleted.')
+            toast.success(tr('Class deleted.'))
           }}
         />
       )}

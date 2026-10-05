@@ -22,13 +22,14 @@ import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
 import type { Item, ItemInput } from '../api/inventory.api'
 import { useCreateItem, useItemCategories, useItems, useRemoveItem, useUpdateItem } from '../hooks/useInventory'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({
   code,
-  name: z.string().trim().min(1, 'Required.').max(200),
+  name: z.string().trim().min(1, tr('Required.')).max(200),
   category: z.string(),
   kind: z.string(),
-  unit: z.string().trim().min(1, 'Required.').max(20),
+  unit: z.string().trim().min(1, tr('Required.')).max(20),
   reorder_level: wholeNumber(),
   description: z.string(),
   is_active: z.boolean(),
@@ -42,8 +43,8 @@ function ItemDialog({ open, record, onOpenChange }: { open: boolean; record: Ite
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? 'Edit item' : 'Add item'}
-      description="A consumable is counted by quantity per store. A fixed asset is tracked one by one, each with its own tag."
+      title={record ? tr('Edit item') : tr('Add item')}
+      description={tr('A consumable is counted by quantity per store. A fixed asset is tracked one by one, each with its own tag.')}
       schema={schema}
       defaultValues={{
         code: record?.code ?? '',
@@ -59,41 +60,41 @@ function ItemDialog({ open, record, onOpenChange }: { open: boolean; record: Ite
         const input: ItemInput = { ...v, kind: v.kind as ItemInput['kind'], category: v.category ? Number(v.category) : null, reorder_level: Number(v.reorder_level) }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Item saved.' : 'Item added.')
+        toast.success(record ? tr('Item saved.') : tr('Item added.'))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
-            <FormField label="Code" required error={errors.code?.message}>
+            <FormField label={tr('Code')} required error={errors.code?.message}>
               <Input {...register('code')} placeholder="pen-blue" />
             </FormField>
-            <FormField label="Name" required error={errors.name?.message}>
-              <Input {...register('name')} placeholder="Blue ball pen" />
+            <FormField label={tr('Name')} required error={errors.name?.message}>
+              <Input {...register('name')} placeholder={tr('Blue ball pen')} />
             </FormField>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Kind" error={errors.kind?.message} description={record ? 'Fixed once it has stock, assets or orders.' : undefined}>
+            <FormField label={tr('Kind')} error={errors.kind?.message} description={record ? tr('Fixed once it has stock, assets or orders.') : undefined}>
               {(p) => <Controller control={control} name="kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('ItemKindEnum')} />} />}
             </FormField>
-            <FormField label="Category">
+            <FormField label={tr('Category')}>
               {(p) => <Controller control={control} name="category" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty options={(categories.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.name }))} />} />}
             </FormField>
-            <FormField label="Unit" required error={errors.unit?.message}>
-              <Input {...register('unit')} placeholder="pcs, box, ream" />
+            <FormField label={tr('Unit')} required error={errors.unit?.message}>
+              <Input {...register('unit')} placeholder={tr('pcs, box, ream')} />
             </FormField>
             {watch('kind') === 'consumable' && (
-              <FormField label="Reorder at" error={errors.reorder_level?.message} description="Flag a store as low at this quantity. 0 = never.">
+              <FormField label={tr('Reorder at')} error={errors.reorder_level?.message} description={tr('Flag a store as low at this quantity. 0 = never.')}>
                 <Input {...register('reorder_level')} inputMode="numeric" />
               </FormField>
             )}
           </div>
-          <FormField label="Description" error={errors.description?.message}>
+          <FormField label={tr('Description')} error={errors.description?.message}>
             <Textarea {...register('description')} rows={2} />
           </FormField>
           <Controller control={control} name="is_active" render={({ field }) => (
             <label className="flex items-center gap-3 text-sm">
-              <Switch checked={field.value} onCheckedChange={field.onChange} /> In use
+              <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('In use')}
             </label>
           )} />
         </>
@@ -110,43 +111,43 @@ export default function ItemsPage() {
   const crud = useCrudState<Item>()
   const remove = useRemoveItem()
   const columns: Column<Item>[] = [
-    { id: 'code', header: 'Code', className: 'font-mono text-xs', mobile: 'hidden', cell: (i) => i.code },
-    { id: 'name', header: 'Item', mobile: 'title', cell: (i) => <span className="font-medium">{i.name}</span> },
-    { id: 'kind', header: 'Kind', cell: (i) => (i.kind === 'asset' ? 'Fixed asset' : 'Consumable') },
-    { id: 'category', header: 'Category', cell: (i) => i.category_name ?? '—' },
-    { id: 'stock', header: 'In stock', className: 'text-right tabular-nums', cell: (i) => (i.kind === 'asset' ? '—' : `${i.total_stock} ${i.unit ?? ''}`) },
-    { id: 'status', header: 'Status', cell: (i) => <StatusBadge status={i.is_active === false ? 'inactive' : 'active'} label={i.is_active === false ? 'Not in use' : 'In use'} /> },
+    { id: 'code', header: tr('Code'), className: 'font-mono text-xs', mobile: 'hidden', cell: (i) => i.code },
+    { id: 'name', header: tr('Item'), mobile: 'title', cell: (i) => <span className="font-medium">{i.name}</span> },
+    { id: 'kind', header: tr('Kind'), cell: (i) => (i.kind === 'asset' ? tr('Fixed asset') : tr('Consumable')) },
+    { id: 'category', header: tr('Category'), cell: (i) => i.category_name ?? '—' },
+    { id: 'stock', header: tr('In stock'), className: 'text-right tabular-nums', cell: (i) => (i.kind === 'asset' ? '—' : `${i.total_stock} ${i.unit ?? ''}`) },
+    { id: 'status', header: tr('Status'), cell: (i) => <StatusBadge status={i.is_active === false ? 'inactive' : 'active'} label={i.is_active === false ? tr('Not in use') : tr('In use')} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Items"
+        ariaLabel={tr('Items')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(i) => i.id}
-        searchPlaceholder="Search name or code…"
+        searchPlaceholder={tr('Search name or code…')}
         toolbar={
           <PermissionGate permission={PERMS.inventory.manage}>
             <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add item
+              <Plus aria-hidden /> {tr('Add item')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'kind', label: 'Kind', options: enumOptions('ItemKindEnum').map((o) => ({ ...o, label: enumLabel('ItemKindEnum', o.value).split(' (')[0]! })) },
-          { name: 'category', label: 'Category', options: (categories.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.name })) },
-          { name: 'is_active', label: 'Status', options: [{ value: 'true', label: 'In use' }, { value: 'false', label: 'Not in use' }] },
+          { name: 'kind', label: tr('Kind'), options: enumOptions('ItemKindEnum').map((o) => ({ ...o, label: enumLabel('ItemKindEnum', o.value).split(' (')[0]! })) },
+          { name: 'category', label: tr('Category'), options: (categories.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.name })) },
+          { name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('In use') }, { value: 'false', label: tr('Not in use') }] },
         ]}
         rowActions={(i) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.inventory.manage, onSelect: () => crud.openEdit(i) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.inventory.manage, destructive: true, onSelect: () => crud.openDelete(i) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.inventory.manage, onSelect: () => crud.openEdit(i) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.inventory.manage, destructive: true, onSelect: () => crud.openDelete(i) },
             ]}
           />
         )}
-        empty={{ title: 'No items yet', description: 'Add what you stock (stationery, cleaning supplies) and what you own (computers, furniture).' }}
+        empty={{ title: tr('No items yet'), description: tr('Add what you stock (stationery, cleaning supplies) and what you own (computers, furniture).') }}
       />
       <ItemDialog open={crud.formOpen} record={crud.record} onOpenChange={(o) => !o && crud.closeForm()} />
       {crud.deleting && (
@@ -154,10 +155,10 @@ export default function ItemsPage() {
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
           subject={`“${crud.deleting.name}”`}
-          description="Only possible for an item with no stock, assets or orders; otherwise mark it not in use."
+          description={tr('Only possible for an item with no stock, assets or orders; otherwise mark it not in use.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Item deleted.')
+            toast.success(tr('Item deleted.'))
           }}
         />
       )}

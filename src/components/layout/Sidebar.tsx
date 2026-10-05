@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useNavigation } from '@/hooks/useNavigation'
 import { SidebarSection } from './SidebarSection'
+import { tr } from '@/lib/i18n'
 
 /** Built from `me.permissions` via navigation.ts — never a hardcoded menu. */
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
@@ -16,11 +17,11 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <GraduationCap className="h-4.5 w-4.5" aria-hidden />
         </span>
         <span className="min-w-0">
-          <span className="block truncate text-sm font-semibold leading-tight">{user?.organization?.name ?? 'Education ERP'}</span>
-          <span className="block text-[11px] leading-tight text-sidebar-muted">School management</span>
+          <span className="block truncate text-sm font-semibold leading-tight">{user?.organization?.name ?? tr('Education ERP')}</span>
+          <span className="block text-[11px] leading-tight text-sidebar-muted">{tr('School management')}</span>
         </span>
       </Link>
-      <nav aria-label="Main" className="flex-1 overflow-y-auto px-2 py-4 [scrollbar-width:thin]">
+      <nav aria-label={tr('Main')} className="flex-1 overflow-y-auto px-2 py-4 [scrollbar-width:thin]">
         {sections.map((section) => (
           <SidebarSection key={section.label} section={section} onNavigate={onNavigate} />
         ))}

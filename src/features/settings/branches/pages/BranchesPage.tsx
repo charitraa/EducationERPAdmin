@@ -14,6 +14,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Campus } from '@/shared/types/organization'
 import { BranchFormDialog } from '../components/BranchFormDialog'
 import { useBranchList, useUpdateBranch } from '../hooks/useBranchResource'
+import { tr } from '@/lib/i18n'
 
 /**
  * Settings → Branches. The only place to add a branch. Branches with history
@@ -29,32 +30,32 @@ export default function BranchesPage() {
   const columns: Column<Campus>[] = [
     {
       id: 'name',
-      header: 'Branch',
+      header: tr('Branch'),
       sortField: 'name',
       mobile: 'title',
       cell: (b) => (
         <span className="inline-flex items-center gap-2 font-medium">
           {b.name}
-          {b.is_main && <span className="rounded border px-1.5 text-[10px] font-medium uppercase text-muted-foreground">Main</span>}
+          {b.is_main && <span className="rounded border px-1.5 text-[10px] font-medium uppercase text-muted-foreground">{tr('Main')}</span>}
         </span>
       ),
     },
-    { id: 'code', header: 'Code', sortField: 'code', className: 'font-mono text-xs', cell: (b) => b.code },
-    { id: 'city', header: 'City', cell: (b) => b.city || '—' },
-    { id: 'contact', header: 'Contact', cell: (b) => [b.phone, b.email].filter(Boolean).join(' · ') || '—' },
-    { id: 'status', header: 'Status', cell: (b) => <StatusBadge status={b.is_active === false ? 'closed' : 'active'} label={b.is_active === false ? 'Closed' : 'Open'} /> },
+    { id: 'code', header: tr('Code'), sortField: 'code', className: 'font-mono text-xs', cell: (b) => b.code },
+    { id: 'city', header: tr('City'), cell: (b) => b.city || '—' },
+    { id: 'contact', header: tr('Contact'), cell: (b) => [b.phone, b.email].filter(Boolean).join(' · ') || '—' },
+    { id: 'status', header: tr('Status'), cell: (b) => <StatusBadge status={b.is_active === false ? 'closed' : 'active'} label={b.is_active === false ? tr('Closed') : tr('Open')} /> },
   ]
 
   return (
     <>
       <PageHeader
-        title="Branches"
-        description="Each place your school teaches from."
+        title={tr('Branches')}
+        description={tr('Each place your school teaches from.')}
         backTo="/settings"
         actions={
           <PermissionGate permission={PERMS.campuses.create}>
             <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add a branch
+              <Plus aria-hidden /> {tr('Add a branch')}
             </Button>
           </PermissionGate>
         }
@@ -63,48 +64,47 @@ export default function BranchesPage() {
         <div className="mb-4 flex gap-3 rounded-lg border border-info/20 bg-info-soft p-3 text-sm text-info">
           <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <p>
-            Your school has one branch, so branch choices are hidden everywhere and new records use it automatically. Add a second branch and
-            branch filters, columns and pickers will appear.
+            {tr('Your school has one branch, so branch choices are hidden everywhere and new records use it automatically. Add a second branch and branch filters, columns and pickers will appear.')}
           </p>
         </div>
       )}
       <DataTable
-        ariaLabel="Branches"
+        ariaLabel={tr('Branches')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(b) => b.id}
-        searchPlaceholder="Search branches…"
-        filters={[{ name: 'is_active', label: 'Status', options: [{ value: 'true', label: 'Open' }, { value: 'false', label: 'Closed' }] }]}
+        searchPlaceholder={tr('Search branches…')}
+        filters={[{ name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('Open') }, { value: 'false', label: tr('Closed') }] }]}
         rowActions={(b) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.campuses.update, onSelect: () => crud.openEdit(b) },
-              { label: 'Close branch', icon: PowerOff, permission: PERMS.campuses.update, hidden: b.is_active === false || b.is_main, destructive: true, onSelect: () => crud.openDelete(b) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.campuses.update, onSelect: () => crud.openEdit(b) },
+              { label: tr('Close branch'), icon: PowerOff, permission: PERMS.campuses.update, hidden: b.is_active === false || b.is_main, destructive: true, onSelect: () => crud.openDelete(b) },
               {
-                label: 'Reopen branch',
+                label: tr('Reopen branch'),
                 icon: Power,
                 permission: PERMS.campuses.update,
                 hidden: b.is_active !== false,
-                onSelect: () => update.mutate({ id: b.id, input: { is_active: true } }, { onSuccess: () => toast.success(`${b.name} reopened.`) }),
+                onSelect: () => update.mutate({ id: b.id, input: { is_active: true } }, { onSuccess: () => toast.success(tr('{name} reopened.', { name: b.name })) }),
               },
             ]}
           />
         )}
-        empty={{ title: 'No branches', description: 'Your organization needs at least one branch.' }}
+        empty={{ title: tr('No branches'), description: tr('Your organization needs at least one branch.') }}
       />
       <BranchFormDialog open={crud.formOpen} onOpenChange={(o) => !o && crud.closeForm()} record={crud.record} />
       {crud.deleting && (
         <ConfirmDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          title={`Close ${crud.deleting.name}?`}
-          description="It stays on record with its history, but disappears from branch choices. You can reopen it later."
-          confirmLabel="Close branch"
+          title={tr('Close {name}?', { name: crud.deleting.name })}
+          description={tr('It stays on record with its history, but disappears from branch choices. You can reopen it later.')}
+          confirmLabel={tr('Close branch')}
           tone="destructive"
           onConfirm={async () => {
             await update.mutateAsync({ id: crud.deleting!.id, input: { is_active: false } })
-            toast.success(`${crud.deleting!.name} closed.`)
+            toast.success(tr('{name} closed.', { name: crud.deleting!.name }))
           }}
         />
       )}

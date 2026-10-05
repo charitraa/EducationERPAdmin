@@ -14,11 +14,12 @@ import { enumLabel } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import { Money } from '../components/money'
 import { useCollection, useOutstanding, useStatement } from '../hooks/useFinance'
+import { tr } from '@/lib/i18n'
 
 const VIEWS = [
-  { value: 'outstanding', label: 'Overdue' },
-  { value: 'collection', label: 'Day sheet' },
-  { value: 'statement', label: 'Student statement' },
+  { value: 'outstanding', label: tr('Overdue') },
+  { value: 'collection', label: tr('Day sheet') },
+  { value: 'statement', label: tr('Student statement') },
 ] as const
 
 function Field({ label, children }: { label: string; children: (id: string) => ReactNode }) {
@@ -50,21 +51,21 @@ function OutstandingView() {
   return (
     <>
       <p className="mb-3 text-sm">
-        <Money value={r.total_outstanding} className="text-lg font-semibold text-danger" tone="none" /> overdue on {r.count} invoice{r.count === 1 ? '' : 's'}, as of {formatDate(r.as_of)}.
+        <Money value={r.total_outstanding} className="text-lg font-semibold text-danger" tone="none" /> {tr('overdue on {count} invoice{value}, as of {date}.', { count: r.count, value: r.count === 1 ? '' : 's', date: formatDate(r.as_of) })}
       </p>
       {r.invoices.length === 0 ? (
-        <EmptyState title="Nothing overdue" />
+        <EmptyState title={tr('Nothing overdue')} />
       ) : (
         <Table
-          label="Overdue invoices"
+          label={tr('Overdue invoices')}
           head={
             <tr>
-              <th className="px-3 py-2">Student</th>
-              <th className="px-3 py-2">Class</th>
-              <th className="px-3 py-2">Invoice</th>
-              <th className="px-3 py-2">Due</th>
-              <th className="px-3 py-2 text-right">Days</th>
-              <th className="px-3 py-2 text-right">Owed</th>
+              <th className="px-3 py-2">{tr('Student')}</th>
+              <th className="px-3 py-2">{tr('Class')}</th>
+              <th className="px-3 py-2">{tr('Invoice')}</th>
+              <th className="px-3 py-2">{tr('Due')}</th>
+              <th className="px-3 py-2 text-right">{tr('Days')}</th>
+              <th className="px-3 py-2 text-right">{tr('Owed')}</th>
             </tr>
           }
         >
@@ -104,7 +105,7 @@ function CollectionView({ from, to }: { from: string; to: string }) {
     <>
       <dl className="mb-3 flex flex-wrap gap-x-8 gap-y-2 rounded-lg border bg-card p-4 text-sm">
         <div>
-          <dt className="text-xs text-muted-foreground">Total received</dt>
+          <dt className="text-xs text-muted-foreground">{tr('Total received')}</dt>
           <dd className="text-lg font-semibold">
             <Money value={r.total} />
           </dd>
@@ -119,17 +120,17 @@ function CollectionView({ from, to }: { from: string; to: string }) {
         ))}
       </dl>
       {r.payments.length === 0 ? (
-        <EmptyState title="Nothing received in these dates" />
+        <EmptyState title={tr('Nothing received in these dates')} />
       ) : (
         <Table
-          label="Payments received"
+          label={tr('Payments received')}
           head={
             <tr>
-              <th className="px-3 py-2">When</th>
-              <th className="px-3 py-2">Student</th>
-              <th className="px-3 py-2">Invoice</th>
-              <th className="px-3 py-2">Method</th>
-              <th className="px-3 py-2 text-right">Amount</th>
+              <th className="px-3 py-2">{tr('When')}</th>
+              <th className="px-3 py-2">{tr('Student')}</th>
+              <th className="px-3 py-2">{tr('Invoice')}</th>
+              <th className="px-3 py-2">{tr('Method')}</th>
+              <th className="px-3 py-2 text-right">{tr('Amount')}</th>
             </tr>
           }
         >
@@ -163,7 +164,7 @@ function StatementView({ studentId, onPick }: { studentId: number | null; onPick
   return (
     <>
       <div className="mb-4 max-w-md print:hidden">
-        <Field label="Student">
+        <Field label={tr('Student')}>
           {(id) => (
             <StudentPicker
               id={id}
@@ -177,7 +178,7 @@ function StatementView({ studentId, onPick }: { studentId: number | null; onPick
         </Field>
       </div>
       {(student?.id ?? studentId) == null ? (
-        <EmptyState title="Find a student" description="Every invoice, what’s been paid, and what’s still owed." icon={UserSearch} />
+        <EmptyState title={tr('Find a student')} description={tr('Every invoice, what’s been paid, and what’s still owed.')} icon={UserSearch} />
       ) : statement.isPending ? (
         <TableSkeleton rows={4} columns={6} />
       ) : statement.isError ? (
@@ -190,42 +191,42 @@ function StatementView({ studentId, onPick }: { studentId: number | null; onPick
             </h2>
             <dl className="flex gap-6 text-sm">
               <div>
-                <dt className="text-xs text-muted-foreground">Billed</dt>
+                <dt className="text-xs text-muted-foreground">{tr('Billed')}</dt>
                 <dd>
                   <Money value={statement.data.total_billed} />
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Paid</dt>
+                <dt className="text-xs text-muted-foreground">{tr('Paid')}</dt>
                 <dd>
                   <Money value={statement.data.total_paid} />
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Balance</dt>
+                <dt className="text-xs text-muted-foreground">{tr('Balance')}</dt>
                 <dd className="font-semibold">
                   <Money value={statement.data.balance} tone="none" />
                 </dd>
               </div>
             </dl>
             <Button variant="outline" size="sm" className="ml-auto print:hidden" onClick={() => window.print()}>
-              <Printer aria-hidden /> Print
+              <Printer aria-hidden /> {tr('Print')}
             </Button>
           </div>
           {statement.data.invoices.length === 0 ? (
-            <EmptyState title="No invoices for this student" />
+            <EmptyState title={tr('No invoices for this student')} />
           ) : (
             <Table
-              label="Statement"
+              label={tr('Statement')}
               head={
                 <tr>
-                  <th className="px-3 py-2">Invoice</th>
-                  <th className="px-3 py-2">For</th>
-                  <th className="px-3 py-2">Issued</th>
-                  <th className="px-3 py-2">Due</th>
-                  <th className="px-3 py-2 text-right">Total</th>
-                  <th className="px-3 py-2 text-right">Paid</th>
-                  <th className="px-3 py-2 text-right">Balance</th>
+                  <th className="px-3 py-2">{tr('Invoice')}</th>
+                  <th className="px-3 py-2">{tr('For')}</th>
+                  <th className="px-3 py-2">{tr('Issued')}</th>
+                  <th className="px-3 py-2">{tr('Due')}</th>
+                  <th className="px-3 py-2 text-right">{tr('Total')}</th>
+                  <th className="px-3 py-2 text-right">{tr('Paid')}</th>
+                  <th className="px-3 py-2 text-right">{tr('Balance')}</th>
                 </tr>
               }
             >
@@ -236,7 +237,7 @@ function StatementView({ studentId, onPick }: { studentId: number | null; onPick
                       {i.invoice_number}
                     </Link>
                   </td>
-                  <td className="px-3 py-2">{i.term_name ?? 'One-time'}</td>
+                  <td className="px-3 py-2">{i.term_name ?? tr('One-time')}</td>
                   <td className="px-3 py-2 tabular-nums">{formatDate(i.issue_date)}</td>
                   <td className={cn('px-3 py-2 tabular-nums', i.is_overdue && 'text-danger')}>{formatDate(i.due_date)}</td>
                   <td className="px-3 py-2 text-right">
@@ -280,7 +281,7 @@ export default function FinanceReportsPage() {
   return (
     <>
       <div className="mb-4 flex flex-wrap items-end gap-3 print:hidden">
-        <div className="inline-flex rounded-md border p-0.5" role="tablist" aria-label="Report">
+        <div className="inline-flex rounded-md border p-0.5" role="tablist" aria-label={tr('Report')}>
           {VIEWS.map((v) => (
             <button
               key={v.value}
@@ -296,15 +297,15 @@ export default function FinanceReportsPage() {
         </div>
         {view === 'collection' && (
           <>
-            <Field label="From (AD)">{(id) => <DatePicker id={id} value={from} onChange={(v) => set('from', v)} />}</Field>
-            <Field label="To (AD)">{(id) => <DatePicker id={id} value={to} onChange={(v) => set('to', v)} />}</Field>
+            <Field label={tr('From (AD)')}>{(id) => <DatePicker id={id} value={from} onChange={(v) => set('from', v)} />}</Field>
+            <Field label={tr('To (AD)')}>{(id) => <DatePicker id={id} value={to} onChange={(v) => set('to', v)} />}</Field>
           </>
         )}
       </div>
       {view === 'outstanding' ? (
         <OutstandingView />
       ) : view === 'collection' ? (
-        valid ? <CollectionView from={from} to={to} /> : <EmptyState title="Check the dates" />
+        valid ? <CollectionView from={from} to={to} /> : <EmptyState title={tr('Check the dates')} />
       ) : (
         <StatementView studentId={student ? Number(student) : null} onPick={(s) => set('student', s ? String(s.id) : '')} />
       )}

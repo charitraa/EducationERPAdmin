@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom'
 import { navigation } from '@/app/navigation'
 import { PageHeader } from '@/components/common/PageHeader'
 import { usePermissions } from '@/hooks/usePermissions'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 
 const DESCRIPTIONS: Record<string, string> = {
-  '/settings/organization': "Your school's name, address and contact details.",
-  '/settings/branches': 'Add a branch, or close one. With one branch, branch choices stay hidden.',
-  '/settings/templates': 'Ready-made grade scales, fee items, leave types and application forms.',
-  '/settings/setup': 'The step-by-step setup guide. Pick up where you left off.',
-  '/settings/api-keys': "Keys for your school's other programs, such as its website.",
+  '/settings/organization': tr("Your school's name, address and contact details."),
+  '/settings/branches': tr('Add a branch, or close one. With one branch, branch choices stay hidden.'),
+  '/settings/templates': tr('Ready-made grade scales, fee items, leave types and application forms.'),
+  '/settings/setup': tr('The step-by-step setup guide. Pick up where you left off.'),
+  '/settings/api-keys': tr("Keys for your school's other programs, such as its website."),
 }
 
 export default function SettingsPage() {

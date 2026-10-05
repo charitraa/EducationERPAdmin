@@ -5,26 +5,27 @@ import { Input } from '@/components/ui/input'
 import { humanize } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import type { Permission } from '../api/roles.api'
+import { tr } from '@/lib/i18n'
 
 /** Module names as staff say them. Anything not listed is humanized. */
 const MODULE_LABELS: Record<string, string> = {
-  academics: 'Academics',
-  admissions: 'Admissions',
-  api_keys: 'API keys',
-  audit: 'Audit log',
-  campuses: 'Branches',
-  communication: 'Parent–teacher meetings',
-  exams: 'Examinations',
-  finance: 'Fees & payments',
-  grades: 'Grading',
-  hr: 'HR & leave',
-  organizations: 'School details',
-  permissions: 'Permission catalogue',
-  roles: 'Roles',
-  users: 'User accounts',
+  academics: tr('Academics'),
+  admissions: tr('Admissions'),
+  api_keys: tr('API keys'),
+  audit: tr('Audit log'),
+  campuses: tr('Branches'),
+  communication: tr('Parent–teacher meetings'),
+  exams: tr('Examinations'),
+  finance: tr('Fees & payments'),
+  grades: tr('Grading'),
+  hr: tr('HR & leave'),
+  organizations: tr('School details'),
+  permissions: tr('Permission catalogue'),
+  roles: tr('Roles'),
+  users: tr('User accounts'),
 }
 
-const moduleLabel = (m: string) => MODULE_LABELS[m] ?? humanize(m)
+const moduleLabel = (m: string) => MODULE_LABELS[m] ?? tr(humanize(m))
 
 interface PermissionPickerProps {
   catalogue: Permission[]
@@ -71,9 +72,9 @@ export function PermissionPicker({ catalogue, value, onChange, disabled }: Permi
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Find a permission…" className="max-w-xs" aria-label="Find a permission" />
+        <Input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder={tr('Find a permission…')} className="max-w-xs" aria-label={tr('Find a permission')} />
         <span className="text-sm text-muted-foreground">
-          {selected.size} of {catalogue.length} selected
+          {tr('{size} of {count} selected', { size: selected.size, count: catalogue.length })}
         </span>
       </div>
       <ul className="divide-y rounded-md border">
@@ -89,7 +90,7 @@ export function PermissionPicker({ catalogue, value, onChange, disabled }: Permi
                   checked={on === 0 ? false : on === codes.length ? true : 'indeterminate'}
                   onCheckedChange={() => setMany(codes, on !== codes.length)}
                   disabled={disabled}
-                  aria-label={`All ${moduleLabel(module)} permissions`}
+                  aria-label={tr('All {moduleLabel} permissions', { moduleLabel: moduleLabel(module) })}
                 />
                 <button type="button" onClick={() => toggleOpen(module)} aria-expanded={expanded} aria-controls={panelId} className="flex flex-1 items-center gap-2 text-left text-sm">
                   <span className="font-medium">{moduleLabel(module)}</span>
@@ -115,7 +116,7 @@ export function PermissionPicker({ catalogue, value, onChange, disabled }: Permi
             </li>
           )
         })}
-        {groups.length === 0 && <li className="p-3 text-sm text-muted-foreground">No permission matches “{filter}”.</li>}
+        {groups.length === 0 && <li className="p-3 text-sm text-muted-foreground">{tr('No permission matches “{filter}”.', { filter })}</li>}
       </ul>
     </div>
   )

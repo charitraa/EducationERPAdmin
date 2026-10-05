@@ -18,6 +18,7 @@ import { SectionHeader } from '../../components/SectionHeader'
 import type { TeachingAssignment } from '../api/teaching.api'
 import { TeachingAssignmentDialog } from '../components/TeachingAssignmentDialog'
 import { useRemoveTeachingAssignment, useTeachingAssignments } from '../hooks/useTeaching'
+import { tr } from '@/lib/i18n'
 
 export default function TeachingPage() {
   const list = useListState({ filters: ['section__academic_year', 'section', 'teacher'], defaultOrdering: '' })
@@ -32,12 +33,12 @@ export default function TeachingPage() {
   const remove = useRemoveTeachingAssignment()
 
   const columns: Column<TeachingAssignment>[] = [
-    { id: 'class', header: 'Class', mobile: 'title', cell: (a) => <span className="font-medium">{a.section_name}</span> },
-    { id: 'subject', header: 'Subject', cell: (a) => a.subject_name },
-    { id: 'teacher', header: 'Teacher', cell: (a) => a.teacher_name },
-    { id: 'role', header: 'Teaches', cell: (a) => enumLabel('TeachingAssignmentRoleEnum', a.role) },
-    { id: 'ppw', header: 'Periods/week', className: 'tabular-nums', mobile: 'hidden', cell: (a) => a.periods_per_week ?? <span className="text-muted-foreground">—</span> },
-    { id: 'status', header: 'Status', cell: (a) => <StatusBadge status={a.is_active === false ? 'inactive' : 'active'} label={a.is_active === false ? 'Handed over' : 'Active'} /> },
+    { id: 'class', header: tr('Class'), mobile: 'title', cell: (a) => <span className="font-medium">{a.section_name}</span> },
+    { id: 'subject', header: tr('Subject'), cell: (a) => a.subject_name },
+    { id: 'teacher', header: tr('Teacher'), cell: (a) => a.teacher_name },
+    { id: 'role', header: tr('Teaches'), cell: (a) => enumLabel('TeachingAssignmentRoleEnum', a.role) },
+    { id: 'ppw', header: tr('Periods/week'), className: 'tabular-nums', mobile: 'hidden', cell: (a) => a.periods_per_week ?? <span className="text-muted-foreground">—</span> },
+    { id: 'status', header: tr('Status'), cell: (a) => <StatusBadge status={a.is_active === false ? 'inactive' : 'active'} label={a.is_active === false ? tr('Handed over') : tr('Active')} /> },
   ]
   const add = (label: string) => (
     <PermissionGate permission={PERMS.academics.classes}>
@@ -49,39 +50,39 @@ export default function TeachingPage() {
 
   return (
     <>
-      <SectionHeader title="Teaching" description="Who teaches each subject to each class. The timetable is built from these." action={add('Assign a teacher')} />
+      <SectionHeader title={tr('Teaching')} description={tr('Who teaches each subject to each class. The timetable is built from these.')} action={add(tr('Assign a teacher'))} />
       <DataTable
-        ariaLabel="Teaching assignments"
+        ariaLabel={tr('Teaching assignments')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(a) => a.id}
         searchable={false}
         filters={[
-          { name: 'section__academic_year', label: 'Academic year', options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? `${y.name} (current)` : y.name })) },
-          { name: 'section', label: 'Class', options: (classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name })) },
-          { name: 'teacher', label: 'Teacher', hidden: !staff.canPick, options: staff.data ?? [] },
+          { name: 'section__academic_year', label: tr('Academic year'), options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? tr('{name} (current)', { name: y.name }) : y.name })) },
+          { name: 'section', label: tr('Class'), options: (classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: c.display_name })) },
+          { name: 'teacher', label: tr('Teacher'), hidden: !staff.canPick, options: staff.data ?? [] },
         ]}
         rowActions={(a) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(a) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(a) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(a) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(a) },
             ]}
           />
         )}
-        empty={{ title: 'Nobody assigned yet', description: 'Assign a teacher to each subject of each class, then build the timetable.', action: add('Assign the first teacher') }}
+        empty={{ title: tr('Nobody assigned yet'), description: tr('Assign a teacher to each subject of each class, then build the timetable.'), action: add(tr('Assign the first teacher')) }}
       />
       <TeachingAssignmentDialog open={crud.formOpen} onOpenChange={(o) => !o && crud.closeForm()} record={crud.record} academicYear={year ? Number(year) : undefined} />
       {crud.deleting && (
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`${crud.deleting.teacher_name} teaching ${crud.deleting.subject_name} to ${crud.deleting.section_name}`}
-          description="Not possible once it has timetable lessons or attendance; make it inactive, or use the timetable’s hand-over, instead."
+          subject={tr('{teacher_name} teaching {subject_name} to {section_name}', { teacher_name: crud.deleting.teacher_name, subject_name: crud.deleting.subject_name, section_name: crud.deleting.section_name })}
+          description={tr('Not possible once it has timetable lessons or attendance; make it inactive, or use the timetable’s hand-over, instead.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Deleted.')
+            toast.success(tr('Deleted.'))
           }}
         />
       )}

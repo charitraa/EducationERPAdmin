@@ -9,15 +9,16 @@ import { SubjectFormDialog } from '@/features/academics/subjects/components/Subj
 import { useSubjectOptions } from '@/features/academics/subjects/hooks/useSubjects'
 import { useCount } from '@/shared/api/count'
 import { MiniList, StepNote } from './StepParts'
+import { tr } from '@/lib/i18n'
 
 function CurriculumStatus({ programId }: { programId: number }) {
   const count = useCount('curriculum', '/curriculum/', { program: programId })
   if (count.isPending) return null
   return count.data ? (
-    <span className="text-xs text-muted-foreground">{count.data} subject entries</span>
+    <span className="text-xs text-muted-foreground">{tr('{data} subject entries', { data: count.data })}</span>
   ) : (
     <Link to={`/academics/curriculum?program=${programId}`} className="text-xs font-medium text-primary hover:underline">
-      Set subjects →
+      {tr('Set subjects →')}
     </Link>
   )
 }
@@ -31,17 +32,16 @@ export function ProgramsStep() {
   return (
     <div className="grid gap-4">
       <StepNote>
-        A program is what you teach over several levels, e.g. "+2 Science" (Grade 11–12) or "Grade 1–10". Then add your subjects and choose which level takes
-        which.
+        {tr('A program is what you teach over several levels, e.g. "+2 Science" (Grade 11–12) or "Grade 1–10". Then add your subjects and choose which level takes which.')}
       </StepNote>
       <div className="grid gap-4 lg:grid-cols-2">
         <MiniList
-          title="Programs"
+          title={tr('Programs')}
           loading={programs.isPending}
-          empty="No programs yet."
+          empty={tr('No programs yet.')}
           action={
             <Button size="sm" variant="outline" onClick={() => setAddingProgram(true)}>
-              <Plus aria-hidden /> Add
+              <Plus aria-hidden /> {tr('Add')}
             </Button>
           }
           items={(programs.data ?? []).map((p) => (
@@ -58,12 +58,12 @@ export function ProgramsStep() {
           ))}
         />
         <MiniList
-          title="Subjects"
+          title={tr('Subjects')}
           loading={subjects.isPending}
-          empty="No subjects yet."
+          empty={tr('No subjects yet.')}
           action={
             <Button size="sm" variant="outline" onClick={() => setAddingSubject(true)}>
-              <Plus aria-hidden /> Add
+              <Plus aria-hidden /> {tr('Add')}
             </Button>
           }
           items={(subjects.data ?? []).map((s) => (
@@ -78,7 +78,7 @@ export function ProgramsStep() {
         <div>
           <Button asChild variant="outline">
             <Link to="/academics/curriculum">
-              Choose subjects per level <ArrowRight aria-hidden />
+              {tr('Choose subjects per level')} <ArrowRight aria-hidden />
             </Link>
           </Button>
         </div>

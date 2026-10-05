@@ -1,14 +1,15 @@
 import { z } from 'zod'
 import type { Parent, ParentInput } from '../api/parents.api'
+import { tr } from '@/lib/i18n'
 
 const text = (max: number) => z.string().trim().max(max)
 
 export const parentSchema = z.object({
-  first_name: z.string().trim().min(1, 'Required.').max(150),
+  first_name: z.string().trim().min(1, tr('Required.')).max(150),
   middle_name: text(150),
   last_name: text(150),
   phone: text(32),
-  email: z.union([z.literal(''), z.string().trim().email('Enter a valid email address.')]),
+  email: z.union([z.literal(''), z.string().trim().email(tr('Enter a valid email address.'))]),
   occupation: text(150),
   address: z.string(),
 })

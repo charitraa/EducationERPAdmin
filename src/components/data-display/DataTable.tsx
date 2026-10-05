@@ -11,6 +11,7 @@ import { EmptyState } from './EmptyState'
 import { ErrorState } from './ErrorState'
 import { TableSkeleton } from './LoadingState'
 import { Pagination } from './Pagination'
+import { tr } from '@/lib/i18n'
 
 export interface Column<T> {
   id: string
@@ -129,7 +130,7 @@ export function DataTable<T>({
               <tr>
                 {selectable && (
                   <th className="w-10 px-3 py-2">
-                    <Checkbox checked={allOnPageSelected} onCheckedChange={togglePage} aria-label="Select all rows on this page" />
+                    <Checkbox checked={allOnPageSelected} onCheckedChange={togglePage} aria-label={tr('Select all rows on this page')} />
                   </th>
                 )}
                 {columns.map((col) => {
@@ -158,7 +159,7 @@ export function DataTable<T>({
                 })}
                 {rowActions && (
                   <th className="w-12 px-3 py-2">
-                    <span className="sr-only">Actions</span>
+                    <span className="sr-only">{tr('Actions')}</span>
                   </th>
                 )}
               </tr>
@@ -181,7 +182,7 @@ export function DataTable<T>({
                   >
                     {selectable && (
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
-                        <Checkbox checked={selected.has(id)} onCheckedChange={() => toggleRow(row)} aria-label="Select row" />
+                        <Checkbox checked={selected.has(id)} onCheckedChange={() => toggleRow(row)} aria-label={tr('Select row')} />
                       </td>
                     )}
                     {columns.map((col) => (
@@ -216,7 +217,7 @@ export function DataTable<T>({
               >
                 {selectable && (
                   <div onClick={(e) => e.stopPropagation()} className="pt-0.5">
-                    <Checkbox checked={selected.has(id)} onCheckedChange={() => toggleRow(row)} aria-label="Select row" />
+                    <Checkbox checked={selected.has(id)} onCheckedChange={() => toggleRow(row)} aria-label={tr('Select row')} />
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
@@ -248,10 +249,10 @@ export function DataTable<T>({
       </DataTableToolbar>
       {selectable && selected.size > 0 && (
         <div className="flex items-center gap-3 border-b bg-accent/50 px-3 py-2 text-sm">
-          <span className="font-medium">{selected.size} selected</span>
+          <span className="font-medium">{tr('{size} selected', { size: selected.size })}</span>
           {bulkActions!([...selected.values()], clearSelection)}
           <button type="button" onClick={clearSelection} className="ml-auto text-xs text-muted-foreground hover:text-foreground">
-            Clear selection
+            {tr('Clear selection')}
           </button>
         </div>
       )}

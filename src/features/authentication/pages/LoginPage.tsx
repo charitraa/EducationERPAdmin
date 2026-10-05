@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/useAuth'
 import { applyServerErrors } from '@/lib/errors'
-import { t, useLocale } from '@/lib/i18n'
+import { t, useLocale, tr } from '@/lib/i18n'
 import { toApiError } from '@/shared/api/errors'
 import { AuthLayout } from '../components/AuthLayout'
 import { loginSchema, type LoginForm } from '../schemas/login.schema'
@@ -35,7 +35,7 @@ export default function LoginPage() {
   const submit = form.handleSubmit(async ({ email, password, otp }) => {
     setServerError(null)
     if (needsOtp && !otp) {
-      form.setError('otp', { message: 'Enter the code.' })
+      form.setError('otp', { message: tr('Enter the code.') })
       return
     }
     try {
@@ -55,13 +55,13 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title={needsOtp ? 'Two-step verification' : t('auth.signIn')}
-      subtitle={needsOtp ? t('auth.otpHint') : 'Use the email your school registered for you.'}
+      title={needsOtp ? tr('Two-step verification') : t('auth.signIn')}
+      subtitle={needsOtp ? t('auth.otpHint') : tr('Use the email your school registered for you.')}
       footer={
         <>
-          New school?{' '}
+          {tr('New school?')}{' '}
           <Link to="/signup" className="font-medium text-primary hover:underline">
-            Create an account
+            {tr('Create an account')}
           </Link>
         </>
       }
@@ -78,13 +78,13 @@ export default function LoginPage() {
           </FormField>
         </div>
         {needsOtp && (
-          <FormField label={t('auth.otp')} error={errors.otp?.message} description="Lost your phone? Type one of your recovery codes instead.">
+          <FormField label={t('auth.otp')} error={errors.otp?.message} description={tr('Lost your phone? Type one of your recovery codes instead.')}>
             <Input {...register('otp')} autoComplete="one-time-code" inputMode="text" className="font-mono tracking-widest" placeholder="123456" />
           </FormField>
         )}
         <Button type="submit" className="h-10" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" aria-hidden /> : needsOtp && <ShieldCheck aria-hidden />}
-          {needsOtp ? 'Verify and sign in' : t('auth.signIn')}
+          {needsOtp ? tr('Verify and sign in') : t('auth.signIn')}
         </Button>
         {needsOtp ? (
           <button
@@ -95,7 +95,7 @@ export default function LoginPage() {
               form.setValue('otp', '')
             }}
           >
-            Use a different account
+            {tr('Use a different account')}
           </button>
         ) : (
           <Link to="/forgot-password" className="justify-self-start text-sm text-muted-foreground hover:text-foreground">

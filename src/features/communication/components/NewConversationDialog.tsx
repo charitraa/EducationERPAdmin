@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import type { Id } from '@/shared/types/api'
 import type { Thread } from '../api/communication.api'
 import { useStartThread } from '../hooks/useCommunication'
+import { tr } from '@/lib/i18n'
 
 /**
  * Staff start conversations with a student or a parent (the backend allows no
@@ -47,8 +48,8 @@ export function NewConversationDialog({ open, onOpenChange, onStarted }: { open:
 
 
   const submit = async () => {
-    if (!chosen) return setError('Choose who to write to.')
-    if (!branch) return setError('Choose a branch.')
+    if (!chosen) return setError(tr('Choose who to write to.'))
+    if (!branch) return setError(tr('Choose a branch.'))
     setError(null)
     try {
       const t = await start.mutateAsync({ other_user: chosen.id, campus: Number(branch), subject: subject.trim() })
@@ -66,11 +67,11 @@ export function NewConversationDialog({ open, onOpenChange, onStarted }: { open:
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New conversation</DialogTitle>
-          <DialogDescription>Message a parent or a student. They reply from their portal.</DialogDescription>
+          <DialogTitle>{tr('New conversation')}</DialogTitle>
+          <DialogDescription>{tr('Message a parent or a student. They reply from their portal.')}</DialogDescription>
         </DialogHeader>
         <FormError message={error} />
-        <div className="inline-flex w-fit rounded-md border p-0.5" role="radiogroup" aria-label="Write to">
+        <div className="inline-flex w-fit rounded-md border p-0.5" role="radiogroup" aria-label={tr('Write to')}>
           {(['parent', 'student'] as const).map((k) => (
             <button
               key={k}
@@ -83,15 +84,15 @@ export function NewConversationDialog({ open, onOpenChange, onStarted }: { open:
               }}
               className={cn('rounded px-3 py-1 text-sm', kind === k ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground')}
             >
-              {k === 'parent' ? 'A parent' : 'A student'}
+              {k === 'parent' ? tr('A parent') : tr('A student')}
             </button>
           ))}
         </div>
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={`Find a ${kind} by name or email…`} className="pl-9" aria-label={`Find a ${kind}`} autoFocus />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={tr('Find a {kind} by name or email…', { kind })} className="pl-9" aria-label={tr('Find a {kind}', { kind })} autoFocus />
         </div>
-        <div role="listbox" aria-label="People" className="max-h-52 overflow-y-auto rounded-md border">
+        <div role="listbox" aria-label={tr('People')} className="max-h-52 overflow-y-auto rounded-md border">
           {people.isPending ? (
             <div className="p-3">
               <Spinner />
@@ -99,7 +100,7 @@ export function NewConversationDialog({ open, onOpenChange, onStarted }: { open:
           ) : people.isError ? (
             <p className="p-3 text-sm text-danger">{errorMessage(people.error)}</p>
           ) : people.data.results.length === 0 ? (
-            <p className="p-3 text-sm text-muted-foreground">No {kind} accounts{term ? ` match “${term}”` : ''}. Only people with a portal login can be messaged.</p>
+            <p className="p-3 text-sm text-muted-foreground">{tr('No {kind} accounts', { kind })}{term ? ' ' + tr('match “{term}”', { term }) : ''}{tr('. Only people with a portal login can be messaged.')}</p>
           ) : (
             people.data.results.map((u) => {
               const name = u.full_name || u.email
@@ -124,21 +125,21 @@ export function NewConversationDialog({ open, onOpenChange, onStarted }: { open:
           )}
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="thread-subject">Subject</Label>
-          <Input id="thread-subject" value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={200} placeholder="Homework, a meeting, fees…" />
+          <Label htmlFor="thread-subject">{tr('Subject')}</Label>
+          <Input id="thread-subject" value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={200} placeholder={tr('Homework, a meeting, fees…')} />
         </div>
         {isMultiBranch && (
           <div className="grid gap-1.5">
-            <Label htmlFor="thread-branch">Branch</Label>
+            <Label htmlFor="thread-branch">{tr('Branch')}</Label>
             <SelectControl id="thread-branch" value={branch} onChange={setCampus} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />
           </div>
         )}
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tr('Cancel')}
           </Button>
           <Button onClick={() => void submit()} disabled={!chosen || start.isPending}>
-            Start{chosen ? ` with ${chosen.name}` : ''}
+            {tr('Start')}{chosen ? ' ' + tr('with {name}', { name: chosen.name }) : ''}
           </Button>
         </DialogFooter>
       </DialogContent>

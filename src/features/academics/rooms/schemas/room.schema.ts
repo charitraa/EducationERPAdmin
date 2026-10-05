@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import { code, optionalWholeNumber, requiredId, toInt, toNullableInt } from '@/lib/validation'
 import type { Room, RoomInput } from '../api/rooms.api'
+import { tr } from '@/lib/i18n'
 
 export const roomSchema = z.object({
-  campus: requiredId('Choose the branch.'),
+  campus: requiredId(tr('Choose the branch.')),
   code,
-  name: z.string().trim().min(1, 'Required.').max(100),
+  name: z.string().trim().min(1, tr('Required.')).max(100),
   building: z.string().max(100),
   floor: z.string().max(20),
   room_type: z.enum(['classroom', 'lab', 'hall', 'library', 'office', 'other']),

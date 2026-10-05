@@ -1,21 +1,22 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { to: '/hostel', label: 'Bed board', end: true },
-  { to: '/hostel/allocations', label: 'Allocations' },
-  { to: '/hostel/rooms', label: 'Rooms & beds' },
-  { to: '/hostel/buildings', label: 'Buildings' },
-  { to: '/hostel/complaints', label: 'Complaints' },
+  { to: '/hostel', label: tr('Bed board'), end: true },
+  { to: '/hostel/allocations', label: tr('Allocations') },
+  { to: '/hostel/rooms', label: tr('Rooms & beds') },
+  { to: '/hostel/buildings', label: tr('Buildings') },
+  { to: '/hostel/complaints', label: tr('Complaints') },
 ]
 
 /** Hostel: who sleeps where, the rooms themselves, and residents' complaints. */
 export function HostelLayout() {
   return (
     <div>
-      <PageHeader title="Hostel" description="Reserve beds, check residents in and out, keep the rooms, and follow up complaints." />
-      <nav aria-label="Hostel" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Hostel')} description={tr('Reserve beds, check residents in and out, keep the rooms, and follow up complaints.')} />
+      <nav aria-label={tr('Hostel')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.to}>

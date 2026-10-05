@@ -13,6 +13,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Parent } from '../api/parents.api'
 import { ParentFormDialog } from '../components/ParentFormDialog'
 import { useParents, useRemoveParent } from '../hooks/useParents'
+import { tr, trc } from '@/lib/i18n'
 
 const dash = <span className="text-muted-foreground">—</span>
 
@@ -24,11 +25,11 @@ export default function ParentsListPage() {
   const remove = useRemoveParent()
 
   const columns: Column<Parent>[] = [
-    { id: 'name', header: 'Name', sortField: 'first_name', mobile: 'title', cell: (p) => <span className="font-medium">{p.full_name}</span> },
-    { id: 'phone', header: 'Phone', cell: (p) => (p.phone ? <span className="tabular-nums">{p.phone}</span> : dash) },
-    { id: 'email', header: 'Email', cell: (p) => p.email || dash },
-    { id: 'occupation', header: 'Occupation', mobile: 'hidden', cell: (p) => p.occupation || dash },
-    { id: 'login', header: 'Portal', mobile: 'hidden', cell: (p) => (p.user ? 'Has login' : <span className="text-muted-foreground">No login</span>) },
+    { id: 'name', header: tr('Name'), sortField: 'first_name', mobile: 'title', cell: (p) => <span className="font-medium">{p.full_name}</span> },
+    { id: 'phone', header: tr('Phone'), cell: (p) => (p.phone ? <span className="tabular-nums">{p.phone}</span> : dash) },
+    { id: 'email', header: tr('Email'), cell: (p) => p.email || dash },
+    { id: 'occupation', header: tr('Occupation'), mobile: 'hidden', cell: (p) => p.occupation || dash },
+    { id: 'login', header: tr('Portal'), mobile: 'hidden', cell: (p) => (p.user ? tr('Has login') : <span className="text-muted-foreground">{tr('No login')}</span>) },
   ]
 
   const addButton = (label: string) => (
@@ -41,28 +42,28 @@ export default function ParentsListPage() {
 
   return (
     <>
-      <PageHeader title="Parents" description="Parents and guardians, and the children they’re linked to." actions={addButton('Add parent')} />
+      <PageHeader title={tr('Parents')} description={tr('Parents and guardians, and the children they’re linked to.')} actions={addButton(tr('Add parent'))} />
       <DataTable
-        ariaLabel="Parents"
+        ariaLabel={tr('Parents')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(p) => p.id}
         onRowClick={(p) => navigate(`/parents/${p.id}`)}
-        searchPlaceholder="Search by name, phone or email…"
+        searchPlaceholder={tr('Search by name, phone or email…')}
         rowActions={(p) => (
           <RowActions
             actions={[
-              { label: 'Open', icon: Eye, onSelect: () => navigate(`/parents/${p.id}`) },
-              { label: 'Edit', icon: Pencil, permission: PERMS.parents.update, onSelect: () => crud.openEdit(p) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.parents.delete, destructive: true, onSelect: () => crud.openDelete(p) },
+              { label: trc('verb', 'Open'), icon: Eye, onSelect: () => navigate(`/parents/${p.id}`) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.parents.update, onSelect: () => crud.openEdit(p) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.parents.delete, destructive: true, onSelect: () => crud.openDelete(p) },
             ]}
           />
         )}
         empty={{
-          title: 'No parents yet',
-          description: 'Guardians are added automatically when an admission is enrolled. You can also add them here.',
-          action: addButton('Add the first parent'),
+          title: tr('No parents yet'),
+          description: tr('Guardians are added automatically when an admission is enrolled. You can also add them here.'),
+          action: addButton(tr('Add the first parent')),
         }}
       />
       <ParentFormDialog open={crud.formOpen} onOpenChange={(o) => !o && crud.closeForm()} record={crud.record} onCreated={(p) => navigate(`/parents/${p.id}`)} />
@@ -71,10 +72,10 @@ export default function ParentsListPage() {
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
           subject={crud.deleting.full_name}
-          description="They disappear from their children’s records. The students themselves are not affected."
+          description={tr('They disappear from their children’s records. The students themselves are not affected.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Parent deleted.')
+            toast.success(tr('Parent deleted.'))
           }}
         />
       )}

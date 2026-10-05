@@ -9,6 +9,7 @@ import { useAcademicYearOptions, useSetCurrentAcademicYear } from '@/features/ac
 import { TermFormDialog } from '@/features/academics/terms/components/TermFormDialog'
 import { useTerms } from '@/features/academics/terms/hooks/useTerms'
 import { MiniList, StepNote } from './StepParts'
+import { tr } from '@/lib/i18n'
 
 export function YearStep() {
   const years = useAcademicYearOptions()
@@ -20,14 +21,14 @@ export function YearStep() {
 
   return (
     <div className="grid gap-4">
-      <StepNote>Name the year the way your school does: 2082/83 (BS) or 2026-27. Dates are entered in AD; the BS date is shown alongside.</StepNote>
+      <StepNote>{tr('Name the year the way your school does: 2082/83 (BS) or 2026-27. Dates are entered in AD; the BS date is shown alongside.')}</StepNote>
       <MiniList
-        title="Academic years"
+        title={tr('Academic years')}
         loading={years.isPending}
-        empty="No academic year yet."
+        empty={tr('No academic year yet.')}
         action={
           <Button size="sm" variant="outline" onClick={() => setAddingYear(true)}>
-            <Plus aria-hidden /> Add year
+            <Plus aria-hidden /> {tr('Add year')}
           </Button>
         }
         items={(years.data ?? []).map((y) => (
@@ -39,28 +40,28 @@ export function YearStep() {
               </span>
             </span>
             {y.is_current ? (
-              <StatusBadge status="current" label="Current" />
+              <StatusBadge status="current" label={tr('Current')} />
             ) : (
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setCurrent.mutate(y.id, { onSuccess: () => toast.success(`${y.name} is now the current year.`) })}
+                onClick={() => setCurrent.mutate(y.id, { onSuccess: () => toast.success(tr('{name} is now the current year.', { name: y.name })) })}
               >
-                <Star aria-hidden /> Make current
+                <Star aria-hidden /> {tr('Make current')}
               </Button>
             )}
           </span>
         ))}
       />
-      {years.data && years.data.length > 0 && !current && <StepNote>Make one year current: it becomes the default for classes, fees and exams.</StepNote>}
+      {years.data && years.data.length > 0 && !current && <StepNote>{tr('Make one year current: it becomes the default for classes, fees and exams.')}</StepNote>}
       {current && (
         <MiniList
-          title={`Terms in ${current.name}`}
+          title={tr('Terms in {name}', { name: current.name })}
           loading={terms.isPending}
-          empty="No terms yet. Add them if you hold exams or bill fees by term."
+          empty={tr('No terms yet. Add them if you hold exams or bill fees by term.')}
           action={
             <Button size="sm" variant="outline" onClick={() => setAddingTerm(true)}>
-              <Plus aria-hidden /> Add term
+              <Plus aria-hidden /> {tr('Add term')}
             </Button>
           }
           items={(terms.data?.results ?? []).map((t) => (

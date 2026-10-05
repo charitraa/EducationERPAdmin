@@ -12,6 +12,7 @@ import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { Id } from '@/shared/types/api'
 import { DEFAULT_DAYS, WEEKDAYS, type BellSchedule, type GenerateResult } from '../api/timetable.api'
 import { useGenerate } from '../hooks/useTimetable'
+import { tr } from '@/lib/i18n'
 
 /**
  * Fills each teaching assignment up to its periods per week. Always previews
@@ -45,7 +46,7 @@ export function GenerateDialog({ open, onOpenChange, schedule, academicYear, pre
       const r = await generate.mutateAsync({ sections, schedule: schedule.id, days, dry_run: dryRun })
       if (dryRun) setPlan(r)
       else {
-        toast.success(`${r.created} lessons added.`)
+        toast.success(tr('{created} lessons added.', { created: r.created }))
         onOpenChange(false)
       }
     } catch (err) {
@@ -60,16 +61,16 @@ export function GenerateDialog({ open, onOpenChange, schedule, academicYear, pre
     >
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Generate the timetable</DialogTitle>
+          <DialogTitle>{tr('Generate the timetable')}</DialogTitle>
           <DialogDescription>
-            Places each subject as many times a week as its “periods a week”, avoiding clashes, in {schedule?.name ?? 'the bell schedule'}. Existing lessons are kept. You see the plan before anything is saved.
+            {tr('Places each subject as many times a week as its “periods a week”, avoiding clashes, in')} {schedule?.name ?? tr('the bell schedule')}{tr('. Existing lessons are kept. You see the plan before anything is saved.')}
           </DialogDescription>
         </DialogHeader>
         <FormError message={error} />
         {!plan ? (
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <p id="gen-classes" className="text-sm font-medium">Classes</p>
+              <p id="gen-classes" className="text-sm font-medium">{tr('Classes')}</p>
               <div role="group" aria-labelledby="gen-classes" className="grid max-h-52 gap-1.5 overflow-y-auto rounded-md border p-3 sm:grid-cols-3">
                 {(classes.data?.results ?? []).map((c) => (
                   <label key={c.id} className="flex items-center gap-2 text-sm">
@@ -77,11 +78,11 @@ export function GenerateDialog({ open, onOpenChange, schedule, academicYear, pre
                     {c.display_name}
                   </label>
                 ))}
-                {classes.data?.results.length === 0 && <p className="text-sm text-muted-foreground">No classes at this branch this year.</p>}
+                {classes.data?.results.length === 0 && <p className="text-sm text-muted-foreground">{tr('No classes at this branch this year.')}</p>}
               </div>
             </div>
             <div className="grid gap-2">
-              <p id="gen-days" className="text-sm font-medium">Teaching days</p>
+              <p id="gen-days" className="text-sm font-medium">{tr('Teaching days')}</p>
               <div role="group" aria-labelledby="gen-days" className="flex flex-wrap gap-1.5">
                 {WEEKDAYS.map((d) => (
                   <button
@@ -100,24 +101,24 @@ export function GenerateDialog({ open, onOpenChange, schedule, academicYear, pre
         ) : (
           <div className="grid gap-3">
             <p className="text-sm">
-              <span className="font-semibold">{plan.lessons.length}</span> lessons can be placed.
+              <span className="font-semibold">{plan.lessons.length}</span> {tr('lessons can be placed.')}
             </p>
             {plan.unplaced.length > 0 && (
               <div className="rounded-md border border-warning/30 bg-warning-soft p-3 text-sm">
                 <p className="mb-1 flex items-center gap-1.5 font-medium">
-                  <AlertTriangle className="h-4 w-4 text-warning" aria-hidden /> Couldn’t fit everything
+                  <AlertTriangle className="h-4 w-4 text-warning" aria-hidden /> {tr('Couldn’t fit everything')}
                 </p>
                 <ul className="list-inside list-disc text-xs">
                   {plan.unplaced.map((u) => (
                     <li key={u.teaching_assignment}>
-                      {u.subject} for {u.section} ({u.teacher}): {u.missing} short. {u.reason}
+                      {tr('{subject} for {section} ({teacher}): {missing} short. {reason}', { subject: u.subject, section: u.section, teacher: u.teacher, missing: u.missing, reason: u.reason })}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
             {plan.lessons.length === 0 && plan.unplaced.length === 0 && (
-              <p className="text-sm text-muted-foreground">Nothing to place: these classes already have every lesson their assignments ask for, or no assignment has “periods a week”.</p>
+              <p className="text-sm text-muted-foreground">{tr('Nothing to place: these classes already have every lesson their assignments ask for, or no assignment has “periods a week”.')}</p>
             )}
           </div>
         )}
@@ -125,21 +126,21 @@ export function GenerateDialog({ open, onOpenChange, schedule, academicYear, pre
           {plan ? (
             <>
               <Button variant="outline" onClick={() => setPlan(null)}>
-                Back
+                {tr('Back')}
               </Button>
               <Button onClick={() => void run(false)} disabled={generate.isPending || plan.lessons.length === 0}>
                 {generate.isPending && <Loader2 className="animate-spin" aria-hidden />}
-                Save this timetable
+                {tr('Save this timetable')}
               </Button>
             </>
           ) : (
             <>
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                {tr('Cancel')}
               </Button>
               <Button onClick={() => void run(true)} disabled={generate.isPending || sections.length === 0 || days.length === 0}>
                 {generate.isPending ? <Loader2 className="animate-spin" aria-hidden /> : <Sparkles aria-hidden />}
-                Preview
+                {tr('Preview')}
               </Button>
             </>
           )}

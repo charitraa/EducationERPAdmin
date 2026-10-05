@@ -1,13 +1,14 @@
 import { z } from 'zod'
 import { code, optionalId, toNullableInt } from '@/lib/validation'
 import type { Subject, SubjectInput } from '../api/subjects.api'
+import { tr } from '@/lib/i18n'
 
 export const subjectSchema = z.object({
   code,
-  name: z.string().trim().min(1, 'Required.').max(200),
+  name: z.string().trim().min(1, tr('Required.')).max(200),
   department: optionalId,
   // Decimal string, never a float: up to 999.9.
-  credit_hours: z.union([z.literal(''), z.string().trim().regex(/^\d{1,3}(\.\d)?$/, 'A number like 3 or 4.5.')]),
+  credit_hours: z.union([z.literal(''), z.string().trim().regex(/^\d{1,3}(\.\d)?$/, tr('A number like 3 or 4.5.'))]),
   description: z.string(),
 })
 

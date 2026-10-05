@@ -4,6 +4,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { cn } from '@/lib/utils'
 import { PERMS } from '@/shared/constants/permissions'
 import { usePendingApplications } from './hooks/useApplications'
+import { tr } from '@/lib/i18n'
 
 /** Requests of every kind, each through its own chain of approvals. Anyone may apply and decide their own steps. */
 export function ApplicationsLayout() {
@@ -12,15 +13,15 @@ export function ApplicationsLayout() {
   const waiting = usePendingApplications({ page_size: 1 })
   const count = waiting.data?.count ?? 0
   const tabs = [
-    { to: '/applications', label: 'Waiting for me', end: true, badge: count },
-    ...(office ? [{ to: '/applications/all', label: 'All applications' }] : []),
-    { to: '/applications/mine', label: 'Mine' },
-    ...(office ? [{ to: '/applications/types', label: 'Forms' }] : []),
+    { to: '/applications', label: tr('Waiting for me'), end: true, badge: count },
+    ...(office ? [{ to: '/applications/all', label: tr('All applications') }] : []),
+    { to: '/applications/mine', label: tr('Mine') },
+    ...(office ? [{ to: '/applications/types', label: tr('Forms') }] : []),
   ]
   return (
     <div>
-      <PageHeader title="Applications" description="Certificates, leave, hostel, transport, scholarships and other requests, each through its approval steps." />
-      <nav aria-label="Applications" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Applications')} description={tr('Certificates, leave, hostel, transport, scholarships and other requests, each through its approval steps.')} />
+      <nav aria-label={tr('Applications')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {tabs.map((tab) => (
             <li key={tab.to}>

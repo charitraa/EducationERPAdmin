@@ -36,6 +36,7 @@ import {
   useUpdateWorkSchedule,
   useWorkSchedules,
 } from '../hooks/useAttendance'
+import { tr } from '@/lib/i18n'
 
 const days = (w: unknown) => (Array.isArray(w) ? (w as number[]) : [])
 const dayNames = (w: unknown) =>
@@ -45,16 +46,16 @@ const dayNames = (w: unknown) =>
 
 const scheduleSchema = z
   .object({
-    campus: z.string().min(1, 'Choose a branch.'),
-    name: z.string().trim().min(1, 'Give it a name.').max(100),
-    start_time: z.string().regex(/^\d{2}:\d{2}/, 'Give a time.'),
-    end_time: z.string().regex(/^\d{2}:\d{2}/, 'Give a time.'),
+    campus: z.string().min(1, tr('Choose a branch.')),
+    name: z.string().trim().min(1, tr('Give it a name.')).max(100),
+    start_time: z.string().regex(/^\d{2}:\d{2}/, tr('Give a time.')),
+    end_time: z.string().regex(/^\d{2}:\d{2}/, tr('Give a time.')),
     grace_minutes: wholeNumber(),
     half_day_minutes: wholeNumber(),
-    weekdays: z.array(z.number()).min(1, 'Pick at least one working day.'),
+    weekdays: z.array(z.number()).min(1, tr('Pick at least one working day.')),
     is_default: z.boolean(),
   })
-  .refine((v) => v.end_time > v.start_time, { path: ['end_time'], message: 'Must be after the start.' })
+  .refine((v) => v.end_time > v.start_time, { path: ['end_time'], message: tr('Must be after the start.') })
 
 function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record: WorkSchedule | null; onOpenChange: (o: boolean) => void }) {
   const { isMultiBranch, branches, selectedBranchId, defaultBranchId } = useBranches()
@@ -64,8 +65,8 @@ function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record:
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={record ? 'Edit work schedule' : 'New work schedule'}
-      description="When the working day starts and ends. Arriving after the grace period is late; working less than the half-day length is a half day."
+      title={record ? tr('Edit work schedule') : tr('New work schedule')}
+      description={tr('When the working day starts and ends. Arriving after the grace period is late; working less than the half-day length is a half day.')}
       schema={scheduleSchema}
       defaultValues={{
         campus: String(record?.campus ?? selectedBranchId ?? defaultBranchId ?? ''),
@@ -81,30 +82,30 @@ function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record:
         const input = { ...v, campus: Number(v.campus), grace_minutes: Number(v.grace_minutes), half_day_minutes: Number(v.half_day_minutes) }
         if (record) await update.mutateAsync({ id: record.id, input })
         else await create.mutateAsync(input)
-        toast.success(record ? 'Schedule saved.' : 'Schedule added.')
+        toast.success(record ? tr('Schedule saved.') : tr('Schedule added.'))
       }}
     >
       {({ control, register, formState: { errors } }) => (
         <>
           {isMultiBranch && (
-            <FormField label="Branch" required error={errors.campus?.message}>
+            <FormField label={tr('Branch')} required error={errors.campus?.message}>
               {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
             </FormField>
           )}
-          <FormField label="Name" required error={errors.name?.message}>
-            <Input {...register('name')} maxLength={100} placeholder="Office hours, Morning shift…" />
+          <FormField label={tr('Name')} required error={errors.name?.message}>
+            <Input {...register('name')} maxLength={100} placeholder={tr('Office hours, Morning shift…')} />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Starts" required error={errors.start_time?.message}>
+            <FormField label={tr('Starts')} required error={errors.start_time?.message}>
               <Input type="time" {...register('start_time')} />
             </FormField>
-            <FormField label="Ends" required error={errors.end_time?.message}>
+            <FormField label={tr('Ends')} required error={errors.end_time?.message}>
               <Input type="time" {...register('end_time')} />
             </FormField>
-            <FormField label="Grace (minutes)" error={errors.grace_minutes?.message}>
+            <FormField label={tr('Grace (minutes)')} error={errors.grace_minutes?.message}>
               <Input inputMode="numeric" {...register('grace_minutes')} />
             </FormField>
-            <FormField label="Half day under (minutes)" error={errors.half_day_minutes?.message}>
+            <FormField label={tr('Half day under (minutes)')} error={errors.half_day_minutes?.message}>
               <Input inputMode="numeric" {...register('half_day_minutes')} />
             </FormField>
           </div>
@@ -114,7 +115,7 @@ function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record:
             render={({ field }) => (
               <div className="grid gap-1.5">
                 <p id="ws-days" className="text-sm font-medium">
-                  Working days
+                  {tr('Working days')}
                 </p>
                 <div role="group" aria-labelledby="ws-days" className="flex flex-wrap gap-1.5">
                   {WEEKDAYS.map((d) => {
@@ -141,7 +142,7 @@ function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record:
             name="is_default"
             render={({ field }) => (
               <label className="flex items-center gap-3 text-sm">
-                <Switch checked={field.value} onCheckedChange={field.onChange} /> The branch’s default, for staff without their own schedule
+                <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('The branch’s default, for staff without their own schedule')}
               </label>
             )}
           />
@@ -151,7 +152,7 @@ function ScheduleDialog({ open, record, onOpenChange }: { open: boolean; record:
   )
 }
 
-const assignSchema = z.object({ staff: z.string().min(1, 'Choose a staff member.'), schedule: z.string().min(1, 'Choose a schedule.') })
+const assignSchema = z.object({ staff: z.string().min(1, tr('Choose a staff member.')), schedule: z.string().min(1, tr('Choose a schedule.')) })
 
 function AssignDialog({ open, onOpenChange, schedules }: { open: boolean; onOpenChange: (o: boolean) => void; schedules: WorkSchedule[] }) {
   const staff = useStaffOptions()
@@ -160,22 +161,22 @@ function AssignDialog({ open, onOpenChange, schedules }: { open: boolean; onOpen
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Give someone their own schedule"
-      description="Instead of their branch’s default. Each staff member has at most one."
-      submitLabel="Assign"
+      title={tr('Give someone their own schedule')}
+      description={tr('Instead of their branch’s default. Each staff member has at most one.')}
+      submitLabel={tr('Assign')}
       schema={assignSchema}
       defaultValues={{ staff: '', schedule: '' }}
       onSubmit={async (v) => {
         await create.mutateAsync({ staff: Number(v.staff), schedule: Number(v.schedule) })
-        toast.success('Schedule assigned.')
+        toast.success(tr('Schedule assigned.'))
       }}
     >
       {({ control, formState: { errors } }) => (
         <>
-          <FormField label="Staff member" required error={errors.staff?.message}>
+          <FormField label={tr('Staff member')} required error={errors.staff?.message}>
             {(p) => <Controller control={control} name="staff" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={staff.data ?? []} loading={staff.isPending} />} />}
           </FormField>
-          <FormField label="Schedule" required error={errors.schedule?.message}>
+          <FormField label={tr('Schedule')} required error={errors.schedule?.message}>
             {(p) => <Controller control={control} name="schedule" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={schedules.map((s) => ({ value: String(s.id), label: `${s.name} (${hhmm(s.start_time)}–${hhmm(s.end_time)})` }))} />} />}
           </FormField>
         </>
@@ -199,30 +200,30 @@ export default function WorkSchedulesPage() {
   const scheduleName = (id: number) => allSchedules.data?.results.find((s) => s.id === id)?.name ?? ''
 
   const columns: Column<WorkSchedule>[] = [
-    { id: 'name', header: 'Schedule', mobile: 'title', cell: (s) => <span className="font-medium">{s.name}</span> },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (s) => branchName(s.campus) },
-    { id: 'hours', header: 'Hours', className: 'tabular-nums', cell: (s) => `${hhmm(s.start_time)}–${hhmm(s.end_time)}` },
-    { id: 'days', header: 'Days', cell: (s) => dayNames(s.weekdays) },
-    { id: 'grace', header: 'Late after', className: 'tabular-nums', mobile: 'hidden', cell: (s) => `${s.grace_minutes ?? 10} min` },
-    { id: 'default', header: '', cell: (s) => (s.is_default ? <StatusBadge status="current" label="Default" /> : null) },
+    { id: 'name', header: tr('Schedule'), mobile: 'title', cell: (s) => <span className="font-medium">{s.name}</span> },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (s) => branchName(s.campus) },
+    { id: 'hours', header: tr('Hours'), className: 'tabular-nums', cell: (s) => `${hhmm(s.start_time)}–${hhmm(s.end_time)}` },
+    { id: 'days', header: tr('Days'), cell: (s) => dayNames(s.weekdays) },
+    { id: 'grace', header: tr('Late after'), className: 'tabular-nums', mobile: 'hidden', cell: (s) => tr('{grace_minutes} min', { grace_minutes: s.grace_minutes ?? 10 }) },
+    { id: 'default', header: '', cell: (s) => (s.is_default ? <StatusBadge status="current" label={tr('Default')} /> : null) },
   ]
 
   return (
     <div className="grid gap-8">
       <section>
         <SectionHeader
-          title="Work schedules"
-          description="Staff days are worked out against these: late, half day, and which days count as working days."
+          title={tr('Work schedules')}
+          description={tr('Staff days are worked out against these: late, half day, and which days count as working days.')}
           action={
             <PermissionGate permission={PERMS.attendance.manage}>
               <Button onClick={crud.openCreate}>
-                <Plus aria-hidden /> Add schedule
+                <Plus aria-hidden /> {tr('Add schedule')}
               </Button>
             </PermissionGate>
           }
         />
         <DataTable
-          ariaLabel="Work schedules"
+          ariaLabel={tr('Work schedules')}
           columns={columns}
           query={query}
           list={list}
@@ -231,21 +232,21 @@ export default function WorkSchedulesPage() {
           rowActions={(s) => (
             <RowActions
               actions={[
-                { label: 'Edit', icon: Pencil, permission: PERMS.attendance.manage, onSelect: () => crud.openEdit(s) },
-                { label: 'Delete', icon: Trash2, permission: PERMS.attendance.manage, destructive: true, onSelect: () => crud.openDelete(s) },
+                { label: tr('Edit'), icon: Pencil, permission: PERMS.attendance.manage, onSelect: () => crud.openEdit(s) },
+                { label: tr('Delete'), icon: Trash2, permission: PERMS.attendance.manage, destructive: true, onSelect: () => crud.openDelete(s) },
               ]}
             />
           )}
-          empty={{ title: 'No work schedules yet', description: 'Without one, staff check-ins are recorded but nobody is ever late or absent. Add a default for each branch.' }}
+          empty={{ title: tr('No work schedules yet'), description: tr('Without one, staff check-ins are recorded but nobody is ever late or absent. Add a default for each branch.') }}
         />
       </section>
       <section>
         <SectionHeader
-          title="Staff on their own schedule"
+          title={tr('Staff on their own schedule')}
           action={
             <PermissionGate permission={PERMS.attendance.manage}>
               <Button variant="outline" onClick={() => setAssigning(true)} disabled={!allSchedules.data?.results.length}>
-                <UserPlus aria-hidden /> Assign
+                <UserPlus aria-hidden /> {tr('Assign')}
               </Button>
             </PermissionGate>
           }
@@ -255,14 +256,14 @@ export default function WorkSchedulesPage() {
         ) : assigned.isError ? (
           <ErrorState error={assigned.error} onRetry={() => void assigned.refetch()} />
         ) : assigned.data.results.length === 0 ? (
-          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">Everyone follows their branch’s default.</p>
+          <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('Everyone follows their branch’s default.')}</p>
         ) : (
           <ul className="divide-y rounded-lg border bg-card">
             {assigned.data.results.map((a) => (
               <li key={a.id} className="flex items-center gap-3 px-4 py-2.5">
                 <span className="flex-1 font-medium">{a.staff_name}</span>
                 <span className="text-sm text-muted-foreground">{scheduleName(a.schedule)}</span>
-                <RowActions actions={[{ label: 'Remove', icon: Trash2, permission: PERMS.attendance.manage, destructive: true, onSelect: () => setUnassigning(a) }]} />
+                <RowActions actions={[{ label: tr('Remove'), icon: Trash2, permission: PERMS.attendance.manage, destructive: true, onSelect: () => setUnassigning(a) }]} />
               </li>
             ))}
           </ul>
@@ -274,22 +275,22 @@ export default function WorkSchedulesPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`the schedule “${crud.deleting.name}”`}
+          subject={tr('the schedule “{name}”', { name: crud.deleting.name })}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Schedule deleted.')
+            toast.success(tr('Schedule deleted.'))
           }}
         />
       )}
       <DeleteDialog
         open={unassigning != null}
         onOpenChange={(o) => !o && setUnassigning(null)}
-        subject="this assignment"
-        confirmLabel="Remove"
-        description={unassigning ? `${unassigning.staff_name} goes back to their branch’s default schedule.` : undefined}
+        subject={tr('this assignment')}
+        confirmLabel={tr('Remove')}
+        description={unassigning ? tr('{staff_name} goes back to their branch’s default schedule.', { staff_name: unassigning.staff_name }) : undefined}
         onConfirm={async () => {
           await removeAssigned.mutateAsync(unassigning!.id)
-          toast.success('Removed.')
+          toast.success(tr('Removed.'))
         }}
       />
     </div>

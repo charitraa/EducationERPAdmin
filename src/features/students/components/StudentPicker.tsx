@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import type { Id } from '@/shared/types/api'
 import { currentEnrollment, type Student } from '../api/students.api'
 import { useStudents } from '../hooks/useStudents'
+import { tr } from '@/lib/i18n'
 
 interface StudentPickerProps {
   value: Student | null
@@ -36,24 +37,24 @@ export function StudentPicker({ value, onChange, exclude = [], id, ...aria }: St
           id={id}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Type a name or student no.…"
+          placeholder={tr('Type a name or student no.…')}
           className="pl-9"
           autoComplete="off"
           aria-controls={listId}
           {...aria}
         />
       </div>
-      <div id={listId} role="listbox" aria-label="Matching students" className="max-h-60 overflow-y-auto rounded-md border">
+      <div id={listId} role="listbox" aria-label={tr('Matching students')} className="max-h-60 overflow-y-auto rounded-md border">
         {term.length < 2 ? (
-          <p className="p-3 text-sm text-muted-foreground">{value ? `Selected: ${value.full_name} (${value.student_number})` : 'Type at least 2 letters to search.'}</p>
+          <p className="p-3 text-sm text-muted-foreground">{value ? tr('Selected: {full_name} ({student_number})', { full_name: value.full_name, student_number: value.student_number }) : tr('Type at least 2 letters to search.')}</p>
         ) : results.isPending ? (
           <div className="p-3">
             <Spinner />
           </div>
         ) : results.isError ? (
-          <p className="p-3 text-sm text-danger">Couldn’t search students.</p>
+          <p className="p-3 text-sm text-danger">{tr('Couldn’t search students.')}</p>
         ) : results.data.results.length === 0 ? (
-          <p className="p-3 text-sm text-muted-foreground">No student matches “{term}”.</p>
+          <p className="p-3 text-sm text-muted-foreground">{tr('No student matches “{term}”.', { term })}</p>
         ) : (
           results.data.results.map((s) => {
             const excluded = exclude.includes(s.id)
@@ -77,7 +78,7 @@ export function StudentPicker({ value, onChange, exclude = [], id, ...aria }: St
                   <span className="block text-xs text-muted-foreground">
                     <span className="font-mono">{s.student_number}</span>
                     {cls ? ` · ${cls}` : ''}
-                    {excluded ? ' · already linked' : ''}
+                    {excluded ? ' · ' + tr('already linked') : ''}
                   </span>
                 </span>
                 {selected && <Check className="h-4 w-4 text-primary" aria-hidden />}

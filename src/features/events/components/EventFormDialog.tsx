@@ -15,13 +15,14 @@ import { isoDate, optionalIsoDate, optionalWholeNumber, requiredId, toNullableIn
 import type { Schema } from '@/shared/types/api'
 import type { Event, EventInput } from '../api/events.api'
 import { useCategoryOptions, useCreateEvent, useUpdateEvent } from '../hooks/useEvents'
+import { tr } from '@/lib/i18n'
 
-const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use HH:MM.')
+const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, tr('Use HH:MM.'))
 
 const schema = z
   .object({
-    name: z.string().trim().min(1, 'Required.').max(200),
-    category: requiredId('Choose a category.'),
+    name: z.string().trim().min(1, tr('Required.')).max(200),
+    category: requiredId(tr('Choose a category.')),
     campus: z.string(),
     venue: z.string().trim().max(200),
     description: z.string(),
@@ -34,7 +35,7 @@ const schema = z
     capacity: optionalWholeNumber,
     organized_by: z.string(),
   })
-  .refine((v) => `${v.end_date}T${v.end_time}` >= `${v.start_date}T${v.start_time}`, { path: ['end_time'], message: 'Must not be before the start.' })
+  .refine((v) => `${v.end_date}T${v.end_time}` >= `${v.start_date}T${v.start_time}`, { path: ['end_time'], message: tr('Must not be before the start.') })
 type EventForm = z.infer<typeof schema>
 
 const defaults = (e: Event | null): EventForm => {
@@ -84,18 +85,18 @@ export function EventFormDialog({ open, onOpenChange, record, onCreated }: { ope
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={record ? `Edit ${record.name}` : 'New event'}
-      description={record ? undefined : 'Saved as “being set up”. Students see it once you publish.'}
-      submitLabel={record ? 'Save' : 'Create event'}
+      title={record ? tr('Edit {name}', { name: record.name }) : tr('New event')}
+      description={record ? undefined : tr('Saved as “being set up”. Students see it once you publish.')}
+      submitLabel={record ? tr('Save') : tr('Create event')}
       schema={schema}
       defaultValues={defaults(record)}
       onSubmit={async (v) => {
         if (record) {
           await update.mutateAsync({ id: record.id, input: toInput(v) })
-          toast.success('Event saved.')
+          toast.success(tr('Event saved.'))
         } else {
           const e = await create.mutateAsync(toInput(v))
-          toast.success(`${e.name} created.`)
+          toast.success(tr('{name} created.', { name: e.name }))
           onCreated?.(e)
         }
       }}
@@ -105,14 +106,14 @@ export function EventFormDialog({ open, onOpenChange, record, onCreated }: { ope
         return (
           <>
             <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
-              <FormField label="Name" required error={errors.name?.message}>
-                <Input {...register('name')} autoFocus placeholder="Annual sports day" />
+              <FormField label={tr('Name')} required error={errors.name?.message}>
+                <Input {...register('name')} autoFocus placeholder={tr('Annual sports day')} />
               </FormField>
               <FormField
-                label="Category"
+                label={tr('Category')}
                 required
                 error={errors.category?.message}
-                description={categories.data?.length === 0 ? 'Add a category first, under Categories.' : undefined}
+                description={categories.data?.length === 0 ? tr('Add a category first, under Categories.') : undefined}
               >
                 {(p) => (
                   <Controller
@@ -126,13 +127,13 @@ export function EventFormDialog({ open, onOpenChange, record, onCreated }: { ope
               </FormField>
             </div>
             <div className="grid gap-4 sm:grid-cols-4">
-              <FormField label="Starts (AD)" required error={errors.start_date?.message} className="sm:col-span-1">
+              <FormField label={tr('Starts (AD)')} required error={errors.start_date?.message} className="sm:col-span-1">
                 {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
               </FormField>
               <FormField label="at" required error={errors.start_time?.message}>
                 <Input {...register('start_time')} type="time" />
               </FormField>
-              <FormField label="Ends (AD)" required error={errors.end_date?.message}>
+              <FormField label={tr('Ends (AD)')} required error={errors.end_date?.message}>
                 {(p) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
               </FormField>
               <FormField label="at " required error={errors.end_time?.message}>
@@ -140,50 +141,50 @@ export function EventFormDialog({ open, onOpenChange, record, onCreated }: { ope
               </FormField>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Venue" error={errors.venue?.message}>
-                <Input {...register('venue')} placeholder="Main ground" />
+              <FormField label={tr('Venue')} error={errors.venue?.message}>
+                <Input {...register('venue')} placeholder={tr('Main ground')} />
               </FormField>
               {staff.canPick && (
-                <FormField label="Organizer" error={errors.organized_by?.message} description="They can run check-in and results.">
+                <FormField label={tr('Organizer')} error={errors.organized_by?.message} description={tr('They can run check-in and results.')}>
                   {(p) => (
                     <Controller
                       control={control}
                       name="organized_by"
-                      render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="The office" loading={staff.isPending} options={staff.data ?? []} />}
+                      render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('The office')} loading={staff.isPending} options={staff.data ?? []} />}
                     />
                   )}
                 </FormField>
               )}
             </div>
             {isMultiBranch && (
-              <FormField label="Branch" error={errors.campus?.message} className="sm:max-w-sm">
+              <FormField label={tr('Branch')} error={errors.campus?.message} className="sm:max-w-sm">
                 {(p) => (
                   <Controller
                     control={control}
                     name="campus"
-                    render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="All branches" options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
+                    render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('All branches')} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
                   />
                 )}
               </FormField>
             )}
             <div className="grid gap-4 sm:grid-cols-3">
-              <FormField label="Sign-up" error={errors.registration_mode?.message}>
+              <FormField label={tr('Sign-up')} error={errors.registration_mode?.message}>
                 {(p) => (
                   <Controller control={control} name="registration_mode" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('RegistrationModeEnum')} />} />
                 )}
               </FormField>
               {mode !== 'none' && (
                 <>
-                  <FormField label="Sign-up closes (AD)" error={errors.deadline_date?.message} description="End of that day. Empty: until it starts.">
+                  <FormField label={tr('Sign-up closes (AD)')} error={errors.deadline_date?.message} description={tr('End of that day. Empty: until it starts.')}>
                     {(p) => <Controller control={control} name="deadline_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
                   </FormField>
-                  <FormField label="Places" error={errors.capacity?.message} description="Empty for no limit.">
+                  <FormField label={tr('Places')} error={errors.capacity?.message} description={tr('Empty for no limit.')}>
                     <Input {...register('capacity')} inputMode="numeric" />
                   </FormField>
                 </>
               )}
             </div>
-            <FormField label="Description" error={errors.description?.message}>
+            <FormField label={tr('Description')} error={errors.description?.message}>
               <Textarea {...register('description')} rows={3} />
             </FormField>
           </>

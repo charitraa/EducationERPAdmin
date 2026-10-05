@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest --run",
-    "api:types": "node scripts/generate-api.mjs"
+    "api:types": "node scripts/generate-api.mjs",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

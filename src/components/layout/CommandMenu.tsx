@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useNavigation } from '@/hooks/useNavigation'
 import { usePermissions } from '@/hooks/usePermissions'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 import { PERMS } from '@/shared/constants/permissions'
 import { classesApi } from '@/features/academics/classes/api/classes.api'
 import { programsApi } from '@/features/academics/programs/api/programs.api'
@@ -28,7 +28,7 @@ interface SearchHit {
 const SOURCES = [
   {
     key: 'programs',
-    heading: 'Programs',
+    heading: tr('Programs'),
     icon: Layers,
     permission: PERMS.academics.view,
     search: (q: string): Promise<SearchHit[]> =>
@@ -36,7 +36,7 @@ const SOURCES = [
   },
   {
     key: 'subjects',
-    heading: 'Subjects',
+    heading: tr('Subjects'),
     icon: BookOpen,
     permission: PERMS.academics.view,
     search: (q: string): Promise<SearchHit[]> =>
@@ -44,7 +44,7 @@ const SOURCES = [
   },
   {
     key: 'classes',
-    heading: 'Classes',
+    heading: tr('Classes'),
     icon: School,
     permission: PERMS.academics.view,
     search: (q: string): Promise<SearchHit[]> =>
@@ -61,7 +61,7 @@ function SourceResults({ source, query, onPick }: { source: (typeof SOURCES)[num
     return (
       <CommandGroup heading={source.heading}>
         <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> Searching…
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> {tr('Searching…')}
         </div>
       </CommandGroup>
     )
@@ -103,13 +103,13 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
   return (
     <Dialog open={open} onOpenChange={(o) => (onOpenChange(o), o || setText(''))}>
       <DialogContent className="top-[20%] translate-y-0 overflow-hidden p-0 sm:max-w-xl">
-        <DialogTitle className="sr-only">Search</DialogTitle>
+        <DialogTitle className="sr-only">{tr('Search')}</DialogTitle>
         <Command shouldFilter={false} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-item]]:gap-2.5 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-2">
-          <CommandInput value={text} onValueChange={setText} placeholder="Go to a page, or search programs, subjects, classes…" />
+          <CommandInput value={text} onValueChange={setText} placeholder={tr('Go to a page, or search programs, subjects, classes…')} />
           <CommandList className="max-h-[60vh]">
-            <CommandEmpty>Nothing found.</CommandEmpty>
+            <CommandEmpty>{tr('Nothing found.')}</CommandEmpty>
             {pages.length > 0 && (
-              <CommandGroup heading="Go to">
+              <CommandGroup heading={tr('Go to')}>
                 {pages.map((p) => (
                   <CommandItem key={p.path} value={`page:${p.path}`} onSelect={() => pick(p.path)}>
                     <p.icon className="text-muted-foreground" aria-hidden />

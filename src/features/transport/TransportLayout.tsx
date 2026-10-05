@@ -1,21 +1,22 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { to: '/transport', label: 'Trips', end: true },
-  { to: '/transport/routes', label: 'Routes & stops' },
-  { to: '/transport/assignments', label: 'Riders' },
-  { to: '/transport/vehicles', label: 'Vehicles' },
-  { to: '/transport/crew', label: 'Crew' },
+  { to: '/transport', label: tr('Trips'), end: true },
+  { to: '/transport/routes', label: tr('Routes & stops') },
+  { to: '/transport/assignments', label: tr('Riders') },
+  { to: '/transport/vehicles', label: tr('Vehicles') },
+  { to: '/transport/crew', label: tr('Crew') },
 ]
 
 /** School transport: the day's trips, routes and stops, riders, and the fleet. */
 export function TransportLayout() {
   return (
     <div>
-      <PageHeader title="Transport" description="Run each day’s pickups and drops, keep routes and riders, and look after the fleet and its papers." />
-      <nav aria-label="Transport" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Transport')} description={tr('Run each day’s pickups and drops, keep routes and riders, and look after the fleet and its papers.')} />
+      <nav aria-label={tr('Transport')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.to}>

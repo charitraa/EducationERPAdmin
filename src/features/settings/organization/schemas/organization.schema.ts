@@ -1,11 +1,12 @@
 import { z } from 'zod'
 import type { Organization, OrganizationUpdate } from '@/shared/types/organization'
+import { tr } from '@/lib/i18n'
 
-const optionalEmail = z.union([z.literal(''), z.string().trim().email('Enter a valid email.')])
-const optionalUrl = z.union([z.literal(''), z.string().trim().url('Include https://, e.g. https://school.edu.np')])
+const optionalEmail = z.union([z.literal(''), z.string().trim().email(tr('Enter a valid email.'))])
+const optionalUrl = z.union([z.literal(''), z.string().trim().url(tr('Include https://, e.g. https://school.edu.np'))])
 
 export const organizationSchema = z.object({
-  name: z.string().trim().min(1, 'Your school needs a name.'),
+  name: z.string().trim().min(1, tr('Your school needs a name.')),
   legal_name: z.string(),
   type: z.enum(['school', 'college', 'university', 'institute', 'other']),
   email: optionalEmail,

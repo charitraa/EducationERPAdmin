@@ -14,10 +14,11 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Event } from '../api/events.api'
 import { EventFormDialog } from '../components/EventFormDialog'
 import { useCategoryOptions, useEvents } from '../hooks/useEvents'
+import { tr } from '@/lib/i18n'
 
 /** Status for the badge: drafts and cancellations as-is; published ones by whether they're over. */
 export function eventBadge(e: Pick<Event, 'status' | 'is_over'>) {
-  if (e.status === 'published') return e.is_over ? { status: 'completed', label: 'Over' } : { status: 'published', label: 'Published' }
+  if (e.status === 'published') return e.is_over ? { status: 'completed', label: tr('Over') } : { status: 'published', label: tr('Published') }
   return { status: e.status === 'draft' ? 'draft' : 'cancelled', label: enumLabel('EventStatusEnum', e.status) }
 }
 
@@ -30,17 +31,17 @@ export default function EventsListPage() {
   const [creating, setCreating] = useState(false)
 
   const columns: Column<Event>[] = [
-    { id: 'name', header: 'Event', mobile: 'title', cell: (e) => <span className="font-medium">{e.name}</span> },
-    { id: 'when', header: 'When', sortField: 'start_at', className: 'tabular-nums whitespace-nowrap', cell: (e) => formatDateTime(e.start_at) },
-    { id: 'category', header: 'Category', cell: (e) => e.category_name },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (e) => (e.campus ? branches.find((b) => b.id === e.campus)?.name : 'All branches') },
+    { id: 'name', header: tr('Event'), mobile: 'title', cell: (e) => <span className="font-medium">{e.name}</span> },
+    { id: 'when', header: tr('When'), sortField: 'start_at', className: 'tabular-nums whitespace-nowrap', cell: (e) => formatDateTime(e.start_at) },
+    { id: 'category', header: tr('Category'), cell: (e) => e.category_name },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (e) => (e.campus ? branches.find((b) => b.id === e.campus)?.name : tr('All branches')) },
     {
       id: 'signups',
-      header: 'Sign-ups',
+      header: tr('Sign-ups'),
       mobile: 'hidden',
       cell: (e) =>
         e.registration_mode === 'none' ? (
-          <span className="text-muted-foreground">No sign-up</span>
+          <span className="text-muted-foreground">{tr('No sign-up')}</span>
         ) : (
           <span className="tabular-nums">
             {e.confirmed_count}
@@ -50,7 +51,7 @@ export default function EventsListPage() {
     },
     {
       id: 'status',
-      header: 'Status',
+      header: tr('Status'),
       cell: (e) => {
         const b = eventBadge(e)
         return <StatusBadge status={b.status} label={b.label} />
@@ -60,7 +61,7 @@ export default function EventsListPage() {
 
   const addButton = (label: string) => (
     <PermissionGate permission={PERMS.events.manage}>
-      <Button onClick={() => setCreating(true)} disabled={categories.data?.length === 0} title={categories.data?.length === 0 ? 'Add an event category first.' : undefined}>
+      <Button onClick={() => setCreating(true)} disabled={categories.data?.length === 0} title={categories.data?.length === 0 ? tr('Add an event category first.') : undefined}>
         <Plus aria-hidden /> {label}
       </Button>
     </PermissionGate>
@@ -68,24 +69,24 @@ export default function EventsListPage() {
 
   return (
     <>
-      <SectionHeader title="All events" action={addButton('New event')} />
+      <SectionHeader title={tr('All events')} action={addButton(tr('New event'))} />
       <DataTable
-        ariaLabel="Events"
+        ariaLabel={tr('Events')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(e) => e.id}
         onRowClick={(e) => navigate(`/events/${e.id}`)}
-        searchPlaceholder="Search by name or venue…"
+        searchPlaceholder={tr('Search by name or venue…')}
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('EventStatusEnum') },
-          { name: 'category', label: 'Category', options: (categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name })) },
-          { name: 'campus', label: 'Branch', hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('EventStatusEnum') },
+          { name: 'category', label: tr('Category'), options: (categories.data ?? []).map((c) => ({ value: String(c.id), label: c.name })) },
+          { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
         ]}
         empty={{
-          title: 'No events yet',
-          description: categories.data?.length === 0 ? 'Start by adding a category (Sports, Cultural, Academic…) under Categories.' : 'Create an event, publish it, then run sign-ups and check-in from its page.',
-          action: addButton('Create the first event'),
+          title: tr('No events yet'),
+          description: categories.data?.length === 0 ? tr('Start by adding a category (Sports, Cultural, Academic…) under Categories.') : tr('Create an event, publish it, then run sign-ups and check-in from its page.'),
+          action: addButton(tr('Create the first event')),
         }}
       />
       <EventFormDialog open={creating} onOpenChange={setCreating} record={null} onCreated={(e) => navigate(`/events/${e.id}`)} />

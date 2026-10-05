@@ -55,15 +55,16 @@ import {
   useUpdateEmployment,
   useUpdateStudy,
 } from '../hooks/useAlumni'
+import { tr } from '@/lib/i18n'
 
-const url = z.union([z.literal(''), z.string().url('A full link, starting https://')])
+const url = z.union([z.literal(''), z.string().url(tr('A full link, starting https://'))])
 const profileSchema = z.object({
-  campus: z.string().min(1, 'Choose a branch.'),
-  first_name: z.string().trim().min(1, 'Required.').max(150),
+  campus: z.string().min(1, tr('Choose a branch.')),
+  first_name: z.string().trim().min(1, tr('Required.')).max(150),
   middle_name: z.string().max(150),
-  last_name: z.string().trim().min(1, 'Required.').max(150),
+  last_name: z.string().trim().min(1, tr('Required.')).max(150),
   gender: z.string(),
-  email: z.union([z.literal(''), z.string().email('An email address.')]),
+  email: z.union([z.literal(''), z.string().email(tr('An email address.'))]),
   phone: z.string().max(32),
   city: z.string().max(100),
   country: z.string().max(100),
@@ -88,8 +89,8 @@ function ProfileDialog({ open, record, onOpenChange }: { open: boolean; record: 
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={r ? `Edit ${r.full_name}` : 'Add an alumnus'}
-      description={r ? undefined : 'For someone who graduated before the system. Current students become alumni by graduating.'}
+      title={r ? tr('Edit {full_name}', { full_name: r.full_name }) : tr('Add an alumnus')}
+      description={r ? undefined : tr('For someone who graduated before the system. Current students become alumni by graduating.')}
       wide
       schema={profileSchema}
       defaultValues={{
@@ -119,55 +120,55 @@ function ProfileDialog({ open, record, onOpenChange }: { open: boolean; record: 
           const p = await create.mutateAsync(input)
           navigate(`/alumni/${p.id}`)
         }
-        toast.success('Saved.')
+        toast.success(tr('Saved.'))
       }}
     >
       {({ register, control, watch, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <FormField label="First name" required error={errors.first_name?.message}>
+            <FormField label={tr('First name')} required error={errors.first_name?.message}>
               <Input {...register('first_name')} />
             </FormField>
-            <FormField label="Middle name">
+            <FormField label={tr('Middle name')}>
               <Input {...register('middle_name')} />
             </FormField>
-            <FormField label="Last name" required error={errors.last_name?.message}>
+            <FormField label={tr('Last name')} required error={errors.last_name?.message}>
               <Input {...register('last_name')} />
             </FormField>
-            <FormField label="Email" error={errors.email?.message}>
+            <FormField label={tr('Email')} error={errors.email?.message}>
               <Input {...register('email')} inputMode="email" />
             </FormField>
-            <FormField label="Phone">
+            <FormField label={tr('Phone')}>
               <Input {...register('phone')} inputMode="tel" />
             </FormField>
-            <FormField label="Gender">
+            <FormField label={tr('Gender')}>
               {(p) => <Controller control={control} name="gender" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty options={enumOptions('GenderEnum')} />} />}
             </FormField>
-            <FormField label="Programme">
+            <FormField label={tr('Programme')}>
               <Input {...register('program_name')} disabled={Boolean(r?.student)} />
             </FormField>
-            <FormField label="Batch (year)">
+            <FormField label={tr('Batch (year)')}>
               <Input {...register('academic_year')} placeholder="2079/80" disabled={Boolean(r?.student)} />
             </FormField>
-            <FormField label="Graduated on" error={errors.graduated_on?.message}>
+            <FormField label={tr('Graduated on')} error={errors.graduated_on?.message}>
               {(p) => <Controller control={control} name="graduated_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} disabled={Boolean(r?.student)} />} />}
             </FormField>
-            <FormField label="City">
+            <FormField label={tr('City')}>
               <Input {...register('city')} />
             </FormField>
-            <FormField label="Country">
+            <FormField label={tr('Country')}>
               <Input {...register('country')} />
             </FormField>
             {isMultiBranch && (
-              <FormField label="Studied at" required error={errors.campus?.message}>
+              <FormField label={tr('Studied at')} required error={errors.campus?.message}>
                 {(p) => <Controller control={control} name="campus" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />} />}
               </FormField>
             )}
           </div>
-          <FormField label="LinkedIn" error={errors.linkedin_url?.message}>
+          <FormField label={tr('LinkedIn')} error={errors.linkedin_url?.message}>
             <Input {...register('linkedin_url')} inputMode="url" />
           </FormField>
-          <FormField label="About">
+          <FormField label={tr('About')}>
             <Textarea {...register('bio')} rows={2} />
           </FormField>
           <div className="grid gap-3 text-sm sm:grid-cols-2">
@@ -181,10 +182,10 @@ function ProfileDialog({ open, record, onOpenChange }: { open: boolean; record: 
           </div>
           {watch('is_mentor') && (
             <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-              <FormField label="Mentors on">
-                <Input {...register('mentor_topics')} placeholder="Careers in software, studying abroad" />
+              <FormField label={tr('Mentors on')}>
+                <Input {...register('mentor_topics')} placeholder={tr('Careers in software, studying abroad')} />
               </FormField>
-              <FormField label="Mentees at once" error={errors.mentor_capacity?.message}>
+              <FormField label={tr('Mentees at once')} error={errors.mentor_capacity?.message}>
                 <Input {...register('mentor_capacity')} inputMode="numeric" />
               </FormField>
             </div>
@@ -204,28 +205,28 @@ function GraduateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
       <FormDialog
         open={open}
         onOpenChange={onOpenChange}
-        title="Graduate a class"
-        description="Everyone placed in the class becomes an alumnus: they leave as graduated, and an alumni profile is made from their record."
-        submitLabel="Graduate"
-        schema={z.object({ section: z.string().min(1, 'Choose a class.'), on_date: isoDate, reason: z.string().max(255) })}
+        title={tr('Graduate a class')}
+        description={tr('Everyone placed in the class becomes an alumnus: they leave as graduated, and an alumni profile is made from their record.')}
+        submitLabel={tr('Graduate')}
+        schema={z.object({ section: z.string().min(1, tr('Choose a class.')), on_date: isoDate, reason: z.string().max(255) })}
         defaultValues={{ section: '', on_date: todayIso(), reason: '' }}
         onSubmit={async (v) => {
           const r = await graduate.mutateAsync({ section: Number(v.section), on_date: v.on_date, reason: v.reason })
           setResult(r)
-          toast.success(`${pluralize(r.graduated, 'student')} graduated.`)
+          toast.success(tr('{pluralize} graduated.', { pluralize: pluralize(r.graduated, 'student') }))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
-            <FormField label="Class" required error={errors.section?.message}>
-              {(p) => <Controller control={control} name="section" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} placeholder="Choose…" options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: `${c.display_name} · ${c.academic_year_name}` }))} />} />}
+            <FormField label={tr('Class')} required error={errors.section?.message}>
+              {(p) => <Controller control={control} name="section" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} placeholder={tr('Choose…')} options={(classes.data?.results ?? []).map((c) => ({ value: String(c.id), label: `${c.display_name} · ${c.academic_year_name}` }))} />} />}
             </FormField>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="On" required error={errors.on_date?.message}>
+              <FormField label={tr('On')} required error={errors.on_date?.message}>
                 {(p) => <Controller control={control} name="on_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Note">
-                <Input {...register('reason')} placeholder="Completed Grade 12" />
+              <FormField label={tr('Note')}>
+                <Input {...register('reason')} placeholder={tr('Completed Grade 12')} />
               </FormField>
             </div>
           </>
@@ -233,7 +234,7 @@ function GraduateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
       </FormDialog>
       {result && result.skipped.length > 0 && (
         <div role="status" className="mb-4 rounded-lg border border-warning/25 bg-warning-soft p-3 text-sm">
-          <p className="font-medium">{pluralize(result.skipped.length, 'student')} not graduated:</p>
+          <p className="font-medium">{pluralize(result.skipped.length, 'student')} {tr('not graduated') + ':'}</p>
           <ul className="ml-5 list-disc">
             {result.skipped.map((s) => (
               <li key={s.student}>
@@ -254,47 +255,47 @@ export function AlumniListPage() {
   const query = useAlumni(list.query)
   const [dialog, setDialog] = useState<'add' | 'graduate' | null>(null)
   const columns: Column<AlumniProfile>[] = [
-    { id: 'name', header: 'Name', mobile: 'title', cell: (p) => (
+    { id: 'name', header: tr('Name'), mobile: 'title', cell: (p) => (
       <span>
         <span className="font-medium">{p.full_name}</span>
         {p.student_number && <span className="ml-1 font-mono text-xs text-muted-foreground">{p.student_number}</span>}
       </span>
     ) },
-    { id: 'batch', header: 'Batch', cell: (p) => [p.program_name, p.academic_year].filter(Boolean).join(' · ') || '—' },
-    { id: 'now', header: 'Now', cell: (p) => (p.current_job ? `${p.current_job.title}, ${p.current_job.employer}` : '—') },
-    { id: 'where', header: 'Lives in', mobile: 'hidden', cell: (p) => [p.city, p.country].filter(Boolean).join(', ') || '—' },
+    { id: 'batch', header: tr('Batch'), cell: (p) => [p.program_name, p.academic_year].filter(Boolean).join(' · ') || '—' },
+    { id: 'now', header: tr('Now'), cell: (p) => (p.current_job ? `${p.current_job.title}, ${p.current_job.employer}` : '—') },
+    { id: 'where', header: tr('Lives in'), mobile: 'hidden', cell: (p) => [p.city, p.country].filter(Boolean).join(', ') || '—' },
     { id: 'flags', header: '', cell: (p) => (
       <span className="flex gap-1">
-        {p.is_mentor && <StatusBadge status="active" label="Mentor" />}
-        {p.directory_visible && <StatusBadge status="published" tone="info" label="Listed" />}
+        {p.is_mentor && <StatusBadge status="active" label={tr('Mentor')} />}
+        {p.directory_visible && <StatusBadge status="published" tone="info" label={tr('Listed')} />}
       </span>
     ) },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Alumni"
+        ariaLabel={tr('Alumni')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(p) => p.id}
-        searchPlaceholder="Name, email, phone or student no.…"
+        searchPlaceholder={tr('Name, email, phone or student no.…')}
         onRowClick={(p) => navigate(`/alumni/${p.id}`)}
         toolbar={
           <PermissionGate permission={PERMS.alumni.manage}>
             <Button variant="outline" onClick={() => setDialog('add')}>
-              <UserPlus aria-hidden /> Add alumnus
+              <UserPlus aria-hidden /> {tr('Add alumnus')}
             </Button>
             <Button onClick={() => setDialog('graduate')}>
-              <GraduationCap aria-hidden /> Graduate a class
+              <GraduationCap aria-hidden /> {tr('Graduate a class')}
             </Button>
           </PermissionGate>
         }
         filters={[
-          { name: 'is_mentor', label: 'Mentor', options: [{ value: 'true', label: 'Mentors' }] },
-          { name: 'directory_visible', label: 'Directory', options: [{ value: 'true', label: 'Listed' }, { value: 'false', label: 'Not listed' }] },
+          { name: 'is_mentor', label: tr('Mentor'), options: [{ value: 'true', label: tr('Mentors') }] },
+          { name: 'directory_visible', label: tr('Directory'), options: [{ value: 'true', label: tr('Listed') }, { value: 'false', label: tr('Not listed') }] },
         ]}
-        empty={{ title: 'No alumni yet', description: 'Graduate a class at the end of its final year, or add earlier graduates by hand.' }}
+        empty={{ title: tr('No alumni yet'), description: tr('Graduate a class at the end of its final year, or add earlier graduates by hand.') }}
       />
       <ProfileDialog open={dialog === 'add'} record={null} onOpenChange={(o) => !o && setDialog(null)} />
       <GraduateDialog open={dialog === 'graduate'} onOpenChange={(o) => !o && setDialog(null)} />
@@ -311,7 +312,7 @@ function Rows<T extends { id: Id }>({ title, rows, render, onAdd, onEdit, onDele
         <h2 className="text-sm font-semibold">{title}</h2>
         {can(PERMS.alumni.manage) && (
           <Button size="sm" variant="outline" className="h-7" onClick={onAdd}>
-            <Plus aria-hidden /> Add
+            <Plus aria-hidden /> {tr('Add')}
           </Button>
         )}
       </div>
@@ -324,8 +325,8 @@ function Rows<T extends { id: Id }>({ title, rows, render, onAdd, onEdit, onDele
               <div className="min-w-0 flex-1">{render(r)}</div>
               <RowActions
                 actions={[
-                  { label: 'Edit', icon: Pencil, permission: PERMS.alumni.manage, onSelect: () => onEdit(r) },
-                  { label: 'Delete', icon: Trash2, permission: PERMS.alumni.manage, destructive: true, onSelect: () => onDelete(r) },
+                  { label: tr('Edit'), icon: Pencil, permission: PERMS.alumni.manage, onSelect: () => onEdit(r) },
+                  { label: tr('Delete'), icon: Trash2, permission: PERMS.alumni.manage, destructive: true, onSelect: () => onDelete(r) },
                 ]}
               />
             </li>
@@ -377,18 +378,18 @@ export function AlumnusPage() {
         title={
           <span className="flex flex-wrap items-center gap-2">
             {p.full_name}
-            {p.is_mentor && <StatusBadge status="active" label="Mentor" />}
+            {p.is_mentor && <StatusBadge status="active" label={tr('Mentor')} />}
           </span>
         }
-        description={[p.program_name, p.academic_year && `batch ${p.academic_year}`, p.graduated_on && `graduated ${formatDate(p.graduated_on)}`, p.campus_name].filter(Boolean).join(' · ')}
+        description={[p.program_name, p.academic_year && tr('batch {academic_year}', { academic_year: p.academic_year }), p.graduated_on && tr('graduated {date}', { date: formatDate(p.graduated_on) }), p.campus_name].filter(Boolean).join(' · ')}
         actions={
           can(PERMS.alumni.manage) && (
             <>
               <Button variant="outline" onClick={() => setEditing(true)}>
-                <Pencil aria-hidden /> Edit
+                <Pencil aria-hidden /> {tr('Edit')}
               </Button>
               {!p.student && (
-                <Button variant="outline" aria-label="Delete alumnus" onClick={() => setDeletingProfile(true)}>
+                <Button variant="outline" aria-label={tr('Delete alumnus')} onClick={() => setDeletingProfile(true)}>
                   <Trash2 aria-hidden />
                 </Button>
               )}
@@ -398,16 +399,16 @@ export function AlumnusPage() {
       />
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="rounded-lg border bg-card p-4 text-sm sm:p-6">
-          <h2 className="mb-3 text-sm font-semibold">Contact</h2>
+          <h2 className="mb-3 text-sm font-semibold">{tr('Contact')}</h2>
           <dl className="grid gap-2">
             {(
               [
-                ['Email', p.email && <a href={`mailto:${p.email}`} className="hover:underline">{p.email}</a>],
-                ['Phone', p.phone && <a href={`tel:${p.phone}`} className="hover:underline">{p.phone}</a>],
-                ['Lives in', [p.city, p.country].filter(Boolean).join(', ')],
-                ['LinkedIn', p.linkedin_url && <a href={p.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">Profile</a>],
-                ['Directory', p.directory_visible ? 'Listed' : 'Not listed'],
-                ['Mentoring', p.is_mentor ? `${p.mentor_topics || 'Yes'} · up to ${p.mentor_capacity}` : 'No'],
+                [tr('Email'), p.email && <a href={`mailto:${p.email}`} className="hover:underline">{p.email}</a>],
+                [tr('Phone'), p.phone && <a href={`tel:${p.phone}`} className="hover:underline">{p.phone}</a>],
+                [tr('Lives in'), [p.city, p.country].filter(Boolean).join(', ')],
+                [tr('LinkedIn'), p.linkedin_url && <a href={p.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">{tr('Profile')}</a>],
+                [tr('Directory'), p.directory_visible ? 'Listed' : 'Not listed'],
+                [tr('Mentoring'), p.is_mentor ? `${p.mentor_topics || 'Yes'} · up to ${p.mentor_capacity}` : 'No'],
               ] as const
             ).map(([k, v]) => (
               <div key={k} className="flex justify-between gap-3">
@@ -420,9 +421,9 @@ export function AlumnusPage() {
         </section>
         <div className="grid content-start gap-4 lg:col-span-2">
           <Rows
-            title="Work"
+            title={tr('Work')}
             rows={jobs.data?.results ?? []}
-            empty="No jobs recorded."
+            empty={tr('No jobs recorded.')}
             render={(j) => (
               <>
                 <p className="font-medium">
@@ -438,14 +439,14 @@ export function AlumnusPage() {
             onDelete={(r) => setDeleting({ kind: 'job', id: r.id, label: `${r.title}, ${r.employer}` })}
           />
           <Rows
-            title="Further study"
+            title={tr('Further study')}
             rows={studies.data?.results ?? []}
-            empty="None recorded."
+            empty={tr('None recorded.')}
             render={(s) => (
               <>
                 <p className="font-medium">
                   {s.qualification}
-                  {s.field && ` in ${s.field}`}, {s.institution}
+                  {s.field && ' ' + tr('in {field}', { field: s.field })}, {s.institution}
                 </p>
                 <p className="text-muted-foreground">
                   {[s.country, `${s.start_year}–${s.end_year ?? ''}`, enumLabel('StudyStatusEnum', s.status)].filter(Boolean).join(' · ')}
@@ -457,9 +458,9 @@ export function AlumnusPage() {
             onDelete={(r) => setDeleting({ kind: 'study', id: r.id, label: `${r.qualification}, ${r.institution}` })}
           />
           <Rows
-            title="Achievements"
+            title={tr('Achievements')}
             rows={awards.data?.results ?? []}
-            empty="None recorded."
+            empty={tr('None recorded.')}
             render={(a) => (
               <>
                 <p className="font-medium">{a.title}</p>
@@ -472,12 +473,12 @@ export function AlumnusPage() {
           />
           {(gifts.data?.results ?? []).length > 0 && (
             <section className="rounded-lg border bg-card p-4 sm:p-6">
-              <h2 className="mb-3 text-sm font-semibold">Gifts</h2>
+              <h2 className="mb-3 text-sm font-semibold">{tr('Gifts')}</h2>
               <ul className="divide-y text-sm">
                 {gifts.data!.results.map((g) => (
                   <li key={g.id} className="flex justify-between gap-3 py-1.5">
                     <span>
-                      {formatDate(g.received_on)} · {g.campaign_name ?? 'General'}
+                      {formatDate(g.received_on)} · {g.campaign_name ?? tr('General')}
                     </span>
                     <Money value={g.amount} />
                   </li>
@@ -492,31 +493,31 @@ export function AlumnusPage() {
       <FormDialog
         open={sub?.kind === 'job'}
         onOpenChange={close}
-        title={job ? 'Edit job' : 'Add a job'}
-        schema={z.object({ employer: z.string().trim().min(1, 'Required.').max(200), title: z.string().trim().min(1, 'Required.').max(150), location: z.string().max(150), start_date: isoDate, end_date: optionalIsoDate })}
+        title={job ? tr('Edit job') : tr('Add a job')}
+        schema={z.object({ employer: z.string().trim().min(1, tr('Required.')).max(200), title: z.string().trim().min(1, tr('Required.')).max(150), location: z.string().max(150), start_date: isoDate, end_date: optionalIsoDate })}
         defaultValues={{ employer: job?.employer ?? '', title: job?.title ?? '', location: job?.location ?? '', start_date: job?.start_date ?? '', end_date: job?.end_date ?? '' }}
         onSubmit={async (v) => {
           const input = { ...v, profile: p.id, end_date: v.end_date || null }
           if (job) await updateJob.mutateAsync({ id: job.id, input })
           else await createJob.mutateAsync(input)
-          toast.success('Saved.')
+          toast.success(tr('Saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Job title" required error={errors.title?.message}>
+            <FormField label={tr('Job title')} required error={errors.title?.message}>
               <Input {...register('title')} />
             </FormField>
-            <FormField label="Employer" required error={errors.employer?.message}>
+            <FormField label={tr('Employer')} required error={errors.employer?.message}>
               <Input {...register('employer')} />
             </FormField>
-            <FormField label="Location" className="sm:col-span-2">
+            <FormField label={tr('Location')} className="sm:col-span-2">
               <Input {...register('location')} />
             </FormField>
-            <FormField label="From" required error={errors.start_date?.message}>
+            <FormField label={tr('From')} required error={errors.start_date?.message}>
               {(pp) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...pp} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
-            <FormField label="To" error={errors.end_date?.message} description="Empty: works there now.">
+            <FormField label={tr('To')} error={errors.end_date?.message} description={tr('Empty: works there now.')}>
               {(pp) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...pp} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
           </div>
@@ -525,37 +526,37 @@ export function AlumnusPage() {
       <FormDialog
         open={sub?.kind === 'study'}
         onOpenChange={close}
-        title={study ? 'Edit study' : 'Add further study'}
-        schema={z.object({ institution: z.string().trim().min(1, 'Required.').max(200), qualification: z.string().trim().min(1, 'Required.').max(150), field: z.string().max(150), country: z.string().max(100), start_year: z.string().regex(/^\d{4}$/, 'A year.'), end_year: z.union([z.literal(''), z.string().regex(/^\d{4}$/, 'A year.')]), status: z.string() })}
+        title={study ? tr('Edit study') : tr('Add further study')}
+        schema={z.object({ institution: z.string().trim().min(1, tr('Required.')).max(200), qualification: z.string().trim().min(1, tr('Required.')).max(150), field: z.string().max(150), country: z.string().max(100), start_year: z.string().regex(/^\d{4}$/, tr('A year.')), end_year: z.union([z.literal(''), z.string().regex(/^\d{4}$/, tr('A year.'))]), status: z.string() })}
         defaultValues={{ institution: study?.institution ?? '', qualification: study?.qualification ?? '', field: study?.field ?? '', country: study?.country ?? '', start_year: study ? String(study.start_year) : '', end_year: study?.end_year ? String(study.end_year) : '', status: study?.status ?? 'ongoing' }}
         onSubmit={async (v) => {
           const input = { ...v, profile: p.id, start_year: Number(v.start_year), end_year: v.end_year ? Number(v.end_year) : null, status: v.status as HigherStudy['status'] }
           if (study) await updateStudy.mutateAsync({ id: study.id, input })
           else await createStudy.mutateAsync(input)
-          toast.success('Saved.')
+          toast.success(tr('Saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Qualification" required error={errors.qualification?.message}>
-              <Input {...register('qualification')} placeholder="MSc" />
+            <FormField label={tr('Qualification')} required error={errors.qualification?.message}>
+              <Input {...register('qualification')} placeholder={tr('MSc')} />
             </FormField>
-            <FormField label="Field">
-              <Input {...register('field')} placeholder="Computer Science" />
+            <FormField label={tr('Field')}>
+              <Input {...register('field')} placeholder={tr('Computer Science')} />
             </FormField>
-            <FormField label="Institution" required error={errors.institution?.message}>
+            <FormField label={tr('Institution')} required error={errors.institution?.message}>
               <Input {...register('institution')} />
             </FormField>
-            <FormField label="Country">
+            <FormField label={tr('Country')}>
               <Input {...register('country')} />
             </FormField>
-            <FormField label="From (year)" required error={errors.start_year?.message}>
+            <FormField label={tr('From (year)')} required error={errors.start_year?.message}>
               <Input {...register('start_year')} inputMode="numeric" />
             </FormField>
-            <FormField label="To (year)" error={errors.end_year?.message}>
+            <FormField label={tr('To (year)')} error={errors.end_year?.message}>
               <Input {...register('end_year')} inputMode="numeric" />
             </FormField>
-            <FormField label="Status">
+            <FormField label={tr('Status')}>
               {(pp) => <Controller control={control} name="status" render={({ field }) => <SelectControl {...pp} value={field.value} onChange={field.onChange} options={enumOptions('StudyStatusEnum')} />} />}
             </FormField>
           </div>
@@ -564,30 +565,30 @@ export function AlumnusPage() {
       <FormDialog
         open={sub?.kind === 'award'}
         onOpenChange={close}
-        title={award ? 'Edit achievement' : 'Add an achievement'}
-        schema={z.object({ title: z.string().trim().min(1, 'Required.').max(200), description: z.string(), achieved_on: optionalIsoDate, url })}
+        title={award ? tr('Edit achievement') : tr('Add an achievement')}
+        schema={z.object({ title: z.string().trim().min(1, tr('Required.')).max(200), description: z.string(), achieved_on: optionalIsoDate, url })}
         defaultValues={{ title: award?.title ?? '', description: award?.description ?? '', achieved_on: award?.achieved_on ?? '', url: award?.url ?? '' }}
         onSubmit={async (v) => {
           const input = { ...v, profile: p.id, achieved_on: v.achieved_on || null }
           if (award) await updateAward.mutateAsync({ id: award.id, input })
           else await createAward.mutateAsync(input)
-          toast.success('Saved.')
+          toast.success(tr('Saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
-            <FormField label="Title" required error={errors.title?.message}>
-              <Input {...register('title')} placeholder="National science award" />
+            <FormField label={tr('Title')} required error={errors.title?.message}>
+              <Input {...register('title')} placeholder={tr('National science award')} />
             </FormField>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="On" error={errors.achieved_on?.message}>
+              <FormField label={tr('On')} error={errors.achieved_on?.message}>
                 {(pp) => <Controller control={control} name="achieved_on" render={({ field }) => <DatePicker {...pp} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Link" error={errors.url?.message}>
+              <FormField label={tr('Link')} error={errors.url?.message}>
                 <Input {...register('url')} inputMode="url" />
               </FormField>
             </div>
-            <FormField label="Description">
+            <FormField label={tr('Description')}>
               <Textarea {...register('description')} rows={2} />
             </FormField>
           </>
@@ -600,7 +601,7 @@ export function AlumnusPage() {
         onConfirm={async () => {
           const d = deleting!
           await (d.kind === 'job' ? removeJob : d.kind === 'study' ? removeStudy : removeAward).mutateAsync(d.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
         }}
       />
       <DeleteDialog
@@ -609,7 +610,7 @@ export function AlumnusPage() {
         subject={p.full_name}
         onConfirm={async () => {
           await removeProfile.mutateAsync(p.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
           navigate('/alumni')
         }}
       />
@@ -626,18 +627,18 @@ export function MentorsPage() {
   const mentors = useAlumni({ ...PICKER_PARAMS, is_mentor: true })
   const pairs = useMentorships(list.query)
   const columns: Column<Mentorship>[] = [
-    { id: 'mentor', header: 'Mentor', mobile: 'title', cell: (m) => <span className="font-medium">{m.mentor_name}</span> },
-    { id: 'mentee', header: 'Mentee', cell: (m) => m.mentee_name },
-    { id: 'topic', header: 'About', cell: (m) => m.topic },
-    { id: 'since', header: 'Asked', mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (m) => formatDate(m.created_at) },
-    { id: 'status', header: 'Status', cell: (m) => <StatusBadge status={m.status ?? 'pending'} tone={MENTOR_TONE[m.status ?? 'pending']} label={enumLabel('MentorshipStatusEnum', m.status)} /> },
+    { id: 'mentor', header: tr('Mentor'), mobile: 'title', cell: (m) => <span className="font-medium">{m.mentor_name}</span> },
+    { id: 'mentee', header: tr('Mentee'), cell: (m) => m.mentee_name },
+    { id: 'topic', header: tr('About'), cell: (m) => m.topic },
+    { id: 'since', header: tr('Asked'), mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (m) => formatDate(m.created_at) },
+    { id: 'status', header: tr('Status'), cell: (m) => <StatusBadge status={m.status ?? 'pending'} tone={MENTOR_TONE[m.status ?? 'pending']} label={enumLabel('MentorshipStatusEnum', m.status)} /> },
   ]
   const rows = mentors.data?.results ?? []
   return (
     <>
-      <h2 className="mb-2 text-sm font-semibold">Mentors</h2>
+      <h2 className="mb-2 text-sm font-semibold">{tr('Mentors')}</h2>
       {rows.length === 0 ? (
-        <p className="mb-6 rounded-lg border bg-card p-4 text-sm text-muted-foreground">No mentors yet. Mark an alumnus as taking mentees on their profile; alumni can also offer themselves from their portal.</p>
+        <p className="mb-6 rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('No mentors yet. Mark an alumnus as taking mentees on their profile; alumni can also offer themselves from their portal.')}</p>
       ) : (
         <ul className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((m) => (
@@ -646,22 +647,22 @@ export function MentorsPage() {
                 <p className="font-medium">{m.full_name}</p>
                 <p className="text-muted-foreground">{m.current_job ? `${m.current_job.title}, ${m.current_job.employer}` : [m.program_name, m.academic_year].filter(Boolean).join(' · ')}</p>
                 {m.mentor_topics && <p className="mt-1">{m.mentor_topics}</p>}
-                <p className="mt-1 text-xs text-muted-foreground">Up to {m.mentor_capacity} mentees</p>
+                <p className="mt-1 text-xs text-muted-foreground">{tr('Up to')} {m.mentor_capacity} {tr('mentees')}</p>
               </button>
             </li>
           ))}
         </ul>
       )}
-      <h2 className="mb-2 text-sm font-semibold">Mentoring</h2>
+      <h2 className="mb-2 text-sm font-semibold">{tr('Mentoring')}</h2>
       <DataTable
-        ariaLabel="Mentoring"
+        ariaLabel={tr('Mentoring')}
         columns={columns}
         query={pairs}
         list={list}
         getRowId={(m) => m.id}
         searchable={false}
-        filters={[{ name: 'status', label: 'Status', options: enumOptions('MentorshipStatusEnum') }]}
-        empty={{ title: 'No mentoring yet', description: 'Students and young alumni ask a mentor from their portal; the mentor accepts or declines.' }}
+        filters={[{ name: 'status', label: tr('Status'), options: enumOptions('MentorshipStatusEnum') }]}
+        empty={{ title: tr('No mentoring yet'), description: tr('Students and young alumni ask a mentor from their portal; the mentor accepts or declines.') }}
       />
     </>
   )

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { parseIsoDate, toBsDate, toIsoDate } from '@/lib/dates'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 interface DatePickerProps {
   /** AD `YYYY-MM-DD`, or '' when empty. This is what the API receives. */
@@ -41,7 +42,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          placeholder="YYYY-MM-DD"
+          placeholder={tr('YYYY-MM-DD')}
           inputMode="numeric"
           autoComplete="off"
           disabled={disabled}
@@ -54,7 +55,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
               type="button"
               disabled={disabled}
               className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-              aria-label="Open calendar"
+              aria-label={tr('Open calendar')}
             >
               <CalendarDays className="h-4 w-4" />
             </button>
@@ -76,7 +77,7 @@ export const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(function
           </PopoverContent>
         </Popover>
       </div>
-      {bs && <p className="text-xs tabular-nums text-muted-foreground">{bs} BS</p>}
+      {bs && <p className="text-xs tabular-nums text-muted-foreground">{tr('{bs} BS', { bs })}</p>}
     </div>
   )
 })

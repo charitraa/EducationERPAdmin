@@ -14,6 +14,7 @@ import { SectionHeader } from '../../components/SectionHeader'
 import type { AcademicYear } from '../api/academic-years.api'
 import { AcademicYearFormDialog } from '../components/AcademicYearFormDialog'
 import { useAcademicYears, useRemoveAcademicYear, useSetCurrentAcademicYear } from '../hooks/useAcademicYears'
+import { tr } from '@/lib/i18n'
 
 export default function AcademicYearsPage() {
   const list = useListState({ filters: ['is_current'], defaultOrdering: '-start_date' })
@@ -25,63 +26,63 @@ export default function AcademicYearsPage() {
   const columns: Column<AcademicYear>[] = [
     {
       id: 'name',
-      header: 'Name',
+      header: tr('Name'),
       sortField: 'name',
       cell: (y) => (
         <span className="inline-flex items-center gap-2 font-medium">
           {y.name}
-          {y.is_current && <StatusBadge status="current" label="Current" />}
+          {y.is_current && <StatusBadge status="current" label={tr('Current')} />}
         </span>
       ),
     },
-    { id: 'start', header: 'Starts', sortField: 'start_date', cell: (y) => <BsDateDisplay value={y.start_date} /> },
-    { id: 'end', header: 'Ends', cell: (y) => <BsDateDisplay value={y.end_date} /> },
+    { id: 'start', header: tr('Starts'), sortField: 'start_date', cell: (y) => <BsDateDisplay value={y.start_date} /> },
+    { id: 'end', header: tr('Ends'), cell: (y) => <BsDateDisplay value={y.end_date} /> },
   ]
 
   return (
     <>
       <SectionHeader
-        title="Academic years"
-        description="The current year is the default everywhere: classes, fees, exams."
+        title={tr('Academic years')}
+        description={tr('The current year is the default everywhere: classes, fees, exams.')}
         action={
           <PermissionGate permission={PERMS.academics.structure}>
             <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add academic year
+              <Plus aria-hidden /> {tr('Add academic year')}
             </Button>
           </PermissionGate>
         }
       />
       <DataTable
-        ariaLabel="Academic years"
+        ariaLabel={tr('Academic years')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(y) => y.id}
-        searchPlaceholder="Search years…"
-        filters={[{ name: 'is_current', label: 'Current', options: [{ value: 'true', label: 'Current year' }, { value: 'false', label: 'Other years' }] }]}
+        searchPlaceholder={tr('Search years…')}
+        filters={[{ name: 'is_current', label: tr('Current'), options: [{ value: 'true', label: tr('Current year') }, { value: 'false', label: tr('Other years') }] }]}
         rowActions={(y) => (
           <RowActions
             actions={[
               {
-                label: 'Make current',
+                label: tr('Make current'),
                 icon: Star,
                 hidden: y.is_current,
                 permission: PERMS.academics.structure,
                 onSelect: () =>
-                  setCurrent.mutate(y.id, { onSuccess: () => toast.success(`${y.name} is now the current academic year.`) }),
+                  setCurrent.mutate(y.id, { onSuccess: () => toast.success(tr('{name} is now the current academic year.', { name: y.name })) }),
               },
-              { label: 'Edit', icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(y) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(y) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(y) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(y) },
             ]}
           />
         )}
         empty={{
-          title: 'No academic years yet',
-          description: 'Add the year you are teaching now, e.g. 2082/83. Terms and classes belong to a year.',
+          title: tr('No academic years yet'),
+          description: tr('Add the year you are teaching now, e.g. 2082/83. Terms and classes belong to a year.'),
           action: (
             <PermissionGate permission={PERMS.academics.structure}>
               <Button onClick={crud.openCreate}>
-                <CheckCircle2 aria-hidden /> Add the first academic year
+                <CheckCircle2 aria-hidden /> {tr('Add the first academic year')}
               </Button>
             </PermissionGate>
           ),
@@ -92,10 +93,10 @@ export default function AcademicYearsPage() {
         <DeleteDialog
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
-          subject={`the academic year ${crud.deleting.name}`}
+          subject={tr('the academic year {name}', { name: crud.deleting.name })}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Academic year deleted.')
+            toast.success(tr('Academic year deleted.'))
           }}
         />
       )}

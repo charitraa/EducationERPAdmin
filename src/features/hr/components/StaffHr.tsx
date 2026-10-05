@@ -14,6 +14,7 @@ import type { Contract, EmployeeProfile, LeaveRequest, StaffDocument } from '../
 import { useContracts, useFiscalYearOptions, useLeaveBalances, useLeaveRequests, useProfiles, useStaffDocuments } from '../hooks/useHr'
 import { days, LeaveDecisionDialogs, leaveActions, leaveSpan, LeaveStatus, RecordLeaveDialog, useOwnLeaveIds } from '../pages/LeavePages'
 import { ContractDialog, contractPeriod, contractState, DocumentDialog, EndContractDialog, ProfileDialog } from '../pages/PeoplePages'
+import { tr } from '@/lib/i18n'
 
 function Card({ title, action, children, className }: { title: string; action?: ReactNode; children: ReactNode; className?: string }) {
   return (
@@ -54,11 +55,11 @@ export function StaffHr({ staffId }: { staffId: Id }) {
 
   return (
     <>
-      <Card title="Contracts" className="lg:col-span-2" action={add('New contract', Plus, () => setDialog('contract'))}>
+      <Card title={tr('Contracts')} className="lg:col-span-2" action={add(tr('New contract'), Plus, () => setDialog('contract'))}>
         {contracts.isPending ? (
           <TableSkeleton rows={2} columns={3} />
         ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No contract on record.</p>
+          <p className="text-sm text-muted-foreground">{tr('No contract on record.')}</p>
         ) : (
           <ul className="divide-y text-sm">
             {rows.map((c) => {
@@ -71,8 +72,8 @@ export function StaffHr({ staffId }: { staffId: Id }) {
                   <StatusBadge status={s.status} tone={s.tone} label={s.label} />
                   <RowActions
                     actions={[
-                      { label: 'Edit', icon: Pencil, permission: PERMS.hr.manage, onSelect: () => setContract(c) },
-                      { label: 'End contract', icon: CalendarX2, permission: PERMS.hr.manage, hidden: s.status === 'closed', onSelect: () => setEnding(c) },
+                      { label: tr('Edit'), icon: Pencil, permission: PERMS.hr.manage, onSelect: () => setContract(c) },
+                      { label: tr('End contract'), icon: CalendarX2, permission: PERMS.hr.manage, hidden: s.status === 'closed', onSelect: () => setEnding(c) },
                     ]}
                   />
                 </li>
@@ -81,31 +82,31 @@ export function StaffHr({ staffId }: { staffId: Id }) {
           </ul>
         )}
       </Card>
-      <Card title="HR profile" action={add(profile ? 'Edit' : 'Add', profile ? Pencil : Plus, () => setDialog('profile'))}>
+      <Card title={tr('HR profile')} action={add(profile ? tr('Edit') : tr('Add'), profile ? Pencil : Plus, () => setDialog('profile'))}>
         {profiles.isPending ? (
           <TableSkeleton rows={2} columns={1} />
         ) : !profile ? (
-          <p className="text-sm text-muted-foreground">Not set up: payroll needs a PAN, tax status and bank account.</p>
+          <p className="text-sm text-muted-foreground">{tr('Not set up: payroll needs a PAN, tax status and bank account.')}</p>
         ) : (
           <dl className="grid gap-2 text-sm">
-            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">PAN</dt><dd className="font-mono">{profile.pan_number || '—'}</dd></div>
-            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Files tax as</dt><dd>{enumLabel('TaxStatusEnum', profile.tax_status)}</dd></div>
-            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Bank</dt><dd className="text-right">{profile.bank_account_number ? <>{profile.bank_name} <span className="font-mono">{profile.bank_account_number}</span></> : <span className="text-warning">Missing</span>}</dd></div>
+            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{tr('PAN')}</dt><dd className="font-mono">{profile.pan_number || '—'}</dd></div>
+            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{tr('Files tax as')}</dt><dd>{enumLabel('TaxStatusEnum', profile.tax_status)}</dd></div>
+            <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{tr('Bank')}</dt><dd className="text-right">{profile.bank_account_number ? <>{profile.bank_name} <span className="font-mono">{profile.bank_account_number}</span></> : <span className="text-warning">{tr('Missing')}</span>}</dd></div>
             {profile.emergency_contact_name && (
-              <div className="flex justify-between gap-2"><dt className="text-muted-foreground">Emergency</dt><dd className="text-right">{profile.emergency_contact_name}{profile.emergency_contact_phone ? ` · ${profile.emergency_contact_phone}` : ''}</dd></div>
+              <div className="flex justify-between gap-2"><dt className="text-muted-foreground">{tr('Emergency')}</dt><dd className="text-right">{profile.emergency_contact_name}{profile.emergency_contact_phone ? ` · ${profile.emergency_contact_phone}` : ''}</dd></div>
             )}
           </dl>
         )}
       </Card>
-      <Card title={current ? `Leave · ${current.name}` : 'Leave'} className="lg:col-span-2" action={add('Record leave', CalendarPlus, () => setDialog('leave'))}>
+      <Card title={current ? tr('Leave · {name}', { name: current.name }) : tr('Leave')} className="lg:col-span-2" action={add(tr('Record leave'), CalendarPlus, () => setDialog('leave'))}>
         {(balances.data?.results ?? []).length > 0 && (
           <ul className="mb-4 grid gap-2 sm:grid-cols-3">
             {balances.data!.results.map((b) => (
               <li key={b.id} className="rounded-md border p-2 text-sm">
                 <p className="text-xs text-muted-foreground">{b.leave_type_name}</p>
                 <p className="font-semibold tabular-nums">
-                  {b.available == null ? `${days(b.used)} taken` : `${days(b.available)} left`}
-                  {b.total != null && <span className="text-xs font-normal text-muted-foreground"> of {days(b.total)}</span>}
+                  {b.available == null ? tr('{days} taken', { days: days(b.used) }) : tr('{days} left', { days: days(b.available) })}
+                  {b.total != null && <span className="text-xs font-normal text-muted-foreground"> {tr('of {days}', { days: days(b.total) })}</span>}
                 </p>
               </li>
             ))}
@@ -114,7 +115,7 @@ export function StaffHr({ staffId }: { staffId: Id }) {
         {requests.isPending ? (
           <TableSkeleton rows={2} columns={3} />
         ) : (requests.data?.results ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">No leave taken or asked for.</p>
+          <p className="text-sm text-muted-foreground">{tr('No leave taken or asked for.')}</p>
         ) : (
           <ul className="divide-y text-sm">
             {requests.data!.results.map((r) => (
@@ -128,11 +129,11 @@ export function StaffHr({ staffId }: { staffId: Id }) {
           </ul>
         )}
       </Card>
-      <Card title="Documents" action={add('Add', FilePlus2, () => setDialog('doc'))}>
+      <Card title={tr('Documents')} action={add(tr('Add'), FilePlus2, () => setDialog('doc'))}>
         {docs.isPending ? (
           <TableSkeleton rows={2} columns={1} />
         ) : (docs.data?.results ?? []).length === 0 ? (
-          <p className="text-sm text-muted-foreground">None on file.</p>
+          <p className="text-sm text-muted-foreground">{tr('None on file.')}</p>
         ) : (
           <ul className="divide-y text-sm">
             {docs.data!.results.map((d) => (

@@ -16,11 +16,12 @@ import { toApiError } from '@/shared/api/errors'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { currentEnrollment, type Student } from '../api/students.api'
 import { usePlaceStudent } from '../hooks/useStudents'
+import { tr } from '@/lib/i18n'
 
 const schema = z.object({
   /** Only narrows the class list; not sent. */
   academic_year: z.string(),
-  section: requiredId('Choose a class.'),
+  section: requiredId(tr('Choose a class.')),
   on_date: optionalIsoDate,
   reason: z.string().trim().max(255),
   allow_over_capacity: z.boolean(),
@@ -42,13 +43,13 @@ function ClassPicker({ control, errors, campus, currentSection }: { control: Con
     .filter((c) => c.id !== currentSection)
     .map((c) => {
       const full = c.capacity != null && c.student_count >= c.capacity
-      const seats = c.capacity != null ? ` · ${c.student_count}/${c.capacity}${full ? ' full' : ''}` : ` · ${pluralize(c.student_count, 'student')}`
+      const seats = c.capacity != null ? ` · ${c.student_count}/${c.capacity}${full ? ' ' + tr('full') : ''}` : ` · ${pluralize(c.student_count, 'student')}`
       return { value: String(c.id), label: `${c.display_name}${seats}` }
     })
 
   return (
     <div className="grid gap-4 sm:grid-cols-[1fr_1.5fr]">
-      <FormField label="Academic year" error={errors.academic_year?.message}>
+      <FormField label={tr('Academic year')} error={errors.academic_year?.message}>
         {(p) => (
           <Controller
             control={control}
@@ -59,17 +60,17 @@ function ClassPicker({ control, errors, campus, currentSection }: { control: Con
                 value={field.value}
                 onChange={field.onChange}
                 loading={years.isPending}
-                options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? `${y.name} (current)` : y.name }))}
+                options={(years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? tr('{name} (current)', { name: y.name }) : y.name }))}
               />
             )}
           />
         )}
       </FormField>
-      <FormField label="Class" required error={errors.section?.message} description={
+      <FormField label={tr('Class')} required error={errors.section?.message} description={
           years.data?.length === 0
-            ? 'No academic years yet. Add one under Academics first.'
+            ? tr('No academic years yet. Add one under Academics first.')
             : year && classes.data && options.length === 0
-              ? 'No other classes at this branch in that year.'
+              ? tr('No other classes at this branch in that year.')
               : undefined
         }>
         {(p) => (
@@ -107,13 +108,13 @@ export function PlaceStudentDialog({ student, open, onOpenChange }: { student: S
       open={open}
       onOpenChange={onOpenChange}
       wide
-      title={isMove ? `Move ${student.full_name} to another class` : `Place ${student.full_name} in a class`}
+      title={isMove ? tr('Move {full_name} to another class', { full_name: student.full_name }) : tr('Place {full_name} in a class', { full_name: student.full_name })}
       description={
         isMove
-          ? `Now in ${enrollment!.section_name}. Promotions and section changes keep the old class in their history.`
-          : 'Attendance, marks and fees follow the class the student is in.'
+          ? tr('Now in {section_name}. Promotions and section changes keep the old class in their history.', { section_name: enrollment!.section_name })
+          : tr('Attendance, marks and fees follow the class the student is in.')
       }
-      submitLabel={isMove ? 'Move' : 'Place'}
+      submitLabel={isMove ? tr('Move') : tr('Place')}
       schema={schema}
       defaultValues={{ academic_year: defaultYear ? String(defaultYear) : '', section: '', on_date: '', reason: '', allow_over_capacity: false }}
       onSubmit={async (v) => {
@@ -130,7 +131,7 @@ export function PlaceStudentDialog({ student, open, onOpenChange }: { student: S
           if (toApiError(err).code === 'over_capacity') setOverCapacity(true)
           throw err
         }
-        toast.success(isMove ? `${student.full_name} moved.` : `${student.full_name} placed.`)
+        toast.success(isMove ? tr('{full_name} moved.', { full_name: student.full_name }) : tr('{full_name} placed.', { full_name: student.full_name }))
       }}
     >
       {({ register, control, formState: { errors } }) => (
@@ -138,11 +139,11 @@ export function PlaceStudentDialog({ student, open, onOpenChange }: { student: S
           <ClassPicker control={control} errors={errors} campus={student.campus} currentSection={enrollment?.section ?? null} />
           {isMove && (
             <div className="grid gap-4 sm:grid-cols-[1fr_1.5fr]">
-              <FormField label="Takes effect (AD)" error={errors.on_date?.message} description="Leave empty for today. A later date keeps them in their class until then.">
+              <FormField label={tr('Takes effect (AD)')} error={errors.on_date?.message} description={tr('Leave empty for today. A later date keeps them in their class until then.')}>
                 {(p) => <Controller control={control} name="on_date" render={({ field }) => <DatePicker {...p} {...field} />} />}
               </FormField>
-              <FormField label="Reason" error={errors.reason?.message}>
-                <Textarea {...register('reason')} rows={2} maxLength={255} placeholder="Promoted, section change…" />
+              <FormField label={tr('Reason')} error={errors.reason?.message}>
+                <Textarea {...register('reason')} rows={2} maxLength={255} placeholder={tr('Promoted, section change…')} />
               </FormField>
             </div>
           )}
@@ -154,8 +155,8 @@ export function PlaceStudentDialog({ student, open, onOpenChange }: { student: S
                 <label className="flex items-start gap-3 rounded-md border border-warning/30 bg-warning-soft p-3 text-sm">
                   <Checkbox checked={field.value} onCheckedChange={(c) => field.onChange(c === true)} className="mt-0.5" />
                   <span>
-                    <span className="font-medium">Place anyway, over the class’s seat limit</span>
-                    <span className="block text-xs text-muted-foreground">The class will have more students than its capacity.</span>
+                    <span className="font-medium">{tr('Place anyway, over the class’s seat limit')}</span>
+                    <span className="block text-xs text-muted-foreground">{tr('The class will have more students than its capacity.')}</span>
                   </span>
                 </label>
               )}

@@ -19,6 +19,7 @@ import type { Child, Parent } from '../api/parents.api'
 import { LinkStudentDialog } from '../components/LinkStudentDialog'
 import { ParentFormDialog } from '../components/ParentFormDialog'
 import { useParent, useParentChildren, useRemoveParent, useUnlinkStudent } from '../hooks/useParents'
+import { tr } from '@/lib/i18n'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -40,7 +41,7 @@ function Children({ parent }: { parent: Parent }) {
   const linkButton = (
     <PermissionGate permission={PERMS.parents.update}>
       <Button size="sm" variant="outline" onClick={() => setLinking(true)}>
-        <Link2 aria-hidden /> Link a child
+        <Link2 aria-hidden /> {tr('Link a child')}
       </Button>
     </PermissionGate>
   )
@@ -48,7 +49,7 @@ function Children({ parent }: { parent: Parent }) {
   return (
     <section className="rounded-lg border bg-card">
       <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
-        <h2 className="text-sm font-semibold">Children</h2>
+        <h2 className="text-sm font-semibold">{tr('Children')}</h2>
         {children.data && children.data.length > 0 && linkButton}
       </div>
       {children.isPending ? (
@@ -57,7 +58,7 @@ function Children({ parent }: { parent: Parent }) {
         <ErrorState error={children.error} onRetry={() => void children.refetch()} />
       ) : children.data.length === 0 ? (
         <div className="flex flex-col items-start gap-3 p-4 text-sm text-muted-foreground">
-          Not linked to any student yet.
+          {tr('Not linked to any student yet.')}
           {linkButton}
         </div>
       ) : (
@@ -75,7 +76,7 @@ function Children({ parent }: { parent: Parent }) {
                   )}
                   {c.is_primary_contact && (
                     <span className="inline-flex items-center gap-1 text-xs text-warning">
-                      <Star className="h-3 w-3 fill-current" aria-hidden /> Primary contact
+                      <Star className="h-3 w-3 fill-current" aria-hidden /> {tr('Primary contact')}
                     </span>
                   )}
                 </p>
@@ -86,8 +87,8 @@ function Children({ parent }: { parent: Parent }) {
               </div>
               <StatusBadge status={c.status} label={enumLabel('StudentStatusEnum', c.status)} />
               <RowActions
-                label={`Actions for ${c.full_name}`}
-                actions={[{ label: 'Unlink', icon: Unlink, permission: PERMS.parents.update, destructive: true, onSelect: () => setUnlinking(c) }]}
+                label={tr('Actions for {full_name}', { full_name: c.full_name })}
+                actions={[{ label: tr('Unlink'), icon: Unlink, permission: PERMS.parents.update, destructive: true, onSelect: () => setUnlinking(c) }]}
               />
             </li>
           ))}
@@ -99,12 +100,12 @@ function Children({ parent }: { parent: Parent }) {
           open
           onOpenChange={(o) => !o && setUnlinking(null)}
           tone="destructive"
-          title={`Unlink ${unlinking.full_name}?`}
-          description={`${parent.full_name} will no longer be listed as their ${enumLabel('RelationshipEnum', unlinking.relationship).toLowerCase()}${unlinking.is_primary_contact ? ', and the student will have no primary contact' : ''}.`}
-          confirmLabel="Unlink"
+          title={tr('Unlink {full_name}?', { full_name: unlinking.full_name })}
+          description={tr('{full_name} will no longer be listed as their {enumLabel}{value}.', { full_name: parent.full_name, enumLabel: enumLabel('RelationshipEnum', unlinking.relationship).toLowerCase(), value: unlinking.is_primary_contact ? ', ' + tr('and the student will have no primary contact') : '' })}
+          confirmLabel={tr('Unlink')}
           onConfirm={async () => {
             await unlink.mutateAsync({ id: parent.id, student: unlinking.student })
-            toast.success(`${unlinking.full_name} unlinked.`)
+            toast.success(tr('{full_name} unlinked.', { full_name: unlinking.full_name }))
           }}
         />
       )}
@@ -129,15 +130,15 @@ export default function ParentDetailPage() {
       <PageHeader
         backTo="/parents"
         title={p.full_name}
-        description={p.occupation || 'Parent / guardian'}
+        description={p.occupation || tr('Parent / guardian')}
         actions={
           <>
             <PermissionGate permission={PERMS.parents.update}>
               <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-                <Pencil aria-hidden /> Edit
+                <Pencil aria-hidden /> {tr('Edit')}
               </Button>
             </PermissionGate>
-            <RowActions label="More actions" actions={[{ label: 'Delete', icon: Trash2, permission: PERMS.parents.delete, destructive: true, onSelect: () => setDeleting(true) }]} />
+            <RowActions label={tr('More actions')} actions={[{ label: tr('Delete'), icon: Trash2, permission: PERMS.parents.delete, destructive: true, onSelect: () => setDeleting(true) }]} />
           </>
         }
       />
@@ -146,12 +147,12 @@ export default function ParentDetailPage() {
           <Children parent={p} />
         </div>
         <section className="rounded-lg border bg-card p-4 sm:p-6">
-          <h2 className="mb-3 text-sm font-semibold">Contact</h2>
+          <h2 className="mb-3 text-sm font-semibold">{tr('Contact')}</h2>
           <dl className="grid gap-4">
-            <Field label="Phone">{p.phone && <a href={`tel:${p.phone}`} className="tabular-nums hover:underline">{p.phone}</a>}</Field>
-            <Field label="Email">{p.email && <a href={`mailto:${p.email}`} className="hover:underline">{p.email}</a>}</Field>
-            <Field label="Address">{p.address}</Field>
-            <Field label="Portal login">{p.user ? 'Linked' : 'No login account'}</Field>
+            <Field label={tr('Phone')}>{p.phone && <a href={`tel:${p.phone}`} className="tabular-nums hover:underline">{p.phone}</a>}</Field>
+            <Field label={tr('Email')}>{p.email && <a href={`mailto:${p.email}`} className="hover:underline">{p.email}</a>}</Field>
+            <Field label={tr('Address')}>{p.address}</Field>
+            <Field label={tr('Portal login')}>{p.user ? tr('Linked') : tr('No login account')}</Field>
           </dl>
         </section>
       </div>
@@ -160,10 +161,10 @@ export default function ParentDetailPage() {
         open={deleting}
         onOpenChange={setDeleting}
         subject={p.full_name}
-        description="They disappear from their children’s records. The students themselves are not affected."
+        description={tr('They disappear from their children’s records. The students themselves are not affected.')}
         onConfirm={async () => {
           await remove.mutateAsync(p.id)
-          toast.success('Parent deleted.')
+          toast.success(tr('Parent deleted.'))
           navigate('/parents', { replace: true })
         }}
       />

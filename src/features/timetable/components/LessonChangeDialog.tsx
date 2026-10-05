@@ -15,11 +15,12 @@ import { toNullableInt } from '@/lib/validation'
 import type { Id } from '@/shared/types/api'
 import { hhmm, type Lesson } from '../api/timetable.api'
 import { useCreateLessonChange, useRemoveLessonChange, useUpdateLessonChange } from '../hooks/useTimetable'
+import { tr } from '@/lib/i18n'
 
 const schema = z
   .object({ what: z.enum(['substitute', 'room', 'cancel']), substitute_teacher: z.string(), room: z.string(), note: z.string().trim().max(255) })
-  .refine((v) => v.what !== 'substitute' || v.substitute_teacher, { path: ['substitute_teacher'], message: 'Choose who covers it.' })
-  .refine((v) => v.what !== 'room' || v.room, { path: ['room'], message: 'Choose the room.' })
+  .refine((v) => v.what !== 'substitute' || v.substitute_teacher, { path: ['substitute_teacher'], message: tr('Choose who covers it.') })
+  .refine((v) => v.what !== 'room' || v.room, { path: ['room'], message: tr('Choose the room.') })
 
 /** One lesson on one date: a substitute teacher, another room, or cancelled. The weekly lesson is untouched. */
 export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson | null; campus: Id | null; onClose: () => void }) {
@@ -38,8 +39,8 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
         open={lesson !== null}
         onOpenChange={(o) => !o && onClose()}
         title={lesson ? `${lesson.subject_name} · ${lesson.section_name}` : ''}
-        description={lesson ? `${formatDate(lesson.date)}, ${lesson.period_name} (${hhmm(lesson.start_time)}–${hhmm(lesson.end_time)}). Only this day changes.` : undefined}
-        submitLabel="Save change"
+        description={lesson ? tr('{date}, {period_name} ({hhmm}–{hhmm2}). Only this day changes.', { date: formatDate(lesson.date), period_name: lesson.period_name, hhmm: hhmm(lesson.start_time), hhmm2: hhmm(lesson.end_time) }) : undefined}
+        submitLabel={tr('Save change')}
         schema={schema}
         defaultValues={{
           what: lesson?.is_cancelled ? 'cancel' : substitute ? 'substitute' : existing ? 'room' : 'substitute',
@@ -58,14 +59,14 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
           }
           if (existing) await update.mutateAsync({ id: existing, input })
           else await create.mutateAsync(input)
-          toast.success(v.what === 'cancel' ? 'Lesson cancelled for that day.' : 'Change saved.')
+          toast.success(v.what === 'cancel' ? tr('Lesson cancelled for that day.') : tr('Change saved.'))
         }}
       >
         {({ register, control, watch, formState: { errors } }) => {
           const what = watch('what')
           return (
             <>
-              <div className="inline-flex w-fit rounded-md border p-0.5" role="radiogroup" aria-label="What changes">
+              <div className="inline-flex w-fit rounded-md border p-0.5" role="radiogroup" aria-label={tr('What changes')}>
                 {(
                   [
                     ['substitute', 'Someone covers it'],
@@ -93,7 +94,7 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
               </div>
               {what !== 'cancel' && (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <FormField label="Covered by" required={what === 'substitute'} error={errors.substitute_teacher?.message}>
+                  <FormField label={tr('Covered by')} required={what === 'substitute'} error={errors.substitute_teacher?.message}>
                     {(p) => (
                       <Controller
                         control={control}
@@ -104,7 +105,7 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
                             value={field.value}
                             onChange={field.onChange}
                             allowEmpty={what === 'room'}
-                            emptyLabel="Their usual teacher"
+                            emptyLabel={tr('Their usual teacher')}
                             loading={staff.isPending}
                             options={(staff.data ?? []).filter((s) => s.value !== String(lesson?.regular_teacher))}
                           />
@@ -112,23 +113,23 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
                       />
                     )}
                   </FormField>
-                  <FormField label="Room" required={what === 'room'} error={errors.room?.message}>
+                  <FormField label={tr('Room')} required={what === 'room'} error={errors.room?.message}>
                     {(p) => (
                       <Controller
                         control={control}
                         name="room"
-                        render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty={what === 'substitute'} emptyLabel="Usual room" loading={rooms.isPending} options={rooms.data ?? []} />}
+                        render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty={what === 'substitute'} emptyLabel={tr('Usual room')} loading={rooms.isPending} options={rooms.data ?? []} />}
                       />
                     )}
                   </FormField>
                 </div>
               )}
-              <FormField label="Note" error={errors.note?.message} description="Shown on the day’s timetable.">
-                <Input {...register('note')} maxLength={255} placeholder={what === 'cancel' ? 'Teacher on leave, school trip…' : ''} />
+              <FormField label={tr('Note')} error={errors.note?.message} description={tr('Shown on the day’s timetable.')}>
+                <Input {...register('note')} maxLength={255} placeholder={what === 'cancel' ? tr('Teacher on leave, school trip…') : ''} />
               </FormField>
               {existing && (
                 <Button type="button" variant="ghost" size="sm" className="w-fit text-danger" onClick={() => setRemoving(true)}>
-                  Undo the change (back to normal)
+                  {tr('Undo the change (back to normal)')}
                 </Button>
               )}
             </>
@@ -139,12 +140,12 @@ export function LessonChangeDialog({ lesson, campus, onClose }: { lesson: Lesson
         <DeleteDialog
           open={removing}
           onOpenChange={setRemoving}
-          subject="this change"
-          confirmLabel="Undo change"
-          description="The lesson runs as usual that day."
+          subject={tr('this change')}
+          confirmLabel={tr('Undo change')}
+          description={tr('The lesson runs as usual that day.')}
           onConfirm={async () => {
             await remove.mutateAsync(existing)
-            toast.success('Back to normal.')
+            toast.success(tr('Back to normal.'))
             onClose()
           }}
         />

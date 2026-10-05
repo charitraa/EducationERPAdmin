@@ -23,6 +23,7 @@ import type { Id } from '@/shared/types/api'
 import { hhmm } from '@/features/timetable/api/timetable.api'
 import type { BoardingStatus, Route } from '../api/transport.api'
 import { useCompleteTrip, useMarkTrip, useOpenTrip, useRouteOptions, useTrip, useTrips } from '../hooks/useTransport'
+import { tr } from '@/lib/i18n'
 
 const DIRECTIONS = ['pickup', 'drop'] as const
 
@@ -56,7 +57,7 @@ export function TripsPage() {
   return (
     <>
       <div className="mb-4 grid max-w-48 gap-1.5">
-        <Label htmlFor={dateId}>Date (AD)</Label>
+        <Label htmlFor={dateId}>{tr('Date (AD)')}</Label>
         <DatePicker id={dateId} value={date} onChange={(v) => setParams(v && v !== todayIso() ? { date: v } : {}, { replace: true })} />
       </div>
       {trips.isPending ? (
@@ -64,7 +65,7 @@ export function TripsPage() {
       ) : trips.isError ? (
         <ErrorState error={trips.error} onRetry={() => void trips.refetch()} />
       ) : routes.length === 0 ? (
-        <EmptyState title="No routes running" description="Add routes with their stops, vehicle and crew." icon={Bus} />
+        <EmptyState title={tr('No routes running')} description={tr('Add routes with their stops, vehicle and crew.')} icon={Bus} />
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
           {routes.map((r) => (
@@ -72,7 +73,7 @@ export function TripsPage() {
               <div className="min-w-0 flex-1">
                 <p className="font-medium">{r.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {[r.vehicle_name, r.driver_name && `driver ${r.driver_name}`, `${r.riders} riders`].filter(Boolean).join(' · ')}
+                  {[r.vehicle_name, r.driver_name && tr('driver {driver_name}', { driver_name: r.driver_name }), tr('{riders} riders', { riders: r.riders })].filter(Boolean).join(' · ')}
                 </p>
               </div>
               {DIRECTIONS.map((d) => {
@@ -81,7 +82,7 @@ export function TripsPage() {
                 return (
                   <Button key={d} size="sm" variant={t ? 'outline' : 'default'} disabled={opening != null || (!t && !can(PERMS.transport.manage))} onClick={() => void go(r, d)}>
                     {busy && <Loader2 className="animate-spin" aria-hidden />}
-                    {d === 'pickup' ? 'Pickup' : 'Drop'}
+                    {d === 'pickup' ? tr('Pickup') : tr('Drop')}
                     {t ? ` · ${t.status === 'completed' ? 'done' : 'open'}` : ''}
                   </Button>
                 )
@@ -90,7 +91,7 @@ export function TripsPage() {
           ))}
         </ul>
       )}
-      <p className="mt-3 text-xs text-muted-foreground">Trips for {formatDate(date)}. Crew members can also open and mark their own route’s trips.</p>
+      <p className="mt-3 text-xs text-muted-foreground">{tr('Trips for {date}. Crew members can also open and mark their own route’s trips.', { date: formatDate(date) })}</p>
     </>
   )
 }
@@ -137,14 +138,14 @@ export function TripPage() {
         }
       />
       <p className="mb-3 flex flex-wrap gap-3 text-sm">
-        <span className="font-medium text-success">{boarded} boarded</span>
-        <span className="font-medium text-danger">{absent} absent</span>
-        {unmarked.length > 0 && <span className="text-muted-foreground">{unmarked.length} not marked</span>}
-        <span className="ml-auto text-muted-foreground">{t.roster.length} riders</span>
+        <span className="font-medium text-success">{tr('{boarded} boarded', { boarded })}</span>
+        <span className="font-medium text-danger">{tr('{absent} absent', { absent })}</span>
+        {unmarked.length > 0 && <span className="text-muted-foreground">{tr('{count} not marked', { count: unmarked.length })}</span>}
+        <span className="ml-auto text-muted-foreground">{tr('{count} riders', { count: t.roster.length })}</span>
       </p>
-      {done && t.completed_at && <p className="mb-3 rounded-lg border border-info/20 bg-info-soft p-3 text-sm">Completed {formatDateTime(t.completed_at)}.</p>}
+      {done && t.completed_at && <p className="mb-3 rounded-lg border border-info/20 bg-info-soft p-3 text-sm">{tr('Completed {dateTime}.', { dateTime: formatDateTime(t.completed_at) })}</p>}
       {t.roster.length === 0 ? (
-        <EmptyState title="Nobody rides this trip" description="Put riders on the route under Riders." />
+        <EmptyState title={tr('Nobody rides this trip')} description={tr('Put riders on the route under Riders.')} />
       ) : (
         <div className="grid gap-4">
           {stops.map(([stopId, stopName]) => (
@@ -157,13 +158,13 @@ export function TripPage() {
                     <li key={r.assignment} className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4">
                       <span className="min-w-0 flex-1 font-medium">
                         {r.rider_name}
-                        {r.staff != null && <span className="ml-1 text-xs font-normal text-muted-foreground">(staff)</span>}
+                        {r.staff != null && <span className="ml-1 text-xs font-normal text-muted-foreground">{tr('(staff)')}</span>}
                         {r.at && <span className="ml-2 text-xs font-normal tabular-nums text-muted-foreground">{hhmm(r.at)}</span>}
                       </span>
                       {done ? (
-                        r.status ? <StatusBadge status={r.status === 'boarded' ? 'completed' : 'rejected'} label={enumLabel('BoardingStatusEnum', r.status)} /> : <span className="text-xs text-muted-foreground">Not marked</span>
+                        r.status ? <StatusBadge status={r.status === 'boarded' ? 'completed' : 'rejected'} label={enumLabel('BoardingStatusEnum', r.status)} /> : <span className="text-xs text-muted-foreground">{tr('Not marked')}</span>
                       ) : (
-                        <div className="flex gap-1.5" role="group" aria-label={`Boarding for ${r.rider_name}`}>
+                        <div className="flex gap-1.5" role="group" aria-label={tr('Boarding for {rider_name}', { rider_name: r.rider_name })}>
                           {(['boarded', 'absent'] as const).map((s) => (
                             <button
                               key={s}
@@ -177,7 +178,7 @@ export function TripPage() {
                               )}
                             >
                               {s === 'boarded' ? <Check className="h-4 w-4" aria-hidden /> : <X className="h-4 w-4" aria-hidden />}
-                              {s === 'boarded' ? 'Boarded' : 'Absent'}
+                              {s === 'boarded' ? tr('Boarded') : tr('Absent')}
                             </button>
                           ))}
                         </div>
@@ -195,11 +196,11 @@ export function TripPage() {
           <div className="flex flex-wrap items-center gap-2">
             {unmarked.length > 0 && (
               <Button variant="outline" onClick={() => void set(unmarked.map((r) => ({ assignment: r.assignment, status: 'boarded' as const })))} disabled={mark.isPending}>
-                <CheckCheck aria-hidden /> Mark the other {unmarked.length} boarded
+                <CheckCheck aria-hidden /> {tr('Mark the other {count} boarded', { count: unmarked.length })}
               </Button>
             )}
             <Button className="ml-auto" onClick={() => setCompleting(true)}>
-              <Flag aria-hidden /> Complete trip
+              <Flag aria-hidden /> {tr('Complete trip')}
             </Button>
           </div>
         </div>
@@ -207,12 +208,12 @@ export function TripPage() {
       <ConfirmDialog
         open={completing}
         onOpenChange={setCompleting}
-        title="Complete this trip?"
-        description={unmarked.length ? `${unmarked.length} rider${unmarked.length === 1 ? ' is' : 's are'} not marked.` : 'Everyone is marked.'}
-        confirmLabel="Complete"
+        title={tr('Complete this trip?')}
+        description={unmarked.length ? (unmarked.length === 1 ? tr('1 rider is not marked.') : tr('{count} riders are not marked.', { count: unmarked.length })) : tr('Everyone is marked.')}
+        confirmLabel={tr('Complete')}
         onConfirm={async () => {
           await complete.mutateAsync(id)
-          toast.success('Trip completed.')
+          toast.success(tr('Trip completed.'))
         }}
       />
     </div>

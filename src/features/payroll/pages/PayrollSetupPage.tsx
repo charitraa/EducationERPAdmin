@@ -41,9 +41,10 @@ import {
   useUpdateTaxScheme,
 } from '../hooks/usePayroll'
 import { amountOrZero, ComponentLines, componentValue, lineSchema } from './SalaryPages'
+import { tr } from '@/lib/i18n'
 
-const code = z.string().trim().min(1, 'Required.').max(50).regex(/^[a-z0-9_-]+$/i, 'Letters, numbers, - and _ only.')
-const percent = z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'A number.').refine((v) => Number(v) <= 100, 'At most 100.')
+const code = z.string().trim().min(1, tr('Required.')).max(50).regex(/^[a-z0-9_-]+$/i, tr('Letters, numbers, - and _ only.'))
+const percent = z.string().trim().regex(/^\d+(\.\d{1,2})?$/, tr('A number.')).refine((v) => Number(v) <= 100, tr('At most 100.'))
 
 function Card({ title, description, onAdd, addLabel, children, className }: { title: string; description?: string; onAdd?: () => void; addLabel?: string; children: ReactNode; className?: string }) {
   return (
@@ -71,9 +72,9 @@ const settingsSchema = z.object({
   days_basis: z.string(),
   deduct_half_days: z.boolean(),
   overtime_enabled: z.boolean(),
-  overtime_multiplier: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, 'Like 1.5.').refine((v) => Number(v) > 0, 'More than zero.'),
-  overtime_min_minutes: z.string().trim().regex(/^\d+$/, 'Whole minutes.'),
-  default_day_minutes: z.string().trim().regex(/^\d+$/, 'Whole minutes.').refine((v) => Number(v) > 0, 'More than zero.'),
+  overtime_multiplier: z.string().trim().regex(/^\d+(\.\d{1,2})?$/, tr('Like 1.5.')).refine((v) => Number(v) > 0, tr('More than zero.')),
+  overtime_min_minutes: z.string().trim().regex(/^\d+$/, tr('Whole minutes.')),
+  default_day_minutes: z.string().trim().regex(/^\d+$/, tr('Whole minutes.')).refine((v) => Number(v) > 0, tr('More than zero.')),
 })
 
 function Settings() {
@@ -84,18 +85,18 @@ function Settings() {
   const [open, setOpen] = useState(false)
   const s = query.data?.results[0]
   const rows: Array<[string, string]> = [
-    ['Absence', enumLabel('AbsenceBasisEnum', s?.absence_basis ?? 'marked')],
-    ['A day’s pay', `Monthly ÷ ${(s?.days_basis ?? 'working') === 'working' ? 'working' : 'calendar'} days`],
-    ['Half days', s?.deduct_half_days ? 'Cost half a day' : 'Not deducted'],
-    ['Overtime', s?.overtime_enabled === false ? 'Off' : `×${Number(s?.overtime_multiplier ?? 1.5)} after ${s?.overtime_min_minutes ?? 30} min`],
-    ['Working day', `${(s?.default_day_minutes ?? 480) / 60} hours without a schedule`],
+    [tr('Absence'), enumLabel('AbsenceBasisEnum', s?.absence_basis ?? 'marked')],
+    [tr('A day’s pay'), (s?.days_basis ?? 'working') === 'working' ? tr('Monthly ÷ working days') : tr('Monthly ÷ calendar days')],
+    [tr('Half days'), s?.deduct_half_days ? tr('Cost half a day') : tr('Not deducted')],
+    [tr('Overtime'), s?.overtime_enabled === false ? tr('Off') : tr('×{multiplier} after {minutes} min', { multiplier: Number(s?.overtime_multiplier ?? 1.5), minutes: s?.overtime_min_minutes ?? 30 })],
+    [tr('Working day'), tr('{hours} hours without a schedule', { hours: (s?.default_day_minutes ?? 480) / 60 })],
   ]
   return (
     <section>
       <SectionHeader
-        title="How attendance counts"
-        description={s ? undefined : 'Defaults apply until you change them.'}
-        action={can(PERMS.payroll.manage) && <Button size="sm" variant="outline" onClick={() => setOpen(true)}><Pencil aria-hidden /> Change</Button>}
+        title={tr('How attendance counts')}
+        description={s ? undefined : tr('Defaults apply until you change them.')}
+        action={can(PERMS.payroll.manage) && <Button size="sm" variant="outline" onClick={() => setOpen(true)}><Pencil aria-hidden /> {tr('Change')}</Button>}
       />
       <dl className="divide-y rounded-lg border bg-card text-sm">
         {rows.map(([k, v]) => (
@@ -108,7 +109,7 @@ function Settings() {
       <FormDialog
         open={open}
         onOpenChange={setOpen}
-        title="Payroll settings"
+        title={tr('Payroll settings')}
         schema={settingsSchema}
         defaultValues={{
           absence_basis: s?.absence_basis ?? 'marked',
@@ -123,27 +124,27 @@ function Settings() {
           const input = { ...v, absence_basis: v.absence_basis as 'marked', days_basis: v.days_basis as 'working', overtime_min_minutes: Number(v.overtime_min_minutes), default_day_minutes: Number(v.default_day_minutes) }
           if (s) await update.mutateAsync({ id: s.id, input })
           else await create.mutateAsync(input)
-          toast.success('Payroll settings saved.')
+          toast.success(tr('Payroll settings saved.'))
         }}
       >
         {({ register, control, watch, formState: { errors } }) => (
           <>
-            <FormField label="Who counts as absent">
+            <FormField label={tr('Who counts as absent')}>
               {(p) => <Controller control={control} name="absence_basis" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('AbsenceBasisEnum')} />} />}
             </FormField>
-            <FormField label="A day’s pay is the monthly amount divided by">
+            <FormField label={tr('A day’s pay is the monthly amount divided by')}>
               {(p) => <Controller control={control} name="days_basis" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('DaysBasisEnum')} />} />}
             </FormField>
             <div className="grid gap-4 sm:grid-cols-3">
-              <FormField label="Working day (minutes)" error={errors.default_day_minutes?.message} description="For staff without a schedule.">
+              <FormField label={tr('Working day (minutes)')} error={errors.default_day_minutes?.message} description={tr('For staff without a schedule.')}>
                 <Input {...register('default_day_minutes')} inputMode="numeric" />
               </FormField>
               {watch('overtime_enabled') && (
                 <>
-                  <FormField label="Overtime rate" error={errors.overtime_multiplier?.message} description="× the hourly rate.">
+                  <FormField label={tr('Overtime rate')} error={errors.overtime_multiplier?.message} description={tr('× the hourly rate.')}>
                     <Input {...register('overtime_multiplier')} inputMode="decimal" />
                   </FormField>
-                  <FormField label="Counted after (min)" error={errors.overtime_min_minutes?.message} description="A day’s extra time below this is ignored.">
+                  <FormField label={tr('Counted after (min)')} error={errors.overtime_min_minutes?.message} description={tr('A day’s extra time below this is ignored.')}>
                     <Input {...register('overtime_min_minutes')} inputMode="numeric" />
                   </FormField>
                 </>
@@ -165,7 +166,7 @@ function Settings() {
   )
 }
 
-const componentSchema = z.object({ code, name: z.string().trim().min(1, 'Required.').max(100), kind: z.string(), calculation: z.string(), is_taxable: z.boolean(), is_pre_tax: z.boolean(), prorate_for_absence: z.boolean(), is_active: z.boolean() })
+const componentSchema = z.object({ code, name: z.string().trim().min(1, tr('Required.')).max(100), kind: z.string(), calculation: z.string(), is_taxable: z.boolean(), is_pre_tax: z.boolean(), prorate_for_absence: z.boolean(), is_active: z.boolean() })
 
 function Components() {
   const query = useComponents({ ...PICKER_PARAMS })
@@ -176,9 +177,9 @@ function Components() {
   const r = crud.record
   const rows = query.data?.results ?? []
   return (
-    <Card title="Pay components" description="Allowances and deductions: dearness allowance, PF, CIT, SSF…" onAdd={crud.openCreate} addLabel="Add component">
+    <Card title={tr('Pay components')} description={tr('Allowances and deductions: dearness allowance, PF, CIT, SSF…')} onAdd={crud.openCreate} addLabel={tr('Add component')}>
       {rows.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? 'Loading…' : 'None yet.'}</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? tr('Loading…') : tr('None yet.')}</p>
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
           {rows.map((c) => (
@@ -187,14 +188,14 @@ function Components() {
                 <span className="font-medium">{c.name}</span> <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
                 {c.is_active === false && <StatusBadge status="inactive" className="ml-2" />}
                 <span className="block text-xs text-muted-foreground">
-                  {[c.kind === 'earning' ? 'Earning' : 'Deduction', c.calculation === 'percent_of_basic' ? '% of basic' : 'fixed', c.kind === 'earning' && (c.is_taxable === false ? 'not taxed' : 'taxed'), c.is_pre_tax && 'before tax', c.kind === 'earning' && c.prorate_for_absence === false && 'not cut for absence'].filter(Boolean).join(' · ')}
+                  {[c.kind === 'earning' ? tr('Earning') : tr('Deduction'), c.calculation === 'percent_of_basic' ? tr('% of basic') : tr('fixed'), c.kind === 'earning' && (c.is_taxable === false ? tr('not taxed') : tr('taxed')), c.is_pre_tax && tr('before tax'), c.kind === 'earning' && c.prorate_for_absence === false && tr('not cut for absence')].filter(Boolean).join(' · ')}
                 </span>
               </span>
               <RowActions
-                label={`Actions for ${c.name}`}
+                label={tr('Actions for {name}', { name: c.name })}
                 actions={[
-                  { label: 'Edit', icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(c) },
-                  { label: 'Delete', icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(c) },
+                  { label: tr('Edit'), icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(c) },
+                  { label: tr('Delete'), icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(c) },
                 ]}
               />
             </li>
@@ -204,37 +205,37 @@ function Components() {
       <FormDialog
         open={crud.formOpen}
         onOpenChange={(o) => !o && crud.closeForm()}
-        title={r ? `Edit ${r.name}` : 'Add pay component'}
+        title={r ? tr('Edit {name}', { name: r.name }) : tr('Add pay component')}
         schema={componentSchema}
         defaultValues={{ code: r?.code ?? '', name: r?.name ?? '', kind: r?.kind ?? 'earning', calculation: r?.calculation ?? 'fixed', is_taxable: r?.is_taxable ?? true, is_pre_tax: r?.is_pre_tax ?? false, prorate_for_absence: r?.prorate_for_absence ?? true, is_active: r?.is_active ?? true }}
         onSubmit={async (v) => {
           const input = { ...v, kind: v.kind as PayComponent['kind'], calculation: v.calculation as PayComponent['calculation'], is_pre_tax: v.kind === 'deduction' && v.is_pre_tax }
           if (r) await update.mutateAsync({ id: r.id, input })
           else await create.mutateAsync(input)
-          toast.success('Component saved.')
+          toast.success(tr('Component saved.'))
         }}
       >
         {({ register, control, watch, formState: { errors } }) => {
           const earning = watch('kind') === 'earning'
-          const toggles = (earning ? [['is_taxable', 'Taxable income'], ['prorate_for_absence', 'Cut for unpaid days, like basic']] : [['is_pre_tax', 'Taken before tax (PF, CIT, SSF)']]) as Array<['is_taxable' | 'prorate_for_absence' | 'is_pre_tax', string]>
+          const toggles = (earning ? [['is_taxable', tr('Taxable income')], ['prorate_for_absence', tr('Cut for unpaid days, like basic')]] : [['is_pre_tax', tr('Taken before tax (PF, CIT, SSF)')]]) as Array<['is_taxable' | 'prorate_for_absence' | 'is_pre_tax', string]>
           return (
             <>
               <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-                <FormField label="Name" required error={errors.name?.message}>
-                  <Input {...register('name')} placeholder="Dearness allowance" />
+                <FormField label={tr('Name')} required error={errors.name?.message}>
+                  <Input {...register('name')} placeholder={tr('Dearness allowance')} />
                 </FormField>
-                <FormField label="Code" required error={errors.code?.message}>
+                <FormField label={tr('Code')} required error={errors.code?.message}>
                   <Input {...register('code')} className="font-mono" placeholder="da" />
                 </FormField>
-                <FormField label="Kind">
+                <FormField label={tr('Kind')}>
                   {(p) => <Controller control={control} name="kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('PayComponentKindEnum')} />} />}
                 </FormField>
-                <FormField label="Worked out as">
+                <FormField label={tr('Worked out as')}>
                   {(p) => <Controller control={control} name="calculation" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('CalculationEnum')} />} />}
                 </FormField>
               </div>
               <div className="grid gap-3 text-sm sm:grid-cols-2">
-                {[...toggles, ['is_active', 'In use on new payslips'] as const].map(([name, label]) => (
+                {[...toggles, ['is_active', tr('In use on new payslips')] as const].map(([name, label]) => (
                   <Controller key={name} control={control} name={name} render={({ field }) => (
                     <label className="flex items-center gap-3">
                       <Switch checked={field.value} onCheckedChange={field.onChange} /> {label}
@@ -246,12 +247,12 @@ function Components() {
           )
         }}
       </FormDialog>
-      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject={crud.deleting?.name ?? 'component'} onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success('Deleted.') }} />
+      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject={crud.deleting?.name ?? 'component'} onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success(tr('Deleted.')) }} />
     </Card>
   )
 }
 
-const structureSchema = z.object({ code, name: z.string().trim().min(1, 'Required.').max(150), description: z.string(), basic: amountOrZero, is_active: z.boolean(), lines: z.array(lineSchema) })
+const structureSchema = z.object({ code, name: z.string().trim().min(1, tr('Required.')).max(150), description: z.string(), basic: amountOrZero, is_active: z.boolean(), lines: z.array(lineSchema) })
 
 function Structures() {
   const query = useStructures({ ...PICKER_PARAMS })
@@ -264,9 +265,9 @@ function Structures() {
   const rows = query.data?.results ?? []
   const comp = (id: number) => components.data?.results.find((c) => c.id === id)
   return (
-    <Card title="Salary structures" description="Pay grades: a monthly basic plus components." onAdd={crud.openCreate} addLabel="Add structure" className="lg:col-span-2">
+    <Card title={tr('Salary structures')} description={tr('Pay grades: a monthly basic plus components.')} onAdd={crud.openCreate} addLabel={tr('Add structure')} className="lg:col-span-2">
       {rows.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? 'Loading…' : 'None yet: add “Lecturer A”, “Office assistant”…'}</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? tr('Loading…') : tr('None yet: add “Lecturer A”, “Office assistant”…')}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {rows.map((s) => (
@@ -277,18 +278,18 @@ function Structures() {
                   {s.is_active === false && <StatusBadge status="inactive" className="ml-2" />}
                 </p>
                 <RowActions
-                  label={`Actions for ${s.name}`}
+                  label={tr('Actions for {name}', { name: s.name })}
                   actions={[
-                    { label: 'Edit', icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(s) },
-                    { label: 'Delete', icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(s) },
+                    { label: tr('Edit'), icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(s) },
+                    { label: tr('Delete'), icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(s) },
                   ]}
                 />
               </div>
               <dl className="mt-1 grid gap-0.5">
-                <div className="flex justify-between"><dt>Basic</dt><dd><Money value={s.basic} tone="none" /></dd></div>
+                <div className="flex justify-between"><dt>{tr('Basic')}</dt><dd><Money value={s.basic} tone="none" /></dd></div>
                 {(s.lines ?? []).map((l) => (
                   <div key={l.id} className="flex justify-between text-muted-foreground">
-                    <dt>{l.component_name}{comp(l.component)?.kind === 'deduction' ? ' (deduction)' : ''}</dt>
+                    <dt>{l.component_name}{comp(l.component)?.kind === 'deduction' ? ' ' + tr('(deduction)') : ''}</dt>
                     <dd>{componentValue(comp(l.component), l.value)}</dd>
                   </div>
                 ))}
@@ -300,7 +301,7 @@ function Structures() {
       <FormDialog
         open={crud.formOpen}
         onOpenChange={(o) => !o && crud.closeForm()}
-        title={r ? `Edit ${r.name}` : 'Add salary structure'}
+        title={r ? tr('Edit {name}', { name: r.name }) : tr('Add salary structure')}
         wide
         schema={structureSchema}
         defaultValues={{ code: r?.code ?? '', name: r?.name ?? '', description: r?.description ?? '', basic: r?.basic ?? '', is_active: r?.is_active ?? true, lines: (r?.lines ?? []).map((l) => ({ component: String(l.component), value: String(Number(l.value)) })) }}
@@ -308,55 +309,55 @@ function Structures() {
           const input = { ...v, lines: v.lines.map((l) => ({ component: Number(l.component), value: l.value })) }
           if (r) await update.mutateAsync({ id: r.id, input })
           else await create.mutateAsync(input)
-          toast.success('Structure saved.')
+          toast.success(tr('Structure saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
             <div className="grid gap-4 sm:grid-cols-[1fr_10rem_10rem]">
-              <FormField label="Name" required error={errors.name?.message}>
-                <Input {...register('name')} placeholder="Lecturer A" />
+              <FormField label={tr('Name')} required error={errors.name?.message}>
+                <Input {...register('name')} placeholder={tr('Lecturer A')} />
               </FormField>
-              <FormField label="Code" required error={errors.code?.message}>
+              <FormField label={tr('Code')} required error={errors.code?.message}>
                 <Input {...register('code')} className="font-mono" />
               </FormField>
-              <FormField label="Basic (a month)" required error={errors.basic?.message}>
+              <FormField label={tr('Basic (a month)')} required error={errors.basic?.message}>
                 <Input {...register('basic')} inputMode="decimal" />
               </FormField>
             </div>
-            <ComponentLines control={control as never} register={register as never} errors={errors.lines as never} hint="Fixed components take an amount a month; percentage ones a % of basic." />
-            <FormField label="Description">
+            <ComponentLines control={control as never} register={register as never} errors={errors.lines as never} hint={tr('Fixed components take an amount a month; percentage ones a % of basic.')} />
+            <FormField label={tr('Description')}>
               <Textarea {...register('description')} rows={2} />
             </FormField>
             <Controller control={control} name="is_active" render={({ field }) => (
               <label className="flex items-center gap-3 text-sm">
-                <Switch checked={field.value} onCheckedChange={field.onChange} /> Can be assigned
+                <Switch checked={field.value} onCheckedChange={field.onChange} /> {tr('Can be assigned')}
               </label>
             )} />
           </>
         )}
       </FormDialog>
-      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject={crud.deleting?.name ?? 'structure'} onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success('Deleted.') }} />
+      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject={crud.deleting?.name ?? 'structure'} onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success(tr('Deleted.')) }} />
     </Card>
   )
 }
 
 const taxSchema = z
   .object({
-    fiscal_year: z.string().min(1, 'Choose a year.'),
+    fiscal_year: z.string().min(1, tr('Choose a year.')),
     tax_status: z.string(),
     name: z.string().max(150),
     female_rebate_percent: percent,
     pre_tax_cap_annual: z.union([z.literal(''), amountOrZero]),
-    pre_tax_cap_fraction: z.union([z.literal(''), z.string().trim().regex(/^0?\.\d{1,4}$|^1$/, 'A share like 0.3333.')]),
+    pre_tax_cap_fraction: z.union([z.literal(''), z.string().trim().regex(/^0?\.\d{1,4}$|^1$/, tr('A share like 0.3333.'))]),
     slabs: z.array(z.object({ upto: z.union([z.literal(''), amountOrZero]), rate: percent })).min(1),
   })
   .superRefine((v, ctx) => {
     v.slabs.forEach((s, i) => {
       const last = i === v.slabs.length - 1
-      if (last && s.upto !== '') ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: 'The last slab has no limit.' })
-      if (!last && s.upto === '') ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: 'Required.' })
-      if (!last && i > 0 && s.upto !== '' && Number(s.upto) <= Number(v.slabs[i - 1].upto)) ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: 'Must rise.' })
+      if (last && s.upto !== '') ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: tr('The last slab has no limit.') })
+      if (!last && s.upto === '') ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: tr('Required.') })
+      if (!last && i > 0 && s.upto !== '' && Number(s.upto) <= Number(v.slabs[i - 1].upto)) ctx.addIssue({ code: 'custom', path: ['slabs', i, 'upto'], message: tr('Must rise.') })
     })
   })
 type TaxValues = z.infer<typeof taxSchema>
@@ -365,27 +366,27 @@ function TaxSlabs({ control, register, errors }: { control: Control<TaxValues>; 
   const { fields, append, remove } = useFieldArray({ control, name: 'slabs' })
   return (
     <fieldset className="grid gap-2">
-      <legend className="mb-1 text-sm font-medium">Slabs (annual taxable income)</legend>
+      <legend className="mb-1 text-sm font-medium">{tr('Slabs (annual taxable income)')}</legend>
       {fields.map((f, i) => (
         <div key={f.id} className="grid grid-cols-[1fr_7rem_auto] items-start gap-2">
           <div>
-            <Input {...register(`slabs.${i}.upto`)} aria-label={`Slab ${i + 1} up to`} inputMode="decimal" placeholder={i === fields.length - 1 ? 'Above that' : 'Up to'} readOnly={i === fields.length - 1} />
+            <Input {...register(`slabs.${i}.upto`)} aria-label={tr('Slab {value} up to', { value: i + 1 })} inputMode="decimal" placeholder={i === fields.length - 1 ? tr('Above that') : tr('Up to')} readOnly={i === fields.length - 1} />
             {errors.slabs?.[i]?.upto?.message && <p className="mt-1 text-xs text-danger">{errors.slabs[i]?.upto?.message}</p>}
           </div>
           <div>
-            <Input {...register(`slabs.${i}.rate`)} aria-label={`Slab ${i + 1} rate`} inputMode="decimal" placeholder="Rate %" />
+            <Input {...register(`slabs.${i}.rate`)} aria-label={tr('Slab {value} rate', { value: i + 1 })} inputMode="decimal" placeholder={tr('Rate %')} />
             {errors.slabs?.[i]?.rate?.message && <p className="mt-1 text-xs text-danger">{errors.slabs[i]?.rate?.message}</p>}
           </div>
-          <Button type="button" variant="ghost" size="icon" aria-label={`Remove slab ${i + 1}`} disabled={fields.length === 1} onClick={() => remove(i)}>
+          <Button type="button" variant="ghost" size="icon" aria-label={tr('Remove slab {value}', { value: i + 1 })} disabled={fields.length === 1} onClick={() => remove(i)}>
             <Trash2 aria-hidden />
           </Button>
         </div>
       ))}
       <div>
         <Button type="button" size="sm" variant="outline" onClick={() => append({ upto: '', rate: '' }, { shouldFocus: false })}>
-          <Plus aria-hidden /> Add slab
+          <Plus aria-hidden /> {tr('Add slab')}
         </Button>
-        <span className="ml-2 text-xs text-muted-foreground">The last slab is open-ended.</span>
+        <span className="ml-2 text-xs text-muted-foreground">{tr('The last slab is open-ended.')}</span>
       </div>
     </fieldset>
   )
@@ -401,9 +402,9 @@ function TaxSchemes() {
   const r = crud.record
   const rows = query.data?.results ?? []
   return (
-    <Card title="Income tax" description="Each fiscal year’s slabs, for single and couple filers." onAdd={crud.openCreate} addLabel="Add scheme" className="lg:col-span-2">
+    <Card title={tr('Income tax')} description={tr('Each fiscal year’s slabs, for single and couple filers.')} onAdd={crud.openCreate} addLabel={tr('Add scheme')} className="lg:col-span-2">
       {rows.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? 'Loading…' : 'None yet: without a scheme, payslips withhold no tax.'}</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? tr('Loading…') : tr('None yet: without a scheme, payslips withhold no tax.')}</p>
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {rows.map((t) => (
@@ -414,10 +415,10 @@ function TaxSchemes() {
                   {t.name && <span className="block text-xs font-normal text-muted-foreground">{t.name}</span>}
                 </p>
                 <RowActions
-                  label={`Actions for ${t.fiscal_year_name} ${t.tax_status}`}
+                  label={tr('Actions for {fiscal_year_name} {tax_status}', { fiscal_year_name: t.fiscal_year_name, tax_status: t.tax_status })}
                   actions={[
-                    { label: 'Edit', icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(t) },
-                    { label: 'Delete', icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(t) },
+                    { label: tr('Edit'), icon: Pencil, permission: PERMS.payroll.manage, onSelect: () => crud.openEdit(t) },
+                    { label: tr('Delete'), icon: Trash2, permission: PERMS.payroll.manage, destructive: true, onSelect: () => crud.openDelete(t) },
                   ]}
                 />
               </div>
@@ -425,13 +426,13 @@ function TaxSchemes() {
                 <tbody>
                   {t.slabs.map((s, i) => (
                     <tr key={s.sequence} className="text-muted-foreground">
-                      <td className="py-0.5">{s.upto == null ? <>Above <Money value={t.slabs[i - 1]?.upto ?? 0} tone="none" /></> : <>Up to <Money value={s.upto} tone="none" /></>}</td>
+                      <td className="py-0.5">{s.upto == null ? <>{tr('Above')} <Money value={t.slabs[i - 1]?.upto ?? 0} tone="none" /></> : <>{tr('Up to')} <Money value={s.upto} tone="none" /></>}</td>
                       <td className="py-0.5 text-right tabular-nums">{Number(s.rate)}%</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {Number(t.female_rebate_percent ?? 0) > 0 && <p className="mt-1 text-xs text-muted-foreground">{Number(t.female_rebate_percent)}% rebate for women</p>}
+              {Number(t.female_rebate_percent ?? 0) > 0 && <p className="mt-1 text-xs text-muted-foreground">{tr('{female_rebate_percent}% rebate for women', { female_rebate_percent: Number(t.female_rebate_percent) })}</p>}
             </li>
           ))}
         </ul>
@@ -439,7 +440,7 @@ function TaxSchemes() {
       <FormDialog
         open={crud.formOpen}
         onOpenChange={(o) => !o && crud.closeForm()}
-        title={r ? 'Edit tax scheme' : 'Add tax scheme'}
+        title={r ? tr('Edit tax scheme') : tr('Add tax scheme')}
         wide
         schema={taxSchema}
         defaultValues={{
@@ -462,38 +463,38 @@ function TaxSchemes() {
           }
           if (r) await update.mutateAsync({ id: r.id, input })
           else await create.mutateAsync(input)
-          toast.success('Tax scheme saved.')
+          toast.success(tr('Tax scheme saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
             <div className="grid gap-4 sm:grid-cols-3">
-              <FormField label="Fiscal year" required error={errors.fiscal_year?.message}>
+              <FormField label={tr('Fiscal year')} required error={errors.fiscal_year?.message}>
                 {(p) => <Controller control={control} name="fiscal_year" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={years.options} />} />}
               </FormField>
-              <FormField label="For" error={errors.tax_status?.message}>
+              <FormField label={tr('For')} error={errors.tax_status?.message}>
                 {(p) => <Controller control={control} name="tax_status" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('TaxStatusEnum')} />} />}
               </FormField>
-              <FormField label="Name">
-                <Input {...register('name')} placeholder="Finance Act 2083" />
+              <FormField label={tr('Name')}>
+                <Input {...register('name')} placeholder={tr('Finance Act 2083')} />
               </FormField>
             </div>
             <TaxSlabs control={control} register={register} errors={errors} />
             <div className="grid gap-4 sm:grid-cols-3">
-              <FormField label="Rebate for women (%)" error={errors.female_rebate_percent?.message}>
+              <FormField label={tr('Rebate for women (%)')} error={errors.female_rebate_percent?.message}>
                 <Input {...register('female_rebate_percent')} inputMode="decimal" />
               </FormField>
-              <FormField label="Pre-tax cap a year" error={errors.pre_tax_cap_annual?.message} description="Empty: no cap.">
+              <FormField label={tr('Pre-tax cap a year')} error={errors.pre_tax_cap_annual?.message} description={tr('Empty: no cap.')}>
                 <Input {...register('pre_tax_cap_annual')} inputMode="decimal" />
               </FormField>
-              <FormField label="…and share of income" error={errors.pre_tax_cap_fraction?.message} description="e.g. 0.3333">
+              <FormField label={tr('…and share of income')} error={errors.pre_tax_cap_fraction?.message} description="e.g. 0.3333">
                 <Input {...register('pre_tax_cap_fraction')} inputMode="decimal" />
               </FormField>
             </div>
           </>
         )}
       </FormDialog>
-      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject="this tax scheme" onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success('Deleted.') }} />
+      <DeleteDialog open={crud.deleting !== null} onOpenChange={(o) => !o && crud.closeDelete()} subject={tr('this tax scheme')} onConfirm={async () => { await remove.mutateAsync(crud.deleting!.id); toast.success(tr('Deleted.')) }} />
     </Card>
   )
 }

@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PAGE_SIZE_OPTIONS } from '@/shared/api/pagination'
+import { tr } from '@/lib/i18n'
 
 interface PaginationProps {
   page: number
@@ -30,13 +31,13 @@ export function Pagination({ page, pageSize, count, totalPages, onPageChange, on
   const to = Math.min(page * pageSize, count)
 
   return (
-    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 border-t px-3 py-2.5 text-sm">
+    <nav aria-label={tr('Pagination')} className="flex flex-wrap items-center justify-between gap-3 border-t px-3 py-2.5 text-sm">
       <div className="flex items-center gap-3 text-muted-foreground">
         <span className="tabular-nums">
-          {from.toLocaleString()}–{to.toLocaleString()} of {count.toLocaleString()}
+          {tr('{localeString}–{localeString2} of {localeString3}', { localeString: from.toLocaleString(), localeString2: to.toLocaleString(), localeString3: count.toLocaleString() })}
         </span>
         <div className="hidden items-center gap-1.5 sm:flex">
-          <span id="page-size-label">Rows</span>
+          <span id="page-size-label">{tr('Rows')}</span>
           <Select value={String(pageSize)} onValueChange={(v) => onPageSizeChange(Number(v))}>
             <SelectTrigger className="h-8 w-[72px]" aria-labelledby="page-size-label">
               <SelectValue />
@@ -52,7 +53,7 @@ export function Pagination({ page, pageSize, count, totalPages, onPageChange, on
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(page - 1)} disabled={page <= 1} aria-label="Previous page">
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(page - 1)} disabled={page <= 1} aria-label={tr('Previous page')}>
           <ChevronLeft />
         </Button>
         <div className="hidden items-center gap-1 sm:flex">
@@ -78,7 +79,7 @@ export function Pagination({ page, pageSize, count, totalPages, onPageChange, on
         <span className="px-2 tabular-nums text-muted-foreground sm:hidden">
           {page} / {totalPages}
         </span>
-        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(page + 1)} disabled={page >= totalPages} aria-label="Next page">
+        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onPageChange(page + 1)} disabled={page >= totalPages} aria-label={tr('Next page')}>
           <ChevronRight />
         </Button>
       </div>

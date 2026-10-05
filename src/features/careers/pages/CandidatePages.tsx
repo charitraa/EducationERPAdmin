@@ -47,8 +47,9 @@ import {
   useVacancies,
   useWithdrawOffer,
 } from '../hooks/useCareers'
+import { tr } from '@/lib/i18n'
 
-const hhmm = z.string().regex(/^\d{2}:\d{2}$/, 'Use HH:MM.')
+const hhmm = z.string().regex(/^\d{2}:\d{2}$/, tr('Use HH:MM.'))
 
 /** The résumé is behind sign-in, so fetch it with the token and open it. */
 async function openResume(id: Id) {
@@ -63,16 +64,16 @@ async function openResume(id: Id) {
 }
 
 const candidateColumns = (withVacancy: boolean): Column<Candidacy>[] => [
-  { id: 'name', header: 'Candidate', mobile: 'title', cell: (c) => (
+  { id: 'name', header: tr('Candidate'), mobile: 'title', cell: (c) => (
     <span>
       <span className="font-medium">{c.full_name}</span>
       <span className="block text-xs text-muted-foreground">{[c.email, c.phone].filter(Boolean).join(' · ')}</span>
     </span>
   ) },
-  ...(withVacancy ? [{ id: 'vacancy', header: 'Vacancy', cell: (c: Candidacy) => c.vacancy_title } satisfies Column<Candidacy>] : []),
-  { id: 'score', header: 'Screening', className: 'tabular-nums', cell: (c) => (c.screening_score != null ? `${c.screening_score}/100` : '—') },
-  { id: 'applied', header: 'Applied', mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (c) => formatDate(c.created_at) },
-  { id: 'status', header: 'Status', cell: (c) => (c.hired_staff ? <StatusBadge status="completed" label="Hired" /> : <ApplicationStatus a={{ status: c.status as 'in_review', step_name: null }} />) },
+  ...(withVacancy ? [{ id: 'vacancy', header: tr('Vacancy'), cell: (c: Candidacy) => c.vacancy_title } satisfies Column<Candidacy>] : []),
+  { id: 'score', header: tr('Screening'), className: 'tabular-nums', cell: (c) => (c.screening_score != null ? `${c.screening_score}/100` : '—') },
+  { id: 'applied', header: tr('Applied'), mobile: 'hidden', className: 'whitespace-nowrap tabular-nums', cell: (c) => formatDate(c.created_at) },
+  { id: 'status', header: tr('Status'), cell: (c) => (c.hired_staff ? <StatusBadge status="completed" label={tr('Hired')} /> : <ApplicationStatus a={{ status: c.status as 'in_review', step_name: null }} />) },
 ]
 
 /** Candidates, for one vacancy or all of them. */
@@ -83,18 +84,18 @@ export function CandidatesTable({ vacancy }: { vacancy?: Id }) {
   const vacancies = useVacancies({ ...PICKER_PARAMS }, { enabled: !vacancy })
   return (
     <DataTable
-      ariaLabel="Candidates"
+      ariaLabel={tr('Candidates')}
       columns={candidateColumns(!vacancy)}
       query={query}
       list={list}
       getRowId={(c) => c.id}
-      searchPlaceholder="Name, email or phone…"
+      searchPlaceholder={tr('Name, email or phone…')}
       onRowClick={(c) => navigate(`/careers/applications/${c.id}`)}
       filters={[
-        { name: 'vacancy', label: 'Vacancy', options: (vacancies.data?.results ?? []).map((v) => ({ value: String(v.id), label: v.title })), hidden: Boolean(vacancy) },
-        { name: 'application__status', label: 'Status', options: enumOptions('ApplicationStatusEnum') },
+        { name: 'vacancy', label: tr('Vacancy'), options: (vacancies.data?.results ?? []).map((v) => ({ value: String(v.id), label: v.title })), hidden: Boolean(vacancy) },
+        { name: 'application__status', label: tr('Status'), options: enumOptions('ApplicationStatusEnum') },
       ]}
-      empty={{ title: 'No candidates yet', description: 'They appear as people apply to an open vacancy.' }}
+      empty={{ title: tr('No candidates yet'), description: tr('They appear as people apply to an open vacancy.') }}
     />
   )
 }
@@ -114,40 +115,40 @@ export function ScheduleDialog({ candidacy, onOpenChange }: { candidacy: Candida
     <FormDialog
       open={candidacy !== null}
       onOpenChange={onOpenChange}
-      title={`Interview ${candidacy?.full_name ?? ''}`}
-      description="The candidate and the panel are told."
+      title={tr('Interview {full_name}', { full_name: candidacy?.full_name ?? '' })}
+      description={tr('The candidate and the panel are told.')}
       wide
-      submitLabel="Schedule"
-      schema={z.object({ date: isoDate, time: hhmm, duration: z.string().regex(/^\d+$/, 'Minutes.'), mode: z.string(), location: z.string().max(255), round: z.string().regex(/^\d+$/), panel: z.array(z.string()) })}
+      submitLabel={tr('Schedule')}
+      schema={z.object({ date: isoDate, time: hhmm, duration: z.string().regex(/^\d+$/, tr('Minutes.')), mode: z.string(), location: z.string().max(255), round: z.string().regex(/^\d+$/), panel: z.array(z.string()) })}
       defaultValues={{ date: todayIso(), time: '10:00', duration: '30', mode: 'in_person', location: '', round: String((existing.data?.results.filter((i) => i.status !== 'cancelled').length ?? 0) + 1), panel: [] }}
       onSubmit={async (v) => {
         await schedule.mutateAsync({ candidacy: candidacy!.id, scheduled_at: combineLocal(v.date, v.time), duration_minutes: Number(v.duration), mode: v.mode as Interview['mode'], location: v.location, round: Number(v.round), panel: v.panel.map(Number) })
-        toast.success('Interview scheduled.')
+        toast.success(tr('Interview scheduled.'))
       }}
     >
       {({ register, control, formState: { errors } }) => (
         <>
           <div className="grid gap-4 sm:grid-cols-4">
-            <FormField label="Date" required error={errors.date?.message} className="sm:col-span-2">
+            <FormField label={tr('Date')} required error={errors.date?.message} className="sm:col-span-2">
               {(p) => <Controller control={control} name="date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
-            <FormField label="Time" required error={errors.time?.message}>
+            <FormField label={tr('Time')} required error={errors.time?.message}>
               <Input {...register('time')} type="time" />
             </FormField>
-            <FormField label="Minutes" error={errors.duration?.message}>
+            <FormField label={tr('Minutes')} error={errors.duration?.message}>
               <Input {...register('duration')} inputMode="numeric" />
             </FormField>
-            <FormField label="How" className="sm:col-span-2">
+            <FormField label={tr('How')} className="sm:col-span-2">
               {(p) => <Controller control={control} name="mode" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('InterviewModeEnum')} />} />}
             </FormField>
-            <FormField label="Round">
+            <FormField label={tr('Round')}>
               <Input {...register('round')} inputMode="numeric" />
             </FormField>
           </div>
-          <FormField label="Where" description="A room, or the call link.">
+          <FormField label={tr('Where')} description={tr('A room, or the call link.')}>
             <Input {...register('location')} maxLength={255} />
           </FormField>
-          <FormField label="Panel">
+          <FormField label={tr('Panel')}>
             {() => (
               <Controller
                 control={control}
@@ -187,31 +188,31 @@ export function InterviewDialogs({ acting, onDone }: { acting: InterviewAct | nu
       <FormDialog
         open={acting?.kind === 'outcome'}
         onOpenChange={close}
-        title={`How did it go? ${i?.candidate ?? ''}`}
-        submitLabel="Record"
-        schema={z.object({ status: z.string(), score: z.union([z.literal(''), z.string().regex(/^\d+(\.\d)?$/, '0 to 10.').refine((v) => Number(v) <= 10, '0 to 10.')]), recommendation: z.string(), feedback: z.string().max(5000) })}
+        title={tr('How did it go? {candidate}', { candidate: i?.candidate ?? '' })}
+        submitLabel={tr('Record')}
+        schema={z.object({ status: z.string(), score: z.union([z.literal(''), z.string().regex(/^\d+(\.\d)?$/, tr('0 to 10.')).refine((v) => Number(v) <= 10, tr('0 to 10.'))]), recommendation: z.string(), feedback: z.string().max(5000) })}
         defaultValues={{ status: 'completed', score: '', recommendation: '', feedback: '' }}
         onSubmit={async (v) => {
           await outcome.mutateAsync({ id: i!.id, status: v.status as 'completed', score: v.score || null, recommendation: v.recommendation, feedback: v.feedback })
-          toast.success('Recorded.')
+          toast.success(tr('Recorded.'))
         }}
       >
         {({ register, control, watch, formState: { errors } }) => (
           <>
-            <FormField label="Outcome">
-              {(p) => <Controller control={control} name="status" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={[{ value: 'completed', label: 'Held' }, { value: 'no_show', label: 'Candidate didn’t come' }]} />} />}
+            <FormField label={tr('Outcome')}>
+              {(p) => <Controller control={control} name="status" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={[{ value: 'completed', label: tr('Held') }, { value: 'no_show', label: tr('Candidate didn’t come') }]} />} />}
             </FormField>
             {watch('status') === 'completed' && (
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormField label="Score (0–10)" error={errors.score?.message}>
+                <FormField label={tr('Score (0–10)')} error={errors.score?.message}>
                   <Input {...register('score')} inputMode="decimal" />
                 </FormField>
-                <FormField label="Recommendation">
+                <FormField label={tr('Recommendation')}>
                   {(p) => <Controller control={control} name="recommendation" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty options={enumOptions('RecommendationEnum')} />} />}
                 </FormField>
               </div>
             )}
-            <FormField label="Feedback">
+            <FormField label={tr('Feedback')}>
               <Textarea {...register('feedback')} rows={3} />
             </FormField>
           </>
@@ -220,24 +221,24 @@ export function InterviewDialogs({ acting, onDone }: { acting: InterviewAct | nu
       <FormDialog
         open={acting?.kind === 'reschedule'}
         onOpenChange={close}
-        title="Move the interview"
-        submitLabel="Move"
+        title={tr('Move the interview')}
+        submitLabel={tr('Move')}
         schema={z.object({ date: isoDate, time: hhmm, location: z.string().max(255) })}
         defaultValues={{ date: at.date, time: at.time, location: i?.location ?? '' }}
         onSubmit={async (v) => {
           await reschedule.mutateAsync({ id: i!.id, scheduled_at: combineLocal(v.date, v.time), location: v.location })
-          toast.success('Moved; the candidate and panel are told.')
+          toast.success(tr('Moved; the candidate and panel are told.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Date" required error={errors.date?.message}>
+            <FormField label={tr('Date')} required error={errors.date?.message}>
               {(p) => <Controller control={control} name="date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
             </FormField>
-            <FormField label="Time" required error={errors.time?.message}>
+            <FormField label={tr('Time')} required error={errors.time?.message}>
               <Input {...register('time')} type="time" />
             </FormField>
-            <FormField label="Where" className="sm:col-span-2">
+            <FormField label={tr('Where')} className="sm:col-span-2">
               <Input {...register('location')} />
             </FormField>
           </div>
@@ -246,18 +247,18 @@ export function InterviewDialogs({ acting, onDone }: { acting: InterviewAct | nu
       <FormDialog
         open={acting?.kind === 'cancel'}
         onOpenChange={close}
-        title="Cancel the interview?"
-        description="The candidate is told."
-        submitLabel="Cancel interview"
-        schema={z.object({ reason: z.string().trim().min(1, 'Say why.').max(255) })}
+        title={tr('Cancel the interview?')}
+        description={tr('The candidate is told.')}
+        submitLabel={tr('Cancel interview')}
+        schema={z.object({ reason: z.string().trim().min(1, tr('Say why.')).max(255) })}
         defaultValues={{ reason: '' }}
         onSubmit={async (v) => {
           await cancel.mutateAsync({ id: i!.id, reason: v.reason })
-          toast.success('Cancelled.')
+          toast.success(tr('Cancelled.'))
         }}
       >
         {({ register, formState: { errors } }) => (
-          <FormField label="Reason" required error={errors.reason?.message}>
+          <FormField label={tr('Reason')} required error={errors.reason?.message}>
             <Input {...register('reason')} />
           </FormField>
         )}
@@ -268,9 +269,9 @@ export function InterviewDialogs({ acting, onDone }: { acting: InterviewAct | nu
 
 export const interviewActions = (i: Interview, act: (a: InterviewAct) => void) => [
   // The backend takes an outcome only once the interview's time has come.
-  { label: 'Record outcome', icon: ClipboardCheck, hidden: i.status !== 'scheduled' || new Date(i.scheduled_at) > new Date(), onSelect: () => act({ kind: 'outcome', i }) },
-  { label: 'Move', icon: CalendarClock, permission: PERMS.careers.manage, hidden: i.status !== 'scheduled', onSelect: () => act({ kind: 'reschedule', i }) },
-  { label: 'Cancel', icon: Ban, permission: PERMS.careers.manage, hidden: i.status !== 'scheduled', destructive: true, onSelect: () => act({ kind: 'cancel', i }) },
+  { label: tr('Record outcome'), icon: ClipboardCheck, hidden: i.status !== 'scheduled' || new Date(i.scheduled_at) > new Date(), onSelect: () => act({ kind: 'outcome', i }) },
+  { label: tr('Move'), icon: CalendarClock, permission: PERMS.careers.manage, hidden: i.status !== 'scheduled', onSelect: () => act({ kind: 'reschedule', i }) },
+  { label: tr('Cancel'), icon: Ban, permission: PERMS.careers.manage, hidden: i.status !== 'scheduled', destructive: true, onSelect: () => act({ kind: 'cancel', i }) },
 ]
 
 export function WithdrawOfferDialog({ offer, onOpenChange }: { offer: JobOffer | null; onOpenChange: (o: boolean) => void }) {
@@ -279,17 +280,17 @@ export function WithdrawOfferDialog({ offer, onOpenChange }: { offer: JobOffer |
     <FormDialog
       open={offer !== null}
       onOpenChange={onOpenChange}
-      title="Withdraw the offer?"
-      submitLabel="Withdraw"
-      schema={z.object({ reason: z.string().trim().min(1, 'Say why.').max(255) })}
+      title={tr('Withdraw the offer?')}
+      submitLabel={tr('Withdraw')}
+      schema={z.object({ reason: z.string().trim().min(1, tr('Say why.')).max(255) })}
       defaultValues={{ reason: '' }}
       onSubmit={async (v) => {
         await withdraw.mutateAsync({ id: offer!.id, reason: v.reason })
-        toast.success('Offer withdrawn.')
+        toast.success(tr('Offer withdrawn.'))
       }}
     >
       {({ register, formState: { errors } }) => (
-        <FormField label="Reason" required error={errors.reason?.message}>
+        <FormField label={tr('Reason')} required error={errors.reason?.message}>
           <Input {...register('reason')} />
         </FormField>
       )}
@@ -309,7 +310,7 @@ function Card({ title, action, children, className }: { title: string; action?: 
   )
 }
 
-const LABELS: Record<string, string> = { first_name: 'First name', middle_name: 'Middle name', last_name: 'Last name', date_of_birth: 'Date of birth', cover_letter: 'Cover letter', expected_salary: 'Expected salary', available_from: 'Available from' }
+const LABELS: Record<string, string> = { first_name: tr('First name'), middle_name: tr('Middle name'), last_name: tr('Last name'), date_of_birth: tr('Date of birth'), cover_letter: tr('Cover letter'), expected_salary: tr('Expected salary'), available_from: tr('Available from') }
 const HIDE = new Set(['first_name', 'middle_name', 'last_name', 'email', 'phone', 'resume', 'extra'])
 
 function Resume({ data }: { data: Record<string, unknown> }) {
@@ -331,7 +332,7 @@ function Resume({ data }: { data: Record<string, unknown> }) {
       {r.summary && <p className="whitespace-pre-wrap">{r.summary}</p>}
       {(r.experience ?? []).length > 0 && (
         <div>
-          <h3 className="mb-1 font-medium">Experience</h3>
+          <h3 className="mb-1 font-medium">{tr('Experience')}</h3>
           <ul className="grid gap-1">
             {r.experience!.map((e, n) => (
               <li key={n}>
@@ -343,7 +344,7 @@ function Resume({ data }: { data: Record<string, unknown> }) {
       )}
       {(r.education ?? []).length > 0 && (
         <div>
-          <h3 className="mb-1 font-medium">Education</h3>
+          <h3 className="mb-1 font-medium">{tr('Education')}</h3>
           <ul className="grid gap-1">
             {r.education!.map((e, n) => (
               <li key={n}>
@@ -355,7 +356,7 @@ function Resume({ data }: { data: Record<string, unknown> }) {
           </ul>
         </div>
       )}
-      {(r.skills ?? []).length > 0 && <p><span className="font-medium">Skills:</span> {r.skills!.join(', ')}</p>}
+      {(r.skills ?? []).length > 0 && <p><span className="font-medium">{tr('Skills') + ':'}</span> {r.skills!.join(', ')}</p>}
     </div>
   )
 }
@@ -383,7 +384,7 @@ export function CandidatePage() {
         backTo={`/careers/vacancies/${c.vacancy}`}
         title={
           <span className="flex flex-wrap items-center gap-2">
-            {c.full_name} {c.hired_staff ? <StatusBadge status="completed" label="Hired" /> : <ApplicationStatus a={{ status: c.status as 'in_review', step_name: null }} />}
+            {c.full_name} {c.hired_staff ? <StatusBadge status="completed" label={tr('Hired')} /> : <ApplicationStatus a={{ status: c.status as 'in_review', step_name: null }} />}
           </span>
         }
         description={
@@ -396,29 +397,29 @@ export function CandidatePage() {
           <>
             {c.resume && (
               <Button variant="outline" onClick={() => void openResume(c.resume!)}>
-                <Download aria-hidden /> {c.resume_name ?? 'Résumé'}
+                <Download aria-hidden /> {c.resume_name ?? tr('Résumé')}
               </Button>
             )}
             {open && (
               <Button asChild>
-                <Link to={`/applications/${c.application}`}>Decide on the application</Link>
+                <Link to={`/applications/${c.application}`}>{tr('Decide on the application')}</Link>
               </Button>
             )}
             {c.hired_staff && (
               <Button asChild variant="outline">
-                <Link to={`/staff/${c.hired_staff}`}>Staff record</Link>
+                <Link to={`/staff/${c.hired_staff}`}>{tr('Staff record')}</Link>
               </Button>
             )}
           </>
         }
       />
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card title="Application" className="lg:col-span-2">
+        <Card title={tr('Application')} className="lg:col-span-2">
           <Resume data={c.data} />
         </Card>
-        <Card title="Screening" action={open && can(PERMS.careers.manage) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('screen')}><Gauge aria-hidden /> Score</Button>}>
+        <Card title={tr('Screening')} action={open && can(PERMS.careers.manage) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('screen')}><Gauge aria-hidden /> {tr('Score')}</Button>}>
           {c.screening_score == null && !c.screening_note ? (
-            <p className="text-sm text-muted-foreground">Not screened yet.</p>
+            <p className="text-sm text-muted-foreground">{tr('Not screened yet.')}</p>
           ) : (
             <div className="text-sm">
               {c.screening_score != null && <p className="text-2xl font-semibold tabular-nums">{c.screening_score}<span className="text-sm font-normal text-muted-foreground">/100</span></p>}
@@ -426,18 +427,18 @@ export function CandidatePage() {
             </div>
           )}
         </Card>
-        <Card title="Interviews" className="lg:col-span-2" action={open && can(PERMS.careers.manage) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('schedule')}><CalendarPlus aria-hidden /> Schedule</Button>}>
+        <Card title={tr('Interviews')} className="lg:col-span-2" action={open && can(PERMS.careers.manage) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('schedule')}><CalendarPlus aria-hidden /> {tr('Schedule')}</Button>}>
           {(interviews.data?.results ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">None yet.</p>
+            <p className="text-sm text-muted-foreground">{tr('None yet.')}</p>
           ) : (
             <ul className="divide-y text-sm">
               {interviews.data!.results.map((i) => (
                 <li key={i.id} className="flex flex-wrap items-start gap-x-3 gap-y-1 py-2">
-                  <span className="font-medium">Round {i.round}</span>
+                  <span className="font-medium">{tr('Round {round}', { round: i.round })}</span>
                   <span className="flex-1 text-muted-foreground">
                     {formatDateTime(i.scheduled_at)} · {enumLabel('InterviewModeEnum', i.mode)}
                     {i.location && ` · ${i.location}`}
-                    {(i.panel_names ?? []).length > 0 && <span className="block">Panel: {i.panel_names!.join(', ')}</span>}
+                    {(i.panel_names ?? []).length > 0 && <span className="block">{tr('Panel: {panel_names}', { panel_names: i.panel_names!.join(', ') })}</span>}
                     {i.status === 'completed' && (
                       <span className="block text-foreground">
                         {i.score != null && `${Number(i.score)}/10 · `}
@@ -453,49 +454,49 @@ export function CandidatePage() {
             </ul>
           )}
         </Card>
-        <Card title="Offer" action={open && !live && can(PERMS.careers.hire) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('offer')}><FileSignature aria-hidden /> Make offer</Button>}>
+        <Card title={tr('Offer')} action={open && !live && can(PERMS.careers.hire) && <Button size="sm" variant="outline" className="h-7" onClick={() => setDialog('offer')}><FileSignature aria-hidden /> {tr('Make offer')}</Button>}>
           {(offers.data?.results ?? []).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No offer made. Offers are made at the job form’s last step.</p>
+            <p className="text-sm text-muted-foreground">{tr('No offer made. Offers are made at the job form’s last step.')}</p>
           ) : (
             <ul className="grid gap-3 text-sm">
               {offers.data!.results.map((o) => (
                 <li key={o.id} className="grid gap-1">
                   <div className="flex items-center justify-between gap-2">
                     <OfferStatus o={o} />
-                    <RowActions actions={[{ label: 'Withdraw', icon: Undo2, permission: PERMS.careers.hire, hidden: !(o.status === 'made' || o.status === 'accepted') || Boolean(c.hired_staff), destructive: true, onSelect: () => setWithdrawing(o) }]} />
+                    <RowActions actions={[{ label: tr('Withdraw'), icon: Undo2, permission: PERMS.careers.hire, hidden: !(o.status === 'made' || o.status === 'accepted') || Boolean(c.hired_staff), destructive: true, onSelect: () => setWithdrawing(o) }]} />
                   </div>
                   <p>
-                    {enumLabel('ContractKindEnum', o.contract_kind)} from {formatDate(o.start_date)}
+                    {enumLabel('ContractKindEnum', o.contract_kind)} {tr('from {date}', { date: formatDate(o.start_date) })}
                     {o.salary_note && ` · ${o.salary_note}`}
                   </p>
-                  {o.expires_on && o.status === 'made' && <p className="text-xs text-muted-foreground">Answer by {formatDate(o.expires_on)}</p>}
+                  {o.expires_on && o.status === 'made' && <p className="text-xs text-muted-foreground">{tr('Answer by {date}', { date: formatDate(o.expires_on) })}</p>}
                   {o.response_note && <p className="text-xs text-muted-foreground">“{o.response_note}”</p>}
                 </li>
               ))}
             </ul>
           )}
-          {live?.status === 'accepted' && open && <p className="mt-3 text-xs text-success">Accepted: approve the application’s last step to hire.</p>}
+          {live?.status === 'accepted' && open && <p className="mt-3 text-xs text-success">{tr('Accepted: approve the application’s last step to hire.')}</p>}
         </Card>
       </div>
 
       <FormDialog
         open={dialog === 'screen'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Screening"
-        submitLabel="Save"
-        schema={z.object({ score: z.union([z.literal(''), z.string().regex(/^\d+$/, '0 to 100.').refine((v) => Number(v) <= 100, '0 to 100.')]), note: z.string().max(5000) })}
+        title={tr('Screening')}
+        submitLabel={tr('Save')}
+        schema={z.object({ score: z.union([z.literal(''), z.string().regex(/^\d+$/, tr('0 to 100.')).refine((v) => Number(v) <= 100, tr('0 to 100.'))]), note: z.string().max(5000) })}
         defaultValues={{ score: c.screening_score != null ? String(c.screening_score) : '', note: c.screening_note ?? '' }}
         onSubmit={async (v) => {
           await screen.mutateAsync({ id: c.id, score: v.score === '' ? null : Number(v.score), note: v.note })
-          toast.success('Screening saved.')
+          toast.success(tr('Screening saved.'))
         }}
       >
         {({ register, formState: { errors } }) => (
           <>
-            <FormField label="Score (0–100)" error={errors.score?.message}>
+            <FormField label={tr('Score (0–100)')} error={errors.score?.message}>
               <Input {...register('score')} inputMode="numeric" />
             </FormField>
-            <FormField label="Note">
+            <FormField label={tr('Note')}>
               <Textarea {...register('note')} rows={3} />
             </FormField>
           </>
@@ -505,40 +506,40 @@ export function CandidatePage() {
       <FormDialog
         open={dialog === 'offer'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title={`Offer to ${c.full_name}`}
-        description="Only at the job form’s last step. The candidate is told and accepts or declines."
+        title={tr('Offer to {full_name}', { full_name: c.full_name })}
+        description={tr('Only at the job form’s last step. The candidate is told and accepts or declines.')}
         wide
-        submitLabel="Make offer"
+        submitLabel={tr('Make offer')}
         schema={z.object({ start_date: isoDate, contract_kind: z.string(), probation_ends_on: optionalIsoDate, contract_end_date: optionalIsoDate, expires_on: optionalIsoDate, salary_note: z.string().max(255), terms: z.string().max(5000) })}
         defaultValues={{ start_date: '', contract_kind: '', probation_ends_on: '', contract_end_date: '', expires_on: '', salary_note: '', terms: '' }}
         onSubmit={async (v) => {
           await offer.mutateAsync({ candidacy: c.id, start_date: v.start_date, ...(v.contract_kind ? { contract_kind: v.contract_kind as JobOffer['contract_kind'] } : {}), probation_ends_on: v.probation_ends_on || null, contract_end_date: v.contract_end_date || null, expires_on: v.expires_on || null, salary_note: v.salary_note, terms: v.terms })
-          toast.success('Offer made.')
+          toast.success(tr('Offer made.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Starts" required error={errors.start_date?.message}>
+              <FormField label={tr('Starts')} required error={errors.start_date?.message}>
                 {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Contract" description="Empty: the vacancy’s.">
-                {(p) => <Controller control={control} name="contract_kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="As the vacancy" options={enumOptions('ContractKindEnum')} />} />}
+              <FormField label={tr('Contract')} description={tr('Empty: the vacancy’s.')}>
+                {(p) => <Controller control={control} name="contract_kind" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('As the vacancy')} options={enumOptions('ContractKindEnum')} />} />}
               </FormField>
-              <FormField label="Probation ends" error={errors.probation_ends_on?.message}>
+              <FormField label={tr('Probation ends')} error={errors.probation_ends_on?.message}>
                 {(p) => <Controller control={control} name="probation_ends_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Contract ends" error={errors.contract_end_date?.message} description="Empty: open-ended.">
+              <FormField label={tr('Contract ends')} error={errors.contract_end_date?.message} description={tr('Empty: open-ended.')}>
                 {(p) => <Controller control={control} name="contract_end_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Salary offered" description="Payroll sets the actual pay.">
-                <Input {...register('salary_note')} placeholder="NPR 50,000 a month" />
+              <FormField label={tr('Salary offered')} description={tr('Payroll sets the actual pay.')}>
+                <Input {...register('salary_note')} placeholder={tr('NPR 50,000 a month')} />
               </FormField>
-              <FormField label="Answer by" error={errors.expires_on?.message}>
+              <FormField label={tr('Answer by')} error={errors.expires_on?.message}>
                 {(p) => <Controller control={control} name="expires_on" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
             </div>
-            <FormField label="Terms">
+            <FormField label={tr('Terms')}>
               <Textarea {...register('terms')} rows={3} />
             </FormField>
           </>
@@ -557,18 +558,18 @@ export function InterviewsPage() {
   const query = useInterviews(list.query)
   const [acting, setActing] = useState<InterviewAct | null>(null)
   const columns: Column<Interview>[] = [
-    { id: 'when', header: 'When', className: 'whitespace-nowrap tabular-nums', cell: (i) => formatDateTime(i.scheduled_at) },
-    { id: 'who', header: 'Candidate', mobile: 'title', cell: (i) => <span className="font-medium">{i.candidate}</span> },
-    { id: 'vacancy', header: 'Vacancy', cell: (i) => i.vacancy_title },
-    { id: 'round', header: 'Round', className: 'tabular-nums', cell: (i) => i.round },
-    { id: 'how', header: 'How', mobile: 'hidden', cell: (i) => `${enumLabel('InterviewModeEnum', i.mode)}${i.location ? ` · ${i.location}` : ''}` },
-    { id: 'panel', header: 'Panel', mobile: 'hidden', cell: (i) => (i.panel_names ?? []).join(', ') || '—' },
-    { id: 'status', header: 'Status', cell: (i) => <InterviewStatus i={i} /> },
+    { id: 'when', header: tr('When'), className: 'whitespace-nowrap tabular-nums', cell: (i) => formatDateTime(i.scheduled_at) },
+    { id: 'who', header: tr('Candidate'), mobile: 'title', cell: (i) => <span className="font-medium">{i.candidate}</span> },
+    { id: 'vacancy', header: tr('Vacancy'), cell: (i) => i.vacancy_title },
+    { id: 'round', header: tr('Round'), className: 'tabular-nums', cell: (i) => i.round },
+    { id: 'how', header: tr('How'), mobile: 'hidden', cell: (i) => `${enumLabel('InterviewModeEnum', i.mode)}${i.location ? ` · ${i.location}` : ''}` },
+    { id: 'panel', header: tr('Panel'), mobile: 'hidden', cell: (i) => (i.panel_names ?? []).join(', ') || '—' },
+    { id: 'status', header: tr('Status'), cell: (i) => <InterviewStatus i={i} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Interviews"
+        ariaLabel={tr('Interviews')}
         columns={columns}
         query={query}
         list={list}
@@ -576,11 +577,11 @@ export function InterviewsPage() {
         searchable={false}
         onRowClick={(i) => navigate(`/careers/applications/${i.candidacy}`)}
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('InterviewStatusEnum') },
-          { name: 'mode', label: 'How', options: enumOptions('InterviewModeEnum') },
+          { name: 'status', label: tr('Status'), options: enumOptions('InterviewStatusEnum') },
+          { name: 'mode', label: tr('How'), options: enumOptions('InterviewModeEnum') },
         ]}
         rowActions={(i) => <RowActions actions={interviewActions(i, setActing)} />}
-        empty={{ title: 'No interviews', description: 'Schedule one from a candidate’s page.' }}
+        empty={{ title: tr('No interviews'), description: tr('Schedule one from a candidate’s page.') }}
       />
       <InterviewDialogs acting={acting} onDone={() => setActing(null)} />
     </>
@@ -594,26 +595,26 @@ export function OffersPage() {
   const query = useOffers(list.query)
   const [withdrawing, setWithdrawing] = useState<JobOffer | null>(null)
   const columns: Column<JobOffer>[] = [
-    { id: 'who', header: 'Candidate', mobile: 'title', cell: (o) => <span className="font-medium">{o.candidate}</span> },
-    { id: 'vacancy', header: 'Vacancy', cell: (o) => o.vacancy_title },
-    { id: 'start', header: 'Starts', className: 'whitespace-nowrap tabular-nums', cell: (o) => formatDate(o.start_date) },
-    { id: 'contract', header: 'Contract', mobile: 'hidden', cell: (o) => enumLabel('ContractKindEnum', o.contract_kind) },
-    { id: 'salary', header: 'Salary', mobile: 'hidden', cell: (o) => o.salary_note || '—' },
-    { id: 'status', header: 'Status', cell: (o) => <OfferStatus o={o} /> },
+    { id: 'who', header: tr('Candidate'), mobile: 'title', cell: (o) => <span className="font-medium">{o.candidate}</span> },
+    { id: 'vacancy', header: tr('Vacancy'), cell: (o) => o.vacancy_title },
+    { id: 'start', header: tr('Starts'), className: 'whitespace-nowrap tabular-nums', cell: (o) => formatDate(o.start_date) },
+    { id: 'contract', header: tr('Contract'), mobile: 'hidden', cell: (o) => enumLabel('ContractKindEnum', o.contract_kind) },
+    { id: 'salary', header: tr('Salary'), mobile: 'hidden', cell: (o) => o.salary_note || '—' },
+    { id: 'status', header: tr('Status'), cell: (o) => <OfferStatus o={o} /> },
   ]
   return (
     <>
       <DataTable
-        ariaLabel="Job offers"
+        ariaLabel={tr('Job offers')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(o) => o.id}
         searchable={false}
         onRowClick={(o) => navigate(`/careers/applications/${o.candidacy}`)}
-        filters={[{ name: 'status', label: 'Status', options: enumOptions('OfferStatusEnum') }]}
-        rowActions={(o) => <RowActions actions={[{ label: 'Withdraw', icon: Undo2, permission: PERMS.careers.hire, hidden: o.status !== 'made', destructive: true, onSelect: () => setWithdrawing(o) }]} />}
-        empty={{ title: 'No offers', description: 'Offers are made from a candidate’s page at the job form’s last step.' }}
+        filters={[{ name: 'status', label: tr('Status'), options: enumOptions('OfferStatusEnum') }]}
+        rowActions={(o) => <RowActions actions={[{ label: tr('Withdraw'), icon: Undo2, permission: PERMS.careers.hire, hidden: o.status !== 'made', destructive: true, onSelect: () => setWithdrawing(o) }]} />}
+        empty={{ title: tr('No offers'), description: tr('Offers are made from a candidate’s page at the job form’s last step.') }}
       />
       <WithdrawOfferDialog offer={withdrawing} onOpenChange={(o) => !o && setWithdrawing(null)} />
     </>

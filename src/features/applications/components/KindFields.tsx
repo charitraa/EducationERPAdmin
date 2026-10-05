@@ -13,6 +13,7 @@ import { useRoute, useRouteOptions } from '@/features/transport/hooks/useTranspo
 import { formatDate } from '@/lib/dates'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { ApplicationKind, FieldDefinition } from '../api/applications.api'
+import { tr } from '@/lib/i18n'
 
 type Widget = 'text' | 'textarea' | 'date' | 'boolean' | 'number' | 'choice' | 'leave_type' | 'scholarship' | 'building' | 'route' | 'stop' | 'direction' | 'event'
 
@@ -27,44 +28,44 @@ interface KindField {
 /** What each kind asks for, matching the backend's data serializers (kinds.py). */
 export const KIND_FIELDS: Record<ApplicationKind, KindField[]> = {
   general: [
-    { name: 'subject', label: 'Subject', widget: 'text', required: true },
-    { name: 'details', label: 'Details', widget: 'textarea' },
+    { name: 'subject', label: tr('Subject'), widget: 'text', required: true },
+    { name: 'details', label: tr('Details'), widget: 'textarea' },
   ],
-  certificate: [{ name: 'purpose', label: 'Purpose', widget: 'text' }],
+  certificate: [{ name: 'purpose', label: tr('Purpose'), widget: 'text' }],
   leave: [
-    { name: 'leave_type', label: 'Leave type', widget: 'leave_type', required: true },
-    { name: 'start_date', label: 'From', widget: 'date', required: true },
-    { name: 'end_date', label: 'To (inclusive)', widget: 'date', required: true },
-    { name: 'half_day', label: 'Half a day', widget: 'boolean' },
-    { name: 'reason', label: 'Reason', widget: 'textarea' },
+    { name: 'leave_type', label: tr('Leave type'), widget: 'leave_type', required: true },
+    { name: 'start_date', label: tr('From'), widget: 'date', required: true },
+    { name: 'end_date', label: tr('To (inclusive)'), widget: 'date', required: true },
+    { name: 'half_day', label: tr('Half a day'), widget: 'boolean' },
+    { name: 'reason', label: tr('Reason'), widget: 'textarea' },
   ],
   scholarship: [
-    { name: 'scholarship', label: 'Scholarship', widget: 'scholarship', required: true },
-    { name: 'reason', label: 'Why', widget: 'textarea' },
+    { name: 'scholarship', label: tr('Scholarship'), widget: 'scholarship', required: true },
+    { name: 'reason', label: tr('Why'), widget: 'textarea' },
   ],
   hostel: [
-    { name: 'building', label: 'Preferred building', widget: 'building' },
-    { name: 'start_date', label: 'From', widget: 'date' },
-    { name: 'note', label: 'Note', widget: 'textarea' },
+    { name: 'building', label: tr('Preferred building'), widget: 'building' },
+    { name: 'start_date', label: tr('From'), widget: 'date' },
+    { name: 'note', label: tr('Note'), widget: 'textarea' },
   ],
   transport: [
-    { name: 'route', label: 'Route', widget: 'route', required: true },
-    { name: 'stop', label: 'Stop', widget: 'stop', required: true },
-    { name: 'direction', label: 'Rides', widget: 'direction' },
-    { name: 'start_date', label: 'From', widget: 'date' },
+    { name: 'route', label: tr('Route'), widget: 'route', required: true },
+    { name: 'stop', label: tr('Stop'), widget: 'stop', required: true },
+    { name: 'direction', label: tr('Rides'), widget: 'direction' },
+    { name: 'start_date', label: tr('From'), widget: 'date' },
   ],
   event: [
-    { name: 'event', label: 'Event', widget: 'event', required: true },
-    { name: 'note', label: 'Note', widget: 'textarea' },
+    { name: 'event', label: tr('Event'), widget: 'event', required: true },
+    { name: 'note', label: tr('Note'), widget: 'textarea' },
   ],
   admission: [
-    { name: 'first_name', label: 'First name', widget: 'text', required: true },
-    { name: 'last_name', label: 'Last name', widget: 'text', required: true },
-    { name: 'date_of_birth', label: 'Date of birth', widget: 'date' },
-    { name: 'phone', label: 'Phone', widget: 'text' },
-    { name: 'email', label: 'Email', widget: 'text' },
-    { name: 'applying_for', label: 'Applying for', widget: 'text' },
-    { name: 'previous_school', label: 'Previous school', widget: 'text' },
+    { name: 'first_name', label: tr('First name'), widget: 'text', required: true },
+    { name: 'last_name', label: tr('Last name'), widget: 'text', required: true },
+    { name: 'date_of_birth', label: tr('Date of birth'), widget: 'date' },
+    { name: 'phone', label: tr('Phone'), widget: 'text' },
+    { name: 'email', label: tr('Email'), widget: 'text' },
+    { name: 'applying_for', label: tr('Applying for'), widget: 'text' },
+    { name: 'previous_school', label: tr('Previous school'), widget: 'text' },
   ],
   job: [],
 }
@@ -115,7 +116,7 @@ export function toPayload(kind: ApplicationKind, extra: FieldDefinition[], data:
 
 function StopSelect({ route, ...p }: { route: string; id?: string; value: string; onChange: (v: string) => void }) {
   const q = useRoute(route ? Number(route) : null)
-  return <SelectControl {...p} disabled={!route} placeholder={route ? 'Choose…' : 'Choose a route first'} options={(q.data?.stops ?? []).map((s) => ({ value: String(s.id), label: s.name }))} />
+  return <SelectControl {...p} disabled={!route} placeholder={route ? tr('Choose…') : tr('Choose a route first')} options={(q.data?.stops ?? []).map((s) => ({ value: String(s.id), label: s.name }))} />
 }
 
 /** The inputs for one kind of application, plus the form's own questions. */
@@ -132,9 +133,9 @@ export function KindFields({ kind, extra, value, onChange, errors = {} }: { kind
     building: buildings,
     route: routes.options,
     direction: [
-      { value: 'both', label: 'Both ways' },
-      { value: 'pickup', label: 'Pickup only' },
-      { value: 'drop', label: 'Drop only' },
+      { value: 'both', label: tr('Both ways') },
+      { value: 'pickup', label: tr('Pickup only') },
+      { value: 'drop', label: tr('Drop only') },
     ],
     event: (events.data?.results ?? []).filter((e) => !e.is_over).map((e) => ({ value: String(e.id), label: `${e.name} · ${formatDate(e.start_at)}` })),
   }
@@ -159,7 +160,7 @@ export function KindFields({ kind, extra, value, onChange, errors = {} }: { kind
               </label>
             )
           case 'choice':
-            input = (p) => <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} placeholder="Choose…" options={(f.choices ?? []).map((c) => ({ value: c, label: c }))} />
+            input = (p) => <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} placeholder={tr('Choose…')} options={(f.choices ?? []).map((c) => ({ value: c, label: c }))} />
             break
           case 'stop':
             input = (p) => <StopSelect {...p} route={String(value.route ?? '')} value={String(v ?? '')} onChange={(c) => set(f.name, c)} />
@@ -169,7 +170,7 @@ export function KindFields({ kind, extra, value, onChange, errors = {} }: { kind
             input = (p) => <Input {...p} inputMode={f.widget === 'number' ? 'decimal' : undefined} value={String(v ?? '')} onChange={(e) => set(f.name, e.target.value)} />
             break
           default:
-            input = (p) => <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} allowEmpty={!f.required} placeholder="Choose…" options={options[f.widget] ?? []} />
+            input = (p) => <SelectControl {...p} value={String(v ?? '')} onChange={(c) => set(f.name, c)} allowEmpty={!f.required} placeholder={tr('Choose…')} options={options[f.widget] ?? []} />
         }
         return (
           <FormField key={f.name} label={f.label} required={f.required} error={errors[f.name]} className={f.widget === 'textarea' ? 'sm:col-span-2' : undefined}>
@@ -188,7 +189,7 @@ export function DataView({ data, extra = [] }: { data: Record<string, unknown>; 
   const labels = { ...LABELS, ...Object.fromEntries(extra.map((f) => [f.name, f.label])) }
   const { extra: answers, ...rest } = data
   const entries = Object.entries({ ...rest, ...((answers as Record<string, unknown> | undefined) ?? {}) }).filter(([, v]) => v !== '' && v != null && !(Array.isArray(v) && v.length === 0))
-  if (entries.length === 0) return <p className="text-sm text-muted-foreground">No details given.</p>
+  if (entries.length === 0) return <p className="text-sm text-muted-foreground">{tr('No details given.')}</p>
   const show = (v: unknown) => (typeof v === 'boolean' ? (v ? 'Yes' : 'No') : typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? formatDate(v) : typeof v === 'object' ? JSON.stringify(v) : String(v))
   return (
     <dl className="grid gap-3 text-sm sm:grid-cols-2">

@@ -23,6 +23,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import { TICKET_STEPS, type Ticket } from '../api/support.api'
 import { AssignTicketDialog } from '../components/AssignTicketDialog'
 import { useAddComment, useCloseTicket, useResolveTicket, useTicket, useTicketComments } from '../hooks/useSupport'
+import { tr } from '@/lib/i18n'
 
 function Conversation({ ticket }: { ticket: Ticket }) {
   const { user } = useAuth()
@@ -45,12 +46,12 @@ function Conversation({ ticket }: { ticket: Ticket }) {
 
   return (
     <section className="rounded-lg border bg-card">
-      <h2 className="border-b px-4 py-3 text-sm font-semibold">Conversation</h2>
+      <h2 className="border-b px-4 py-3 text-sm font-semibold">{tr('Conversation')}</h2>
       <ol className="grid gap-3 p-4">
         {/* The ticket itself opens the conversation. */}
         <li className="rounded-md border bg-muted/30 p-3">
           <p className="text-xs text-muted-foreground">
-            {ticket.raised_by === user?.id ? 'You' : ticket.raised_by_name || 'Someone'} · {formatDateTime(ticket.created_at)}
+            {ticket.raised_by === user?.id ? tr('You') : ticket.raised_by_name || tr('Someone')} · {formatDateTime(ticket.created_at)}
           </p>
           <p className="mt-1 whitespace-pre-wrap break-words text-sm">{ticket.description}</p>
         </li>
@@ -64,7 +65,7 @@ function Conversation({ ticket }: { ticket: Ticket }) {
             return (
               <li key={c.id} className={cn('rounded-md border p-3', mine ? 'ml-6 border-primary/20 bg-accent/40' : 'mr-6')}>
                 <p className="text-xs text-muted-foreground">
-                  {mine ? 'You' : c.author_name || 'Someone'} · {formatDateTime(c.created_at)}
+                  {mine ? tr('You') : c.author_name || tr('Someone')} · {formatDateTime(c.created_at)}
                 </p>
                 <p className="mt-1 whitespace-pre-wrap break-words text-sm">{c.body}</p>
               </li>
@@ -74,7 +75,7 @@ function Conversation({ ticket }: { ticket: Ticket }) {
       </ol>
       {closed ? (
         <p className="flex items-center gap-2 border-t px-4 py-3 text-sm text-muted-foreground">
-          <Lock className="h-4 w-4" aria-hidden /> This ticket is closed.
+          <Lock className="h-4 w-4" aria-hidden /> {tr('This ticket is closed.')}
         </p>
       ) : (
         <form
@@ -89,17 +90,17 @@ function Conversation({ ticket }: { ticket: Ticket }) {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={3}
-            placeholder="Write a reply…"
-            aria-label="Reply"
+            placeholder={tr('Write a reply…')}
+            aria-label={tr('Reply')}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) void send()
             }}
           />
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground">Ctrl+Enter to send</span>
+            <span className="text-xs text-muted-foreground">{tr('Ctrl+Enter to send')}</span>
             <Button type="submit" size="sm" disabled={!body.trim() || add.isPending}>
               {add.isPending && <Loader2 className="animate-spin" aria-hidden />}
-              Send
+              {tr('Send')}
             </Button>
           </div>
         </form>
@@ -137,22 +138,22 @@ export default function TicketDetailPage() {
             <StatusBadge status={status} label={enumLabel('SupportTicketStatusEnum', status)} />
           </span>
         }
-        description={`Ticket #${t.id} · raised ${formatDateTime(t.created_at)}${isMultiBranch && t.campus_name ? ` · ${t.campus_name}` : ''}`}
+        description={tr('Ticket #{id} · raised {dateTime}{value}', { id: t.id, dateTime: formatDateTime(t.created_at), value: isMultiBranch && t.campus_name ? ` · ${t.campus_name}` : '' })}
         actions={
           <>
             {office && status !== 'closed' && (
               <Button size="sm" variant="outline" onClick={() => setDialog('assign')}>
-                <UserCog aria-hidden /> {t.assigned_to ? 'Reassign' : 'Assign'}
+                <UserCog aria-hidden /> {t.assigned_to ? tr('Reassign') : tr('Assign')}
               </Button>
             )}
             {office && working && (
               <Button size="sm" onClick={() => setDialog('resolve')}>
-                <CheckCircle2 aria-hidden /> Resolve
+                <CheckCircle2 aria-hidden /> {tr('Resolve')}
               </Button>
             )}
             {(office || mine) && status !== 'closed' && (
               <Button size="sm" variant="outline" onClick={() => setDialog('close')}>
-                <Lock aria-hidden /> Close
+                <Lock aria-hidden /> {tr('Close')}
               </Button>
             )}
           </>
@@ -166,25 +167,25 @@ export default function TicketDetailPage() {
           <Conversation ticket={t} />
         </div>
         <section className="h-fit rounded-lg border bg-card p-4 sm:p-6">
-          <h2 className="mb-3 text-sm font-semibold">Details</h2>
+          <h2 className="mb-3 text-sm font-semibold">{tr('Details')}</h2>
           <dl className="grid gap-4 text-sm">
             <div>
-              <dt className="text-xs text-muted-foreground">Raised by</dt>
-              <dd>{mine ? 'You' : t.raised_by_name || '—'}</dd>
+              <dt className="text-xs text-muted-foreground">{tr('Raised by')}</dt>
+              <dd>{mine ? tr('You') : t.raised_by_name || '—'}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">Assigned to</dt>
-              <dd>{t.assigned_to === user?.id ? 'You' : t.assigned_to_name || 'Nobody yet'}</dd>
+              <dt className="text-xs text-muted-foreground">{tr('Assigned to')}</dt>
+              <dd>{t.assigned_to === user?.id ? tr('You') : t.assigned_to_name || tr('Nobody yet')}</dd>
             </div>
             {t.resolved_at && (
               <div>
-                <dt className="text-xs text-muted-foreground">Resolved</dt>
+                <dt className="text-xs text-muted-foreground">{tr('Resolved')}</dt>
                 <dd className="tabular-nums">{formatDateTime(t.resolved_at)}</dd>
               </div>
             )}
             {t.closed_at && (
               <div>
-                <dt className="text-xs text-muted-foreground">Closed</dt>
+                <dt className="text-xs text-muted-foreground">{tr('Closed')}</dt>
                 <dd className="tabular-nums">{formatDateTime(t.closed_at)}</dd>
               </div>
             )}
@@ -196,23 +197,23 @@ export default function TicketDetailPage() {
       <ConfirmDialog
         open={dialog === 'resolve'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Mark as resolved?"
-        description="Tell the requester what was done in a reply first. They, or the office, can then close it."
-        confirmLabel="Resolve"
+        title={tr('Mark as resolved?')}
+        description={tr('Tell the requester what was done in a reply first. They, or the office, can then close it.')}
+        confirmLabel={tr('Resolve')}
         onConfirm={async () => {
           await resolve.mutateAsync(t.id)
-          toast.success('Ticket resolved.')
+          toast.success(tr('Ticket resolved.'))
         }}
       />
       <ConfirmDialog
         open={dialog === 'close'}
         onOpenChange={(o) => !o && setDialog(null)}
-        title="Close this ticket?"
-        description="No more replies can be added. Raise a new ticket if the problem comes back."
-        confirmLabel="Close ticket"
+        title={tr('Close this ticket?')}
+        description={tr('No more replies can be added. Raise a new ticket if the problem comes back.')}
+        confirmLabel={tr('Close ticket')}
         onConfirm={async () => {
           await close.mutateAsync(t.id)
-          toast.success('Ticket closed.')
+          toast.success(tr('Ticket closed.'))
         }}
       />
     </>

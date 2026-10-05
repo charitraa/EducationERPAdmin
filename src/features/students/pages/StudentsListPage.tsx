@@ -15,6 +15,7 @@ import { enumLabel, enumOptions } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
 import { currentEnrollment, type Student } from '../api/students.api'
 import { useRemoveStudent, useStudents } from '../hooks/useStudents'
+import { tr, trc } from '@/lib/i18n'
 
 const muted = (text: string) => <span className="text-muted-foreground">{text}</span>
 
@@ -27,10 +28,10 @@ export default function StudentsListPage() {
   const remove = useRemoveStudent()
 
   const columns: Column<Student>[] = [
-    { id: 'number', header: 'Student no.', sortField: 'student_number', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (s) => s.student_number },
+    { id: 'number', header: tr('Student no.'), sortField: 'student_number', className: 'w-28 font-mono text-xs', mobile: 'hidden', cell: (s) => s.student_number },
     {
       id: 'name',
-      header: 'Name',
+      header: tr('Name'),
       sortField: 'first_name',
       mobile: 'title',
       cell: (s) => (
@@ -39,11 +40,11 @@ export default function StudentsListPage() {
         </Link>
       ),
     },
-    { id: 'class', header: 'Class', cell: (s) => currentEnrollment(s)?.section_name || muted('Not placed') },
-    { id: 'program', header: 'Program', mobile: 'hidden', cell: (s) => currentEnrollment(s)?.program_name || muted('—') },
+    { id: 'class', header: tr('Class'), cell: (s) => currentEnrollment(s)?.section_name || muted('Not placed') },
+    { id: 'program', header: tr('Program'), mobile: 'hidden', cell: (s) => currentEnrollment(s)?.program_name || muted('—') },
     {
       id: 'contact',
-      header: 'Contact',
+      header: tr('Contact'),
       cell: (s) =>
         s.phone || s.email ? (
           <span className="grid text-xs">
@@ -54,8 +55,8 @@ export default function StudentsListPage() {
           muted('—')
         ),
     },
-    { id: 'campus', header: 'Branch', hidden: !isMultiBranch, cell: (s) => s.campus_name },
-    { id: 'status', header: 'Status', cell: (s) => <StatusBadge status={s.status} label={enumLabel('StudentStatusEnum', s.status)} /> },
+    { id: 'campus', header: tr('Branch'), hidden: !isMultiBranch, cell: (s) => s.campus_name },
+    { id: 'status', header: tr('Status'), cell: (s) => <StatusBadge status={s.status} label={enumLabel('StudentStatusEnum', s.status)} /> },
   ]
 
   const addButton = (label: string) => (
@@ -70,33 +71,33 @@ export default function StudentsListPage() {
 
   return (
     <>
-      <PageHeader title="Students" description="Everyone enrolled at your school, their class and where they stand." actions={addButton('Add student')} />
+      <PageHeader title={tr('Students')} description={tr('Everyone enrolled at your school, their class and where they stand.')} actions={addButton(tr('Add student'))} />
       <DataTable
-        ariaLabel="Students"
+        ariaLabel={tr('Students')}
         columns={columns}
         query={query}
         list={list}
         getRowId={(s) => s.id}
         onRowClick={(s) => navigate(`/students/${s.id}`)}
-        searchPlaceholder="Search by name, student no., phone or email…"
+        searchPlaceholder={tr('Search by name, student no., phone or email…')}
         filters={[
-          { name: 'status', label: 'Status', options: enumOptions('StudentStatusEnum') },
-          { name: 'gender', label: 'Gender', options: enumOptions('GenderEnum') },
-          { name: 'campus', label: 'Branch', hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
+          { name: 'status', label: tr('Status'), options: enumOptions('StudentStatusEnum') },
+          { name: 'gender', label: tr('Gender'), options: enumOptions('GenderEnum') },
+          { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) },
         ]}
         rowActions={(s) => (
           <RowActions
             actions={[
-              { label: 'Open', icon: Eye, onSelect: () => navigate(`/students/${s.id}`) },
-              { label: 'Edit details', icon: Pencil, permission: PERMS.students.update, onSelect: () => navigate(`/students/${s.id}/edit`) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.students.delete, destructive: true, onSelect: () => crud.openDelete(s) },
+              { label: trc('verb', 'Open'), icon: Eye, onSelect: () => navigate(`/students/${s.id}`) },
+              { label: tr('Edit details'), icon: Pencil, permission: PERMS.students.update, onSelect: () => navigate(`/students/${s.id}/edit`) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.students.delete, destructive: true, onSelect: () => crud.openDelete(s) },
             ]}
           />
         )}
         empty={{
-          title: 'No students yet',
-          description: 'Add students one at a time here, or enroll them from an approved admission.',
-          action: addButton('Add the first student'),
+          title: tr('No students yet'),
+          description: tr('Add students one at a time here, or enroll them from an approved admission.'),
+          action: addButton(tr('Add the first student')),
         }}
       />
       {crud.deleting && (
@@ -104,10 +105,10 @@ export default function StudentsListPage() {
           open
           onOpenChange={(o) => !o && crud.closeDelete()}
           subject={`${crud.deleting.full_name} (${crud.deleting.student_number})`}
-          description="Only for records added by mistake. To record a student leaving, open their record and withdraw or graduate them instead."
+          description={tr('Only for records added by mistake. To record a student leaving, open their record and withdraw or graduate them instead.')}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Student deleted.')
+            toast.success(tr('Student deleted.'))
           }}
         />
       )}

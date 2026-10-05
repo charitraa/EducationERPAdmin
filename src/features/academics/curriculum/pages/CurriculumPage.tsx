@@ -17,6 +17,7 @@ import { useSubjectOptions } from '../../subjects/hooks/useSubjects'
 import type { CurriculumEntry } from '../api/curriculum.api'
 import { AddSubjectsDialog } from '../components/AddSubjectsDialog'
 import { useProgramCurriculum, useRemoveCurriculumEntry, useUpdateCurriculumEntry } from '../hooks/useCurriculum'
+import { tr } from '@/lib/i18n'
 
 /**
  * Which subjects each level of a program takes, shown as one card per level
@@ -48,11 +49,11 @@ export default function CurriculumPage() {
     return (
       <EmptyState
         icon={BookOpen}
-        title="Add a program first"
-        description="The curriculum says which subjects each level of a program takes."
+        title={tr('Add a program first')}
+        description={tr('The curriculum says which subjects each level of a program takes.')}
         action={
           <Button asChild variant="outline">
-            <Link to="/academics/programs">Go to Programs</Link>
+            <Link to="/academics/programs">{tr('Go to Programs')}</Link>
           </Button>
         }
       />
@@ -64,8 +65,8 @@ export default function CurriculumPage() {
   return (
     <>
       <SectionHeader
-        title="Curriculum"
-        description="The subjects each level takes. Electives are the ones students choose between."
+        title={tr('Curriculum')}
+        description={tr('The subjects each level takes. Electives are the ones students choose between.')}
         action={
           <div className="w-full sm:w-64">
             <SelectControl
@@ -73,7 +74,7 @@ export default function CurriculumPage() {
               value={programId ? String(programId) : ''}
               onChange={(v) => setParams({ program: v }, { replace: true })}
               options={programs.data.map((p) => ({ value: String(p.id), label: p.name }))}
-              placeholder="Choose a program"
+              placeholder={tr('Choose a program')}
             />
           </div>
         }
@@ -92,26 +93,26 @@ export default function CurriculumPage() {
                   <div>
                     <h3 className="text-sm font-semibold">{name}</h3>
                     <p className="text-xs text-muted-foreground">
-                      {entries.length} subject{entries.length === 1 ? '' : 's'}
-                      {entries.some((e) => e.is_elective) && ` · ${entries.filter((e) => e.is_elective).length} elective`}
+                      {tr('{count} subject{value}', { count: entries.length, value: entries.length === 1 ? '' : 's' })}
+                      {entries.some((e) => e.is_elective) && ' · ' + tr('{count} elective', { count: entries.filter((e) => e.is_elective).length })}
                     </p>
                   </div>
                   {canEdit && (
                     <Button variant="ghost" size="sm" onClick={() => setAdding(level)} disabled={!subjects.data?.length}>
-                      <Plus aria-hidden /> Add
+                      <Plus aria-hidden /> {tr('Add')}
                     </Button>
                   )}
                 </header>
                 {curriculum.isPending ? (
-                  <div className="p-4 text-sm text-muted-foreground">Loading…</div>
+                  <div className="p-4 text-sm text-muted-foreground">{tr('Loading…')}</div>
                 ) : entries.length === 0 ? (
                   <p className="px-4 py-6 text-center text-sm text-muted-foreground">
                     {subjects.data?.length === 0 ? (
                       <>
-                        No subjects exist yet. <Link className="font-medium text-primary underline-offset-2 hover:underline" to="/academics/subjects">Add subjects</Link>
+                        {tr('No subjects exist yet.')} <Link className="font-medium text-primary underline-offset-2 hover:underline" to="/academics/subjects">{tr('Add subjects')}</Link>
                       </>
                     ) : (
-                      'No subjects for this level yet.'
+                      tr('No subjects for this level yet.')
                     )}
                   </p>
                 ) : (
@@ -125,15 +126,15 @@ export default function CurriculumPage() {
                             type="button"
                             onClick={() => update.mutate({ id: e.id, input: { is_elective: !e.is_elective } })}
                             className="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:bg-muted"
-                            title="Switch between core and elective"
+                            title={tr('Switch between core and elective')}
                           >
-                            {e.is_elective ? 'Elective' : 'Core'}
+                            {e.is_elective ? tr('Elective') : tr('Core')}
                           </button>
                         ) : (
-                          <span className="text-[11px] text-muted-foreground">{e.is_elective ? 'Elective' : 'Core'}</span>
+                          <span className="text-[11px] text-muted-foreground">{e.is_elective ? tr('Elective') : tr('Core')}</span>
                         )}
                         {canEdit && (
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setRemoving(e)} aria-label={`Remove ${e.subject_name} from ${name}`}>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setRemoving(e)} aria-label={tr('Remove {subject_name} from {name}', { subject_name: e.subject_name, name })}>
                             <X />
                           </Button>
                         )}
@@ -160,13 +161,13 @@ export default function CurriculumPage() {
         <ConfirmDialog
           open
           onOpenChange={(o) => !o && setRemoving(null)}
-          title={`Remove ${removing.subject_name} from ${removing.level_label}?`}
-          description="The subject itself stays; only this level stops taking it."
-          confirmLabel="Remove"
+          title={tr('Remove {subject_name} from {level_label}?', { subject_name: removing.subject_name, level_label: removing.level_label })}
+          description={tr('The subject itself stays; only this level stops taking it.')}
+          confirmLabel={tr('Remove')}
           tone="destructive"
           onConfirm={async () => {
             await remove.mutateAsync(removing.id)
-            toast.success('Removed from the curriculum.')
+            toast.success(tr('Removed from the curriculum.'))
           }}
         />
       )}

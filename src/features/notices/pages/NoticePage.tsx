@@ -30,12 +30,13 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Schema } from '@/shared/types/api'
 import { endOfDayIso, localDate, noticeState, type Notice, type NoticeInput } from '../api/notices.api'
 import { useCreateNotice, useNotice, usePublishNotice, useRemoveNotice, useUpdateNotice } from '../hooks/useNotices'
+import { tr } from '@/lib/i18n'
 
-const STATE_LABELS = { draft: 'Draft', published: 'Published', expired: 'Expired' }
+const STATE_LABELS = { draft: tr('Draft'), published: tr('Published'), expired: tr('Expired') }
 
 const schema = z.object({
-  title: z.string().trim().min(1, 'Required.').max(200),
-  body: z.string().trim().min(1, 'Write the notice.'),
+  title: z.string().trim().min(1, tr('Required.')).max(200),
+  body: z.string().trim().min(1, tr('Write the notice.')),
   audience: z.string(),
   campus: z.string(),
   expires_on: optionalIsoDate,
@@ -63,12 +64,12 @@ function NoticeView({ title, body, audience, campus, meta }: { title: string; bo
   return (
     <article className="rounded-lg border bg-card p-4 sm:p-6">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        For {enumLabel('AudienceEnum', audience).toLowerCase()}
+        {tr('For')} {enumLabel('AudienceEnum', audience).toLowerCase()}
         {campus ? ` · ${campus}` : ''}
       </p>
-      <h2 className="mt-1 text-lg font-semibold">{title || <span className="text-muted-foreground">Untitled notice</span>}</h2>
+      <h2 className="mt-1 text-lg font-semibold">{title || <span className="text-muted-foreground">{tr('Untitled notice')}</span>}</h2>
       {meta && <p className="mt-0.5 text-xs text-muted-foreground">{meta}</p>}
-      <div className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{body || <span className="text-muted-foreground">The notice text appears here.</span>}</div>
+      <div className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{body || <span className="text-muted-foreground">{tr('The notice text appears here.')}</span>}</div>
     </article>
   )
 }
@@ -128,10 +129,10 @@ function NoticeEditor({ record }: { record: Notice | null }) {
       if (record) {
         const saved = await update.mutateAsync({ id: record.id, input: toInput(v) })
         form.reset(defaults(saved))
-        toast.success('Notice saved.')
+        toast.success(tr('Notice saved.'))
       } else {
         const saved = await create.mutateAsync(toInput(v))
-        toast.success('Draft saved. Publish it when it’s ready.')
+        toast.success(tr('Draft saved. Publish it when it’s ready.'))
         setSavedTo(`/notices/${saved.id}`)
       }
     } catch (err) {
@@ -145,73 +146,73 @@ function NoticeEditor({ record }: { record: Notice | null }) {
         backTo="/notices"
         title={
           <span className="flex flex-wrap items-center gap-2">
-            {record ? record.title : 'Write a notice'}
+            {record ? record.title : tr('Write a notice')}
             {record && <StatusBadge status={state === 'expired' ? 'closed' : state} label={STATE_LABELS[state]} />}
           </span>
         }
         description={
           record?.published_at
-            ? `Published ${formatDateTime(record.published_at)}${record.expires_at ? ` · ${state === 'expired' ? 'expired' : 'shown until'} ${formatDate(localDate(record.expires_at))}` : ''}`
-            : 'Saved as a draft first; nobody sees it until you publish.'
+            ? tr('Published {dateTime}{value}', { dateTime: formatDateTime(record.published_at), value: record.expires_at ? ' · ' + (state === 'expired' ? tr('expired {date}', { date: formatDate(localDate(record.expires_at)) }) : tr('shown until {date}', { date: formatDate(localDate(record.expires_at)) })) : '' })
+            : tr('Saved as a draft first; nobody sees it until you publish.')
         }
         actions={
           record && (
             <>
               {state === 'draft' && (
                 <Button size="sm" onClick={() => setDialog('publish')} disabled={formState.isDirty}>
-                  <Send aria-hidden /> Publish
+                  <Send aria-hidden /> {tr('Publish')}
                 </Button>
               )}
               {state === 'published' && (
                 <Button size="sm" variant="outline" onClick={() => setDialog('expire')}>
-                  <Clock aria-hidden /> Take down
+                  <Clock aria-hidden /> {tr('Take down')}
                 </Button>
               )}
-              <Button size="sm" variant="outline" onClick={() => setDialog('delete')} aria-label="Delete notice">
+              <Button size="sm" variant="outline" onClick={() => setDialog('delete')} aria-label={tr('Delete notice')}>
                 <Trash2 aria-hidden />
               </Button>
             </>
           )
         }
       />
-      {record && state === 'draft' && formState.isDirty && <p className="-mt-3 mb-4 text-xs text-muted-foreground">Save your changes before publishing.</p>}
+      {record && state === 'draft' && formState.isDirty && <p className="-mt-3 mb-4 text-xs text-muted-foreground">{tr('Save your changes before publishing.')}</p>}
       <div className="grid gap-4 lg:grid-cols-2">
         <form onSubmit={save} noValidate className="grid content-start gap-4 rounded-lg border bg-card p-4 sm:p-6">
           <FormError message={serverError} />
-          <FormField label="Title" required error={errors.title?.message}>
-            <Input {...register('title')} autoFocus={!record} placeholder="School closed on Friday" />
+          <FormField label={tr('Title')} required error={errors.title?.message}>
+            <Input {...register('title')} autoFocus={!record} placeholder={tr('School closed on Friday')} />
           </FormField>
-          <FormField label="Notice" required error={errors.body?.message}>
+          <FormField label={tr('Notice')} required error={errors.body?.message}>
             <Textarea {...register('body')} rows={10} />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="For" error={errors.audience?.message}>
+            <FormField label={tr('For')} error={errors.audience?.message}>
               {(p) => <Controller control={control} name="audience" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={enumOptions('AudienceEnum')} />} />}
             </FormField>
             {isMultiBranch && (
-              <FormField label="Branch" error={errors.campus?.message}>
+              <FormField label={tr('Branch')} error={errors.campus?.message}>
                 {(p) => (
                   <Controller
                     control={control}
                     name="campus"
-                    render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="All branches" options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
+                    render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('All branches')} options={branches.map((b) => ({ value: String(b.id), label: b.name }))} />}
                   />
                 )}
               </FormField>
             )}
-            <FormField label="Shown until (AD)" error={errors.expires_on?.message} description="Empty to keep it up until taken down.">
+            <FormField label={tr('Shown until (AD)')} error={errors.expires_on?.message} description={tr('Empty to keep it up until taken down.')}>
               {(p) => <Controller control={control} name="expires_on" render={({ field }) => <DatePicker {...p} {...field} />} />}
             </FormField>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="submit" disabled={formState.isSubmitting || (record != null && !formState.isDirty)}>
               {formState.isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-              {record ? 'Save changes' : 'Save draft'}
+              {record ? tr('Save changes') : tr('Save draft')}
             </Button>
           </div>
         </form>
         <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Preview</p>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{tr('Preview')}</p>
           <NoticeView
             title={values.title ?? ''}
             body={values.body ?? ''}
@@ -227,33 +228,33 @@ function NoticeEditor({ record }: { record: Notice | null }) {
           <ConfirmDialog
             open={dialog === 'publish'}
             onOpenChange={(o) => !o && setDialog(null)}
-            title="Publish this notice?"
-            description={`Everyone in its audience (${enumLabel('AudienceEnum', record.audience ?? 'all').toLowerCase()}) sees it from now${record.expires_at ? ` until ${formatDate(localDate(record.expires_at))}` : ''}. It can’t go back to draft.`}
-            confirmLabel="Publish"
+            title={tr('Publish this notice?')}
+            description={tr('Everyone in its audience ({enumLabel}) sees it from now{value}. It can’t go back to draft.', { enumLabel: enumLabel('AudienceEnum', record.audience ?? 'all').toLowerCase(), value: record.expires_at ? ' ' + tr('until {date}', { date: formatDate(localDate(record.expires_at)) }) : '' })}
+            confirmLabel={tr('Publish')}
             onConfirm={async () => {
               await publish.mutateAsync({ id: record.id, expiresAt: null })
-              toast.success('Notice published.')
+              toast.success(tr('Notice published.'))
             }}
           />
           <ConfirmDialog
             open={dialog === 'expire'}
             onOpenChange={(o) => !o && setDialog(null)}
-            title="Take this notice down?"
-            description="It stops showing right away. It stays in this list, marked expired."
-            confirmLabel="Take down"
+            title={tr('Take this notice down?')}
+            description={tr('It stops showing right away. It stays in this list, marked expired.')}
+            confirmLabel={tr('Take down')}
             onConfirm={async () => {
               const saved = await update.mutateAsync({ id: record.id, input: { expires_at: new Date().toISOString() } })
               form.reset(defaults(saved))
-              toast.success('Notice taken down.')
+              toast.success(tr('Notice taken down.'))
             }}
           />
           <DeleteDialog
             open={dialog === 'delete'}
             onOpenChange={(o) => !o && setDialog(null)}
-            subject={`the notice “${record.title}”`}
+            subject={tr('the notice “{title}”', { title: record.title })}
             onConfirm={async () => {
               await remove.mutateAsync(record.id)
-              toast.success('Notice deleted.')
+              toast.success(tr('Notice deleted.'))
               setSavedTo('/notices')
             }}
           />

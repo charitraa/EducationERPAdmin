@@ -1,22 +1,23 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { cn } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 const TABS = [
-  { to: '/finance', label: 'Overview', end: true },
-  { to: '/finance/invoices', label: 'Invoices' },
-  { to: '/finance/payments', label: 'Payments' },
-  { to: '/finance/fees', label: 'Fee structures' },
-  { to: '/finance/scholarships', label: 'Scholarships' },
-  { to: '/finance/reports', label: 'Reports' },
+  { to: '/finance', label: tr('Overview'), end: true },
+  { to: '/finance/invoices', label: tr('Invoices') },
+  { to: '/finance/payments', label: tr('Payments') },
+  { to: '/finance/fees', label: tr('Fee structures') },
+  { to: '/finance/scholarships', label: tr('Scholarships') },
+  { to: '/finance/reports', label: tr('Reports') },
 ]
 
 /** Fees, invoices, payments and scholarships under one sub-navigation. */
 export function FinanceLayout() {
   return (
     <div>
-      <PageHeader title="Finance" description="What each student is billed, what they’ve paid, and what’s still owed." />
-      <nav aria-label="Finance" className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
+      <PageHeader title={tr('Finance')} description={tr('What each student is billed, what they’ve paid, and what’s still owed.')} />
+      <nav aria-label={tr('Finance')} className="-mx-3 mb-5 overflow-x-auto border-b px-3 sm:mx-0 sm:px-0">
         <ul className="flex min-w-max gap-1">
           {TABS.map((tab) => (
             <li key={tab.to}>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatRelative } from '@/lib/dates'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 import { cn } from '@/lib/utils'
 import type { Notification } from '../api/notifications.api'
 import { useMarkAllRead, useMarkRead, useNotificationList, useUnreadCount } from '../hooks/useNotifications'
@@ -26,7 +26,7 @@ function NotificationRow({ n, onRead }: { n: Notification; onRead?: () => void }
           {n.body && <span className="line-clamp-2 block text-xs text-muted-foreground">{n.body}</span>}
           <span className="mt-0.5 block text-[11px] text-muted-foreground">
             {formatRelative(n.created_at)}
-            {!n.is_read && <span className="sr-only"> · unread, select to mark as read</span>}
+            {!n.is_read && <span className="sr-only"> {'· ' + tr('unread, select to mark as read')}</span>}
           </span>
         </span>
       </button>
@@ -46,7 +46,7 @@ export function NotificationsMenu() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label={`${t('header.notifications')}${count ? `, ${count} unread` : ''}`}>
+        <Button variant="ghost" size="icon" className="relative" aria-label={t('header.notifications') + (count ? ', ' + tr('{count} unread', { count }) : '')}>
           <Bell />
           {count > 0 && (
             <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-none text-white">

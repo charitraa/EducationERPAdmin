@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { formatDate, formatDateTime } from '@/lib/dates'
 import { enumLabel, humanize } from '@/lib/formatters'
 import { initials } from '@/lib/utils'
+import { tr } from '@/lib/i18n'
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -40,18 +41,18 @@ export default function ProfilePage() {
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       </div>
-      <Card title="Account">
-        <Row label="Phone" value={user.phone} />
-        <Row label="Organization" value={user.organization?.name} />
-        <Row label="Account type" value={humanize(user.user_type)} />
+      <Card title={tr('Account')}>
+        <Row label={tr('Phone')} value={user.phone} />
+        <Row label={tr('Organization')} value={user.organization?.name} />
+        <Row label={tr('Account type')} value={humanize(user.user_type)} />
         <Row
-          label="Roles"
+          label={tr('Roles')}
           value={
             user.roles.length ? (
               <ul className="flex flex-wrap gap-1.5">
                 {user.roles.map((r) => (
                   <li key={`${r.code}-${r.campus ?? ''}`} className="rounded border px-2 py-0.5 text-xs">
-                    {r.name}
+                    {tr(r.name)}
                     {r.campus && <span className="text-muted-foreground"> · {r.campus}</span>}
                   </li>
                 ))}
@@ -59,30 +60,30 @@ export default function ProfilePage() {
             ) : null
           }
         />
-        <Row label="Last sign-in" value={formatDateTime(user.last_login)} />
+        <Row label={tr('Last sign-in')} value={formatDateTime(user.last_login)} />
       </Card>
       {staff && (
-        <Card title="Staff record">
-          <Row label="Employee number" value={<span className="font-mono">{staff.employee_number}</span>} />
-          <Row label="Designation" value={staff.designation} />
-          <Row label="Staff type" value={enumLabel('StaffTypeEnum', staff.staff_type)} />
-          <Row label="Branch" value={staff.campus_name} />
-          <Row label="Joined" value={formatDate(staff.joined_on)} />
+        <Card title={tr('Staff record')}>
+          <Row label={tr('Employee number')} value={<span className="font-mono">{staff.employee_number}</span>} />
+          <Row label={tr('Designation')} value={staff.designation} />
+          <Row label={tr('Staff type')} value={enumLabel('StaffTypeEnum', staff.staff_type)} />
+          <Row label={tr('Branch')} value={staff.campus_name} />
+          <Row label={tr('Joined')} value={formatDate(staff.joined_on)} />
         </Card>
       )}
       {student && (
-        <Card title="Student record">
-          <Row label="Student number" value={<span className="font-mono">{student.student_number}</span>} />
-          <Row label="Class" value={enrollment?.section_name ?? enrollment?.program_name} />
-          <Row label="Branch" value={student.campus_name} />
-          <Row label="Admitted" value={formatDate(student.admitted_on)} />
-          <Row label="Status" value={humanize(student.status)} />
+        <Card title={tr('Student record')}>
+          <Row label={tr('Student number')} value={<span className="font-mono">{student.student_number}</span>} />
+          <Row label={tr('Class')} value={enrollment?.section_name ?? enrollment?.program_name} />
+          <Row label={tr('Branch')} value={student.campus_name} />
+          <Row label={tr('Admitted')} value={formatDate(student.admitted_on)} />
+          <Row label={tr('Status')} value={humanize(student.status)} />
         </Card>
       )}
       {parent && (
-        <Card title="Children">
+        <Card title={tr('Children')}>
           {parent.children.length === 0 ? (
-            <Row label="Linked" value="No children are linked to you yet; ask the school office." />
+            <Row label={tr('Linked')} value="No children are linked to you yet; ask the school office." />
           ) : (
             parent.children.map((c) => (
               <Row
@@ -92,7 +93,7 @@ export default function ProfilePage() {
                   <>
                     <span className="font-medium">{c.full_name}</span> <span className="font-mono text-xs text-muted-foreground">{c.student_number}</span>
                     <span className="text-muted-foreground"> · {c.campus_name}</span>
-                    {c.is_primary_contact && <span className="ml-2 rounded border px-1.5 text-xs">Primary contact</span>}
+                    {c.is_primary_contact && <span className="ml-2 rounded border px-1.5 text-xs">{tr('Primary contact')}</span>}
                   </>
                 }
               />
@@ -101,14 +102,14 @@ export default function ProfilePage() {
         </Card>
       )}
       {alumnus && (
-        <Card title="Alumni">
-          <Row label="Program" value={alumnus.program_name} />
-          <Row label="Graduated" value={formatDate(alumnus.graduated_on)} />
-          <Row label="Mentoring" value={alumnus.is_mentor ? 'Open to mentees' : 'Not mentoring'} />
+        <Card title={tr('Alumni')}>
+          <Row label={tr('Program')} value={alumnus.program_name} />
+          <Row label={tr('Graduated')} value={formatDate(alumnus.graduated_on)} />
+          <Row label={tr('Mentoring')} value={alumnus.is_mentor ? 'Open to mentees' : 'Not mentoring'} />
         </Card>
       )}
       {!staff && !student && !parent && !alumnus && (
-        <p className="text-sm text-muted-foreground">Your account isn’t linked to a staff, student or parent record, so there’s nothing of your own here beyond your applications.</p>
+        <p className="text-sm text-muted-foreground">{tr('Your account isn’t linked to a staff, student or parent record, so there’s nothing of your own here beyond your applications.')}</p>
       )}
     </div>
   )

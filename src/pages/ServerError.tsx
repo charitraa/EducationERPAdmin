@@ -1,7 +1,7 @@
 import { ServerCrash } from 'lucide-react'
 import { useRouteError } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { t } from '@/lib/i18n'
+import { t, tr } from '@/lib/i18n'
 import { StatusPage } from './StatusPage'
 
 /** Route error boundary: a crash in one page doesn't take down the app. */
@@ -12,10 +12,10 @@ export default function ServerError({ onRetry }: { onRetry?: () => void }) {
   return (
     <StatusPage
       icon={ServerCrash}
-      title={isStaleChunk ? 'A new version is available' : t('pages.serverError')}
-      actions={<Button onClick={onRetry ?? (() => window.location.reload())}>{isStaleChunk ? 'Reload' : 'Try again'}</Button>}
+      title={isStaleChunk ? tr('A new version is available') : t('pages.serverError')}
+      actions={<Button onClick={onRetry ?? (() => window.location.reload())}>{isStaleChunk ? tr('Reload') : tr('Try again')}</Button>}
     >
-      {isStaleChunk ? 'Reload the page to continue.' : 'The page ran into a problem. Try again, and if it keeps happening, tell your administrator.'}
+      {isStaleChunk ? tr('Reload the page to continue.') : tr('The page ran into a problem. Try again, and if it keeps happening, tell your administrator.')}
     </StatusPage>
   )
 }

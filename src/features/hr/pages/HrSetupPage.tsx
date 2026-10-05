@@ -37,10 +37,11 @@ import {
   useUpdatePosition,
 } from '../hooks/useHr'
 import { days } from './LeavePages'
+import { tr } from '@/lib/i18n'
 
 const fiscalYearSchema = z
-  .object({ name: z.string().trim().min(1, 'Required.').max(50), start_date: isoDate, end_date: isoDate })
-  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: 'Must be after the start.' })
+  .object({ name: z.string().trim().min(1, tr('Required.')).max(50), start_date: isoDate, end_date: isoDate })
+  .refine((v) => v.end_date > v.start_date, { path: ['end_date'], message: tr('Must be after the start.') })
 
 function FiscalYears() {
   const query = useFiscalYears({ ...PICKER_PARAMS })
@@ -52,18 +53,18 @@ function FiscalYears() {
   return (
     <section>
       <SectionHeader
-        title="Fiscal years"
-        description="The leave year, and payroll’s tax year (Shrawan 1 to Asar end)."
+        title={tr('Fiscal years')}
+        description={tr('The leave year, and payroll’s tax year (Shrawan 1 to Asar end).')}
         action={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button size="sm" variant="outline" onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add year
+              <Plus aria-hidden /> {tr('Add year')}
             </Button>
           </PermissionGate>
         }
       />
       {years.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? 'Loading…' : 'None yet. Leave and tax both need one.'}</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? tr('Loading…') : tr('None yet. Leave and tax both need one.')}</p>
       ) : (
         <ul className="divide-y rounded-lg border bg-card">
           {years.map((y) => (
@@ -73,10 +74,10 @@ function FiscalYears() {
                 {formatDate(y.start_date)} – {formatDate(y.end_date)}
               </span>
               <RowActions
-                label={`Actions for ${y.name}`}
+                label={tr('Actions for {name}', { name: y.name })}
                 actions={[
-                  { label: 'Edit', icon: Pencil, permission: PERMS.hr.manage, onSelect: () => crud.openEdit(y) },
-                  { label: 'Delete', icon: Trash2, permission: PERMS.hr.manage, destructive: true, onSelect: () => crud.openDelete(y) },
+                  { label: tr('Edit'), icon: Pencil, permission: PERMS.hr.manage, onSelect: () => crud.openEdit(y) },
+                  { label: tr('Delete'), icon: Trash2, permission: PERMS.hr.manage, destructive: true, onSelect: () => crud.openDelete(y) },
                 ]}
               />
             </li>
@@ -86,25 +87,25 @@ function FiscalYears() {
       <FormDialog
         open={crud.formOpen}
         onOpenChange={(o) => !o && crud.closeForm()}
-        title={crud.record ? `Edit ${crud.record.name}` : 'Add fiscal year'}
+        title={crud.record ? tr('Edit {name}', { name: crud.record.name }) : tr('Add fiscal year')}
         schema={fiscalYearSchema}
         defaultValues={{ name: crud.record?.name ?? '', start_date: crud.record?.start_date ?? '', end_date: crud.record?.end_date ?? '' }}
         onSubmit={async (v) => {
           if (crud.record) await update.mutateAsync({ id: crud.record.id, input: v })
           else await create.mutateAsync(v)
-          toast.success('Fiscal year saved.')
+          toast.success(tr('Fiscal year saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
-            <FormField label="Name" required error={errors.name?.message}>
+            <FormField label={tr('Name')} required error={errors.name?.message}>
               <Input {...register('name')} placeholder="2083/84" />
             </FormField>
             <div className="grid gap-4 sm:grid-cols-2">
-              <FormField label="Starts" required error={errors.start_date?.message}>
+              <FormField label={tr('Starts')} required error={errors.start_date?.message}>
                 {(p) => <Controller control={control} name="start_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
-              <FormField label="Ends (inclusive)" required error={errors.end_date?.message}>
+              <FormField label={tr('Ends (inclusive)')} required error={errors.end_date?.message}>
                 {(p) => <Controller control={control} name="end_date" render={({ field }) => <DatePicker {...p} value={field.value} onChange={field.onChange} onBlur={field.onBlur} />} />}
               </FormField>
             </div>
@@ -117,17 +118,17 @@ function FiscalYears() {
         subject={crud.deleting?.name ?? 'year'}
         onConfirm={async () => {
           await remove.mutateAsync(crud.deleting!.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
         }}
       />
     </section>
   )
 }
 
-const halfDays = z.string().trim().regex(/^\d+(\.[05])?$/, 'Whole or half days.')
+const halfDays = z.string().trim().regex(/^\d+(\.[05])?$/, tr('Whole or half days.'))
 const leaveTypeSchema = z.object({
-  code: z.string().trim().min(1, 'Required.').max(50).regex(/^[a-z0-9_-]+$/i, 'Letters, numbers, - and _ only.'),
-  name: z.string().trim().min(1, 'Required.').max(100),
+  code: z.string().trim().min(1, tr('Required.')).max(50).regex(/^[a-z0-9_-]+$/i, tr('Letters, numbers, - and _ only.')),
+  name: z.string().trim().min(1, tr('Required.')).max(100),
   is_paid: z.boolean(),
   annual_quota: z.union([z.literal(''), halfDays]),
   carry_forward_max: halfDays,
@@ -148,27 +149,27 @@ function LeaveTypes() {
   return (
     <section className="lg:col-span-2">
       <SectionHeader
-        title="Leave types"
-        description="Each with a yearly quota, how much carries over, and whether it’s paid."
+        title={tr('Leave types')}
+        description={tr('Each with a yearly quota, how much carries over, and whether it’s paid.')}
         action={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button size="sm" variant="outline" onClick={crud.openCreate}>
-              <Plus aria-hidden /> Add type
+              <Plus aria-hidden /> {tr('Add type')}
             </Button>
           </PermissionGate>
         }
       />
       {types.length === 0 ? (
-        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? 'Loading…' : 'None yet: add casual, sick, home leave, maternity…'}</p>
+        <p className="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{query.isPending ? tr('Loading…') : tr('None yet: add casual, sick, home leave, maternity…')}</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border bg-card">
           <table className="w-full text-sm">
             <thead className="border-b text-left text-xs text-muted-foreground">
               <tr>
-                <th className="px-3 py-2 font-medium">Type</th>
-                <th className="px-3 py-2 font-medium">A year</th>
-                <th className="px-3 py-2 font-medium">Carries over</th>
-                <th className="px-3 py-2 font-medium">Rules</th>
+                <th className="px-3 py-2 font-medium">{tr('Type')}</th>
+                <th className="px-3 py-2 font-medium">{tr('A year')}</th>
+                <th className="px-3 py-2 font-medium">{tr('Carries over')}</th>
+                <th className="px-3 py-2 font-medium">{tr('Rules')}</th>
                 <th className="w-10 px-3 py-2" />
               </tr>
             </thead>
@@ -179,17 +180,17 @@ function LeaveTypes() {
                     <span className="font-medium">{t.name}</span> <span className="font-mono text-xs text-muted-foreground">{t.code}</span>
                     {t.is_active === false && <StatusBadge status="inactive" className="ml-2" />}
                   </td>
-                  <td className="px-3 py-2 tabular-nums">{t.annual_quota == null ? 'No limit' : `${days(t.annual_quota)} days`}</td>
-                  <td className="px-3 py-2 tabular-nums">{Number(t.carry_forward_max) ? `up to ${days(t.carry_forward_max)}` : '—'}</td>
+                  <td className="px-3 py-2 tabular-nums">{t.annual_quota == null ? tr('No limit') : tr('{days} days', { days: days(t.annual_quota) })}</td>
+                  <td className="px-3 py-2 tabular-nums">{Number(t.carry_forward_max) ? tr('up to {days}', { days: days(t.carry_forward_max) }) : '—'}</td>
                   <td className="px-3 py-2 text-muted-foreground">
-                    {[t.is_paid === false ? 'Unpaid' : 'Paid', t.allow_half_day === false && 'whole days only', t.prorate_for_joiners === false && 'full quota for joiners', t.gender && `${enumLabel('GenderEnum', t.gender)} only`].filter(Boolean).join(' · ')}
+                    {[t.is_paid === false ? tr('Unpaid') : tr('Paid'), t.allow_half_day === false && tr('whole days only'), t.prorate_for_joiners === false && tr('full quota for joiners'), t.gender && tr('{enumLabel} only', { enumLabel: enumLabel('GenderEnum', t.gender) })].filter(Boolean).join(' · ')}
                   </td>
                   <td className="px-3 py-1">
                     <RowActions
-                      label={`Actions for ${t.name}`}
+                      label={tr('Actions for {name}', { name: t.name })}
                       actions={[
-                        { label: 'Edit', icon: Pencil, permission: PERMS.hr.manage, onSelect: () => crud.openEdit(t) },
-                        { label: 'Delete', icon: Trash2, permission: PERMS.hr.manage, destructive: true, onSelect: () => crud.openDelete(t) },
+                        { label: tr('Edit'), icon: Pencil, permission: PERMS.hr.manage, onSelect: () => crud.openEdit(t) },
+                        { label: tr('Delete'), icon: Trash2, permission: PERMS.hr.manage, destructive: true, onSelect: () => crud.openDelete(t) },
                       ]}
                     />
                   </td>
@@ -202,7 +203,7 @@ function LeaveTypes() {
       <FormDialog
         open={crud.formOpen}
         onOpenChange={(o) => !o && crud.closeForm()}
-        title={r ? `Edit ${r.name}` : 'Add leave type'}
+        title={r ? tr('Edit {name}', { name: r.name }) : tr('Add leave type')}
         schema={leaveTypeSchema}
         defaultValues={{
           code: r?.code ?? '',
@@ -219,26 +220,26 @@ function LeaveTypes() {
           const input = { ...v, annual_quota: v.annual_quota === '' ? null : v.annual_quota, gender: v.gender as LeaveType['gender'] }
           if (r) await update.mutateAsync({ id: r.id, input })
           else await create.mutateAsync(input)
-          toast.success('Leave type saved.')
+          toast.success(tr('Leave type saved.'))
         }}
       >
         {({ register, control, formState: { errors } }) => (
           <>
             <div className="grid gap-4 sm:grid-cols-[1fr_10rem]">
-              <FormField label="Name" required error={errors.name?.message}>
-                <Input {...register('name')} placeholder="Sick leave" />
+              <FormField label={tr('Name')} required error={errors.name?.message}>
+                <Input {...register('name')} placeholder={tr('Sick leave')} />
               </FormField>
-              <FormField label="Code" required error={errors.code?.message}>
+              <FormField label={tr('Code')} required error={errors.code?.message}>
                 <Input {...register('code')} className="font-mono" placeholder="sick" />
               </FormField>
-              <FormField label="Days a year" error={errors.annual_quota?.message} description="Empty: no limit.">
+              <FormField label={tr('Days a year')} error={errors.annual_quota?.message} description={tr('Empty: no limit.')}>
                 <Input {...register('annual_quota')} inputMode="decimal" />
               </FormField>
-              <FormField label="Carries over, at most" error={errors.carry_forward_max?.message}>
+              <FormField label={tr('Carries over, at most')} error={errors.carry_forward_max?.message}>
                 <Input {...register('carry_forward_max')} inputMode="decimal" />
               </FormField>
-              <FormField label="Only for" description="Maternity, paternity.">
-                {(p) => <Controller control={control} name="gender" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel="Everyone" options={enumOptions('GenderEnum')} />} />}
+              <FormField label={tr('Only for')} description={tr('Maternity, paternity.')}>
+                {(p) => <Controller control={control} name="gender" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} allowEmpty emptyLabel={tr('Everyone')} options={enumOptions('GenderEnum')} />} />}
               </FormField>
             </div>
             <div className="grid gap-3 text-sm sm:grid-cols-2">
@@ -266,7 +267,7 @@ function LeaveTypes() {
         subject={crud.deleting?.name ?? 'type'}
         onConfirm={async () => {
           await remove.mutateAsync(crud.deleting!.id)
-          toast.success('Deleted.')
+          toast.success(tr('Deleted.'))
         }}
       />
     </section>
@@ -281,9 +282,9 @@ export function HrSetupPage() {
       <FiscalYears />
       <SimpleCrudList
         permission={PERMS.hr.manage}
-        title="Positions"
-        noun="position"
-        fields={[{ name: 'code', label: 'Code', required: true, mono: true }, { name: 'name', label: 'Name', required: true }]}
+        title={tr('Positions')}
+        noun={tr('position')}
+        fields={[{ name: 'code', label: tr('Code'), required: true, mono: true }, { name: 'name', label: tr('Name'), required: true }]}
         query={usePositions({ ...PICKER_PARAMS })}
         create={useCreatePosition() as never}
         update={useUpdatePosition() as never}

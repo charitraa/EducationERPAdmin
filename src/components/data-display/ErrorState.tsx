@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { errorMessage } from '@/lib/errors'
 import { cn } from '@/lib/utils'
 import { toApiError } from '@/shared/api/errors'
+import { tr } from '@/lib/i18n'
 
 interface ErrorStateProps {
   error: unknown
@@ -23,7 +24,7 @@ export function ErrorState({ error, onRetry, className }: ErrorStateProps) {
       <p className="font-medium">{errorMessage(e)}</p>
       {retryable && onRetry && (
         <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
-          Try again
+          {tr('Try again')}
         </Button>
       )}
     </div>

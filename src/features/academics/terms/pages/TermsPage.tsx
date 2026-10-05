@@ -14,6 +14,7 @@ import { SectionHeader } from '../../components/SectionHeader'
 import type { Term } from '../api/terms.api'
 import { TermFormDialog } from '../components/TermFormDialog'
 import { useRemoveTerm, useTerms } from '../hooks/useTerms'
+import { tr } from '@/lib/i18n'
 
 export default function TermsPage() {
   const list = useListState({ filters: ['academic_year'], defaultOrdering: 'sequence' })
@@ -26,26 +27,26 @@ export default function TermsPage() {
 
   const columns: Column<Term>[] = [
     { id: 'seq', header: '#', sortField: 'sequence', className: 'w-12 tabular-nums text-muted-foreground', mobile: 'hidden', cell: (t) => t.sequence },
-    { id: 'name', header: 'Term', mobile: 'title', cell: (t) => <span className="font-medium">{t.name}</span> },
-    { id: 'year', header: 'Academic year', cell: (t) => t.academic_year_name },
-    { id: 'start', header: 'Starts', sortField: 'start_date', cell: (t) => <BsDateDisplay value={t.start_date} /> },
-    { id: 'end', header: 'Ends', cell: (t) => <BsDateDisplay value={t.end_date} /> },
+    { id: 'name', header: tr('Term'), mobile: 'title', cell: (t) => <span className="font-medium">{t.name}</span> },
+    { id: 'year', header: tr('Academic year'), cell: (t) => t.academic_year_name },
+    { id: 'start', header: tr('Starts'), sortField: 'start_date', cell: (t) => <BsDateDisplay value={t.start_date} /> },
+    { id: 'end', header: tr('Ends'), cell: (t) => <BsDateDisplay value={t.end_date} /> },
   ]
 
   return (
     <>
       <SectionHeader
-        title="Terms"
+        title={tr('Terms')}
         action={
           <PermissionGate permission={PERMS.academics.structure}>
-            <Button onClick={crud.openCreate} disabled={!years.data?.length} title={years.data?.length ? undefined : 'Add an academic year first'}>
-              <Plus aria-hidden /> Add term
+            <Button onClick={crud.openCreate} disabled={!years.data?.length} title={years.data?.length ? undefined : tr('Add an academic year first')}>
+              <Plus aria-hidden /> {tr('Add term')}
             </Button>
           </PermissionGate>
         }
       />
       <DataTable
-        ariaLabel="Terms"
+        ariaLabel={tr('Terms')}
         columns={columns}
         query={query}
         list={list}
@@ -54,25 +55,25 @@ export default function TermsPage() {
         filters={[
           {
             name: 'academic_year',
-            label: 'Academic year',
-            options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? `${y.name} (current)` : y.name })),
+            label: tr('Academic year'),
+            options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.is_current ? tr('{name} (current)', { name: y.name }) : y.name })),
           },
         ]}
         rowActions={(t) => (
           <RowActions
             actions={[
-              { label: 'Edit', icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(t) },
-              { label: 'Delete', icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(t) },
+              { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.structure, onSelect: () => crud.openEdit(t) },
+              { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.structure, destructive: true, onSelect: () => crud.openDelete(t) },
             ]}
           />
         )}
         empty={{
-          title: 'No terms yet',
-          description: years.data?.length ? 'Split the academic year into terms for exams and fees.' : 'Add an academic year first, then its terms.',
+          title: tr('No terms yet'),
+          description: years.data?.length ? tr('Split the academic year into terms for exams and fees.') : tr('Add an academic year first, then its terms.'),
           action: (
             <PermissionGate permission={PERMS.academics.structure}>
               <Button onClick={crud.openCreate} disabled={!years.data?.length}>
-                <Plus aria-hidden /> Add the first term
+                <Plus aria-hidden /> {tr('Add the first term')}
               </Button>
             </PermissionGate>
           ),
@@ -92,7 +93,7 @@ export default function TermsPage() {
           subject={`${crud.deleting.name} (${crud.deleting.academic_year_name})`}
           onConfirm={async () => {
             await remove.mutateAsync(crud.deleting!.id)
-            toast.success('Term deleted.')
+            toast.success(tr('Term deleted.'))
           }}
         />
       )}

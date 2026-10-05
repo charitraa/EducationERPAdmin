@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatDateTime } from '@/lib/dates'
 import { cn } from '@/lib/utils'
 import { useMarkAllRead, useMarkRead, useNotificationList, useUnreadCount } from '../hooks/useNotifications'
+import { tr } from '@/lib/i18n'
 
 export default function NotificationsPage() {
   const [tab, setTab] = useState<'unread' | 'read'>('unread')
@@ -20,17 +21,17 @@ export default function NotificationsPage() {
   return (
     <>
       <PageHeader
-        title="Notifications"
+        title={tr('Notifications')}
         actions={
           <Button variant="outline" onClick={() => markAll.mutate()} disabled={!unread.data || markAll.isPending}>
-            <CheckCheck aria-hidden /> Mark all as read
+            <CheckCheck aria-hidden /> {tr('Mark all as read')}
           </Button>
         }
       />
       <Tabs value={tab} onValueChange={(v) => setTab(v as 'unread' | 'read')}>
         <TabsList>
-          <TabsTrigger value="unread">Unread {unread.data ? `(${unread.data})` : ''}</TabsTrigger>
-          <TabsTrigger value="read">Read</TabsTrigger>
+          <TabsTrigger value="unread">{tr('Unread {value}', { value: unread.data ? `(${unread.data})` : '' })}</TabsTrigger>
+          <TabsTrigger value="read">{tr('Read')}</TabsTrigger>
         </TabsList>
         {/* One panel for whichever tab is chosen: the tabs' aria-controls point at it. */}
         <TabsContent value={tab} className="mt-3 max-w-3xl rounded-lg border bg-card">
@@ -39,7 +40,7 @@ export default function NotificationsPage() {
           ) : list.isError ? (
             <ErrorState error={list.error} onRetry={() => void list.refetch()} />
           ) : list.data.results.length === 0 ? (
-            <EmptyState title={tab === 'unread' ? "You're all caught up" : 'No read notifications'} />
+            <EmptyState title={tab === 'unread' ? tr("You're all caught up") : tr('No read notifications')} />
           ) : (
             <ul className="divide-y">
               {list.data.results.map((n) => (
@@ -52,7 +53,7 @@ export default function NotificationsPage() {
                   </div>
                   {!n.is_read && (
                     <Button variant="ghost" size="sm" onClick={() => markRead.mutate(n.id)}>
-                      Mark read
+                      {tr('Mark read')}
                     </Button>
                   )}
                 </li>
