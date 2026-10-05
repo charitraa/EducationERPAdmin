@@ -63,6 +63,7 @@ const ProgramsPage = lazy(() => import('@/features/academics/programs/pages/Prog
 const SubjectsPage = lazy(() => import('@/features/academics/subjects/pages/SubjectsPage'))
 const CurriculumPage = lazy(() => import('@/features/academics/curriculum/pages/CurriculumPage'))
 const ClassesPage = lazy(() => import('@/features/academics/classes/pages/ClassesPage'))
+const ElectivesPage = lazy(() => import('@/features/academics/electives/pages/ElectivesPage'))
 const TeachingPage = lazy(() => import('@/features/academics/teaching/pages/TeachingPage'))
 const AcademicYearsPage = lazy(() => import('@/features/academics/academic-years/pages/AcademicYearsPage'))
 const TermsPage = lazy(() => import('@/features/academics/terms/pages/TermsPage'))
@@ -237,6 +238,7 @@ const academicsRoutes: RouteObject = {
     { path: 'subjects', handle: crumb(tr('Subjects')), element: page(SubjectsPage) },
     { path: 'curriculum', handle: crumb(tr('Curriculum')), element: page(CurriculumPage) },
     { path: 'classes', handle: crumb(tr('Classes')), element: page(ClassesPage) },
+    { path: 'electives', handle: crumb(tr('Electives')), element: page(ElectivesPage) },
     { path: 'teaching', handle: crumb(tr('Teaching')), element: page(TeachingPage) },
     { path: 'academic-years', handle: crumb(tr('Academic years')), element: page(AcademicYearsPage) },
     { path: 'terms', handle: crumb(tr('Terms')), element: page(TermsPage) },

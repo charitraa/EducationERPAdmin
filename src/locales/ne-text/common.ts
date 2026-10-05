@@ -276,4 +276,5 @@ export default {
   "Your changes on this page haven't been saved and will be lost.": 'यो पृष्ठका परिवर्तनहरू सुरक्षित भएका छैनन् र हराउनेछन्।',
   "Your role doesn't include this. If you need it, ask your school administrator to change your role.": 'तपाईंको भूमिकामा यो पर्दैन। चाहिएमा विद्यालयका प्रशासकलाई भूमिका परिवर्तन गर्न भन्नुहोस्।',
   'YYYY-MM-DD': 'YYYY-MM-DD',
+  "Electives": "ऐच्छिक विषय",
 } satisfies Record<string, string>

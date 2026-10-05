@@ -16,6 +16,7 @@ import { formatDate } from '@/lib/dates'
 import { enumLabel } from '@/lib/formatters'
 import { PERMS } from '@/shared/constants/permissions'
 import { StudentParentsPanel } from '@/features/parents/components/StudentParentsPanel'
+import { StudentElectivesList } from '@/features/academics/electives/components/StudentElectivesList'
 import { currentEnrollment, isEnrolled, type Student, type StudentStatus } from '../api/students.api'
 import { EnrollmentHistory, isUpcoming } from '../components/EnrollmentHistory'
 import { PlaceStudentDialog } from '../components/PlaceStudentDialog'
@@ -188,6 +189,11 @@ export default function StudentDetailPage() {
                   <Field label={tr('Class')}>{enrollment?.section_name ?? (isEnrolled(s.status) ? tr('Not placed yet') : '')}</Field>
                   <Field label={tr('Program')}>{enrollment?.program_name}</Field>
                   <Field label={tr('Academic year')}>{enrollment?.academic_year_name}</Field>
+                  {enrollment?.section && (
+                    <Field label={tr('Electives')}>
+                      <StudentElectivesList student={s.id} section={enrollment.section} />
+                    </Field>
+                  )}
                   {isMultiBranch && <Field label={tr('Branch')}>{s.campus_name}</Field>}
                   <Field label={tr('In this class since')}>{enrollment?.section ? <span className="tabular-nums">{formatDate(enrollment.started_on)}</span> : ''}</Field>
                   <Field label={tr('Admitted on')}>

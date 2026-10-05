@@ -8,37 +8,39 @@ const n = (v: number | null | undefined) => (v == null ? '—' : String(v))
 
 function Lines({ lines, caption }: { lines: ReportLine[]; caption: string }) {
   return (
-    <table className="w-full border-collapse text-sm" aria-label={caption}>
-      <thead>
-        <tr className="border-y bg-muted/50 text-left text-xs font-medium text-muted-foreground print:bg-transparent">
-          <th className="px-3 py-1.5">{tr('Subject')}</th>
-          <th className="px-2 py-1.5 text-right">{tr('Credit')}</th>
-          <th className="px-2 py-1.5 text-right">{tr('Marks')}</th>
-          <th className="px-2 py-1.5 text-right">%</th>
-          <th className="px-2 py-1.5 text-center">{tr('Grade')}</th>
-          <th className="px-2 py-1.5 text-right">{tr('GP')}</th>
-          <th className="px-3 py-1.5">{tr('Remark')}</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y">
-        {lines.map((l) => (
-          <tr key={l.subject} className={cn(l.status === 'fail' && 'text-danger')}>
-            <td className="px-3 py-1.5">
-              {l.subject_name}
-              {l.absent && <span className="ml-1 text-xs">{tr('(absent)')}</span>}
-            </td>
-            <td className="px-2 py-1.5 text-right tabular-nums">{n(l.credit_hours)}</td>
-            <td className="px-2 py-1.5 text-right tabular-nums">
-              {n(l.obtained)} / {n(l.full)}
-            </td>
-            <td className="px-2 py-1.5 text-right tabular-nums">{n(l.percentage)}</td>
-            <td className="px-2 py-1.5 text-center font-medium">{l.letter || '—'}</td>
-            <td className="px-2 py-1.5 text-right tabular-nums">{n(l.grade_point)}</td>
-            <td className="px-3 py-1.5 text-xs">{l.remark}</td>
+    <div className="overflow-x-auto print:overflow-visible">
+      <table className="w-full min-w-[34rem] border-collapse text-sm print:min-w-0" aria-label={caption}>
+        <thead>
+          <tr className="border-y bg-muted/50 text-left text-xs font-medium text-muted-foreground print:bg-transparent">
+            <th className="px-3 py-1.5">{tr('Subject')}</th>
+            <th className="px-2 py-1.5 text-right">{tr('Credit')}</th>
+            <th className="px-2 py-1.5 text-right">{tr('Marks')}</th>
+            <th className="px-2 py-1.5 text-right">%</th>
+            <th className="px-2 py-1.5 text-center">{tr('Grade')}</th>
+            <th className="px-2 py-1.5 text-right">{tr('GP')}</th>
+            <th className="px-3 py-1.5">{tr('Remark')}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody className="divide-y">
+          {lines.map((l) => (
+            <tr key={l.subject} className={cn(l.status === 'fail' && 'text-danger')}>
+              <td className="px-3 py-1.5">
+                {l.subject_name}
+                {l.absent && <span className="ml-1 text-xs">{tr('(absent)')}</span>}
+              </td>
+              <td className="px-2 py-1.5 text-right tabular-nums">{n(l.credit_hours)}</td>
+              <td className="px-2 py-1.5 text-right tabular-nums">
+                {n(l.obtained)} / {n(l.full)}
+              </td>
+              <td className="px-2 py-1.5 text-right tabular-nums">{n(l.percentage)}</td>
+              <td className="px-2 py-1.5 text-center font-medium">{l.letter || '—'}</td>
+              <td className="px-2 py-1.5 text-right tabular-nums">{n(l.grade_point)}</td>
+              <td className="px-3 py-1.5 text-xs">{l.remark}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -54,7 +56,7 @@ function Fact({ label, value }: { label: string; value: React.ReactNode }) {
 /** One report card, laid out to print one per page. */
 export function ReportCardView({ card }: { card: ReportCard }) {
   return (
-    <article className="rounded-lg border bg-card p-5 print:break-after-page print:rounded-none print:border-0 print:p-0">
+    <article className="rounded-lg border bg-card p-4 sm:p-5 print:break-after-page print:rounded-none print:border-0 print:p-0">
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b pb-3">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{card.campus}</p>
@@ -95,7 +97,7 @@ export function ReportCardView({ card }: { card: ReportCard }) {
 /** A student's whole transcript: every published result marked for it, and the cumulative GPA. */
 export function TranscriptView({ t }: { t: Transcript }) {
   return (
-    <article className="rounded-lg border bg-card p-5 print:rounded-none print:border-0 print:p-0">
+    <article className="rounded-lg border bg-card p-4 sm:p-5 print:rounded-none print:border-0 print:p-0">
       <header className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b pb-3">
         <div>
           <h2 className="text-lg font-semibold">{tr('Academic transcript')}</h2>
@@ -113,7 +115,7 @@ export function TranscriptView({ t }: { t: Transcript }) {
       {t.records.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tr('No published result is marked for the transcript yet.')}</p>
       ) : (
-        <div className="grid gap-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
           {t.records.map((r) => (
             <section key={r.result_id} className="print:break-inside-avoid">
               <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">

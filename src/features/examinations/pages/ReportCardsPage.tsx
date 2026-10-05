@@ -82,7 +82,7 @@ export default function ReportCardsPage() {
       ) : cards.data.length === 0 ? (
         <EmptyState title={tr('No results for this choice')} description={tr('Work out (or publish) the results first.')} />
       ) : (
-        <div className="grid gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
           {cards.data.map((c) => (
             <ReportCardView key={c.result_id} card={c} />
           ))}

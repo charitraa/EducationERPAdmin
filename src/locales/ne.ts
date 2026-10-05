@@ -109,6 +109,7 @@ export const ne: Partial<Record<MessageKey, string>> = {
   'nav.myProfile': 'मेरो प्रोफाइल',
   'nav.soon': 'छिट्टै',
   'academics.teaching': 'अध्यापन',
+  'academics.electives': 'ऐच्छिक विषय',
   'academics.departments': 'विभागहरू',
   'header.allBranches': 'सबै शाखा',
   'header.profile': 'मेरो प्रोफाइल',

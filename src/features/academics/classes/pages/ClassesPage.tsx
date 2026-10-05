@@ -1,4 +1,5 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -40,6 +41,7 @@ export default function ClassesPage() {
   const query = useClasses({ ...list.query, academic_year: year, campus: list.filters.campus ?? selectedBranchId ?? undefined })
   const crud = useCrudState<SchoolClass>()
   const remove = useRemoveClass()
+  const navigate = useNavigate()
 
   const columns: Column<SchoolClass>[] = [
     { id: 'name', header: tr('Class'), sortField: 'name', mobile: 'title', cell: (c) => <span className="font-medium">{c.display_name}</span> },
@@ -82,6 +84,7 @@ export default function ClassesPage() {
         rowActions={(c) => (
           <RowActions
             actions={[
+              { label: tr('Electives'), icon: ListChecks, onSelect: () => navigate(`/academics/electives?section=${c.id}`) },
               { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(c) },
               { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(c) },
             ]}

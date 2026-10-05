@@ -41,9 +41,9 @@ export default function SetupWizardPage() {
   return (
     <>
       <PageHeader title={tr('Set up your school')} description={tr('{completed} of {total} steps done. Skip anything and come back later.', { completed: setup.completed, total: setup.total })} />
-      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
         <nav aria-label={tr('Setup steps')}>
-          <ol className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
+          <ol className="relative flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
             {setup.steps.map((s, i) => {
               const Icon = s.done ? CheckCircle2 : s.skipped ? MinusCircle : Circle
               const active = s.id === currentId
