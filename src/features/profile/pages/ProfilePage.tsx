@@ -1,10 +1,15 @@
+import { KeyRound, Pencil } from 'lucide-react'
+import { useState } from 'react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { useWho } from '@/features/self/hooks/useSelf'
 import { useAuth } from '@/hooks/useAuth'
 import { formatDate, formatDateTime } from '@/lib/dates'
 import { enumLabel, humanize } from '@/lib/formatters'
 import { initials } from '@/lib/utils'
 import { tr } from '@/lib/i18n'
+import { ChangePasswordDialog, EditDetailsDialog } from '../components/AccountDialogs'
+import { TwoFactorPanel } from '../components/TwoFactorPanel'
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -15,10 +20,13 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="mb-2 text-sm font-semibold">{title}</h2>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold">{title}</h2>
+        {action}
+      </div>
       <dl className="divide-y rounded-lg border bg-card px-4">{children}</dl>
     </section>
   )
@@ -28,6 +36,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 export default function ProfilePage() {
   const { user } = useAuth()
   const { staff, student, parent, alumnus } = useWho()
+  const [dialog, setDialog] = useState<'details' | 'password' | null>(null)
   if (!user) return null
   const enrollment = student?.current_enrollment as { section_name?: string; program_name?: string } | null | undefined
   return (
@@ -41,7 +50,14 @@ export default function ProfilePage() {
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
       </div>
-      <Card title={tr('Account')}>
+      <Card
+        title={tr('Account')}
+        action={
+          <Button variant="outline" size="sm" onClick={() => setDialog('details')}>
+            <Pencil aria-hidden /> {tr('Edit my details')}
+          </Button>
+        }
+      >
         <Row label={tr('Phone')} value={user.phone} />
         <Row label={tr('Organization')} value={user.organization?.name} />
         <Row label={tr('Account type')} value={humanize(user.user_type)} />
@@ -61,6 +77,17 @@ export default function ProfilePage() {
           }
         />
         <Row label={tr('Last sign-in')} value={formatDateTime(user.last_login)} />
+      </Card>
+      <Card title={tr('Sign-in and security')}>
+        <Row
+          label={tr('Password')}
+          value={
+            <Button variant="outline" size="sm" onClick={() => setDialog('password')}>
+              <KeyRound aria-hidden /> {tr('Change password')}
+            </Button>
+          }
+        />
+        <Row label={tr('Two-factor sign-in')} value={<TwoFactorPanel />} />
       </Card>
       {staff && (
         <Card title={tr('Staff record')}>
@@ -83,7 +110,7 @@ export default function ProfilePage() {
       {parent && (
         <Card title={tr('Children')}>
           {parent.children.length === 0 ? (
-            <Row label={tr('Linked')} value="No children are linked to you yet; ask the school office." />
+            <Row label={tr('Linked')} value={tr('No children are linked to you yet; ask the school office.')} />
           ) : (
             parent.children.map((c) => (
               <Row
@@ -105,12 +132,14 @@ export default function ProfilePage() {
         <Card title={tr('Alumni')}>
           <Row label={tr('Program')} value={alumnus.program_name} />
           <Row label={tr('Graduated')} value={formatDate(alumnus.graduated_on)} />
-          <Row label={tr('Mentoring')} value={alumnus.is_mentor ? 'Open to mentees' : 'Not mentoring'} />
+          <Row label={tr('Mentoring')} value={alumnus.is_mentor ? tr('Open to mentees') : tr('Not mentoring')} />
         </Card>
       )}
       {!staff && !student && !parent && !alumnus && (
         <p className="text-sm text-muted-foreground">{tr('Your account isn’t linked to a staff, student or parent record, so there’s nothing of your own here beyond your applications.')}</p>
       )}
+      <EditDetailsDialog user={user} open={dialog === 'details'} onOpenChange={(o) => !o && setDialog(null)} />
+      <ChangePasswordDialog open={dialog === 'password'} onOpenChange={(o) => !o && setDialog(null)} />
     </div>
   )
 }

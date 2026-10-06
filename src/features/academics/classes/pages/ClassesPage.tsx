@@ -1,4 +1,5 @@
-import { ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowUpRight, ListChecks, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
@@ -16,6 +17,7 @@ import { SectionHeader } from '../../components/SectionHeader'
 import { useProgramOptions } from '../../programs/hooks/usePrograms'
 import type { SchoolClass } from '../api/classes.api'
 import { ClassFormDialog } from '../components/ClassFormDialog'
+import { PromoteClassDialog } from '../components/PromoteClassDialog'
 import { useClasses, useRemoveClass } from '../hooks/useClasses'
 import { tr } from '@/lib/i18n'
 
@@ -42,6 +44,7 @@ export default function ClassesPage() {
   const crud = useCrudState<SchoolClass>()
   const remove = useRemoveClass()
   const navigate = useNavigate()
+  const [promoting, setPromoting] = useState<SchoolClass | null>(null)
 
   const columns: Column<SchoolClass>[] = [
     { id: 'name', header: tr('Class'), sortField: 'name', mobile: 'title', cell: (c) => <span className="font-medium">{c.display_name}</span> },
@@ -85,6 +88,7 @@ export default function ClassesPage() {
           <RowActions
             actions={[
               { label: tr('Electives'), icon: ListChecks, onSelect: () => navigate(`/academics/electives?section=${c.id}`) },
+              { label: tr('Promote class…'), icon: ArrowUpRight, permission: PERMS.students.place, onSelect: () => setPromoting(c) },
               { label: tr('Edit'), icon: Pencil, permission: PERMS.academics.classes, onSelect: () => crud.openEdit(c) },
               { label: tr('Delete'), icon: Trash2, permission: PERMS.academics.classes, destructive: true, onSelect: () => crud.openDelete(c) },
             ]}
@@ -105,6 +109,7 @@ export default function ClassesPage() {
           ),
         }}
       />
+      <PromoteClassDialog source={promoting} onClose={() => setPromoting(null)} />
       <ClassFormDialog open={crud.formOpen} onOpenChange={(o) => !o && crud.closeForm()} record={crud.record} />
       {crud.deleting && (
         <DeleteDialog

@@ -21,11 +21,11 @@ import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
 import { useAcademicYearOptions, useCurrentAcademicYear } from '../../academic-years/hooks/useAcademicYears'
 import type { SectionStudent } from '../../classes/api/classes.api'
-import { useClasses } from '../../classes/hooks/useClasses'
+import { useClasses, useSectionStudents } from '../../classes/hooks/useClasses'
 import { SectionHeader } from '../../components/SectionHeader'
 import { useProgramCurriculum } from '../../curriculum/hooks/useCurriculum'
 import type { StudentElective } from '../api/electives.api'
-import { useAddElective, useClassElectives, useDropElective, useSectionStudents } from '../hooks/useElectives'
+import { useAddElective, useClassElectives, useDropElective } from '../hooks/useElectives'
 
 /** A 400's field messages ("…is taught at the same time as Biology") read better than its generic summary. */
 function refusal(err: unknown) {

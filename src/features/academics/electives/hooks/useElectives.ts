@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { Id } from '@/shared/types/api'
-import { classKeys, sectionStudents } from '../../classes/api/classes.api'
 import { electiveKeys, electivesApi, type StudentElective, type StudentElectiveInput } from '../api/electives.api'
 
 /** Every elective choice recorded in a class, dropped ones included (they carry `ended_on`). */
@@ -21,14 +20,6 @@ export function useStudentElectives(student: Id | null) {
     queryKey: electiveKeys.list(params),
     queryFn: () => electivesApi.list(params),
     enabled: student != null,
-  })
-}
-
-export function useSectionStudents(section: Id | null) {
-  return useQuery({
-    queryKey: [...classKeys.detail(section ?? 0), 'students'],
-    queryFn: () => sectionStudents(section!),
-    enabled: section != null,
   })
 }
 
