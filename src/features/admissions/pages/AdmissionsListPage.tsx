@@ -58,9 +58,9 @@ function PipelineCard({ status, label, hint, icon, campus, active }: { status: A
 
 export default function AdmissionsListPage() {
   const navigate = useNavigate()
-  const { isMultiBranch, branches, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['status', 'campus'], defaultOrdering: '-applied_on' })
-  const query = useAdmissions({ ...list.query, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const { isMultiBranch, branches } = useBranches()
+  const list = useListState({ filters: ['status', 'campus'], followBranch: true, defaultOrdering: '-applied_on' })
+  const query = useAdmissions(list.query)
   const crud = useCrudState<Admission>()
   const remove = useRemoveAdmission()
 

@@ -220,7 +220,7 @@ export function ContractsPage() {
         list={list}
         getRowId={(c) => c.id}
         searchPlaceholder={tr('Name, employee no. or reference…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('New contract')}
@@ -388,7 +388,7 @@ export function ProfilesPage() {
         getRowId={(p) => p.id}
         searchPlaceholder={tr('Name, employee no. or PAN…')}
         onRowClick={crud.openEdit}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add profile')}
@@ -517,7 +517,7 @@ export function DocumentsPage() {
         getRowId={(d) => d.id}
         searchPlaceholder={tr('Title, number or name…')}
         onRowClick={crud.openEdit}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button onClick={crud.openCreate}>
               <FilePlus2 aria-hidden /> {tr('Add document')}

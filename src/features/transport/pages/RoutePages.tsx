@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -146,7 +146,8 @@ function RouteDialog({ open, record, onOpenChange }: { open: boolean; record: Ro
 /** Every route with its vehicle, crew and riders. */
 export function RoutesPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['is_active'] })
+  const list = useListState({ filters: ['is_active', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useRoutes(list.query)
   const [creating, setCreating] = useState(false)
   const columns: Column<Route>[] = [
@@ -168,14 +169,14 @@ export function RoutesPage() {
         getRowId={(r) => r.id}
         searchPlaceholder={tr('Route or stop name…')}
         onRowClick={(r) => navigate(`/transport/routes/${r.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.transport.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('New route')}
             </Button>
           </PermissionGate>
         }
-        filters={[{ name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('Running') }, { value: 'false', label: tr('Not running') }] }]}
+        filters={[{ name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('Running') }, { value: 'false', label: tr('Not running') }] }, branchFilter]}
         empty={{ title: tr('No routes yet'), description: tr('Add vehicles and crew, then routes with their stops.') }}
       />
       <RouteDialog open={creating} record={null} onOpenChange={setCreating} />
@@ -454,7 +455,7 @@ export function RidersPage() {
         list={list}
         getRowId={(r) => r.id}
         searchPlaceholder={tr('Rider name or number…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.transport.manage}>
             <Button variant="outline" onClick={() => setDialog('bill')}>
               <Files aria-hidden /> {tr('Bill a term')}

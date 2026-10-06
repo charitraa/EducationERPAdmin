@@ -152,4 +152,5 @@ export default {
   'Waive': 'मिनाहा गर्नुहोस्',
   'Waive this fine?': 'यो जरिवाना मिनाहा गर्ने?',
   'Withdraw {accession_number}?': '{accession_number} हटाउने?',
+  '{count} more overdue': 'थप {count} म्याद नाघेका',
 } satisfies Record<string, string>

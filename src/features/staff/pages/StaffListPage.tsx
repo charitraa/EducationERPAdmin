@@ -21,9 +21,9 @@ const dash = <span className="text-muted-foreground">—</span>
 
 export default function StaffListPage() {
   const navigate = useNavigate()
-  const { isMultiBranch, branches, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['status', 'staff_type', 'campus'], defaultOrdering: 'first_name' })
-  const query = useStaffList({ ...list.query, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const { isMultiBranch, branches } = useBranches()
+  const list = useListState({ filters: ['status', 'staff_type', 'campus'], followBranch: true, defaultOrdering: 'first_name' })
+  const query = useStaffList(list.query)
   const crud = useCrudState<StaffMember>()
   const remove = useRemoveStaff()
 

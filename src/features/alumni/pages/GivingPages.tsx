@@ -172,7 +172,7 @@ export function AlumniEventsPage() {
         getRowId={(e) => e.id}
         searchPlaceholder={tr('Title…')}
         onRowClick={setViewing}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.alumni.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('New event')}
@@ -390,7 +390,7 @@ export function DonationsPage() {
         list={list}
         getRowId={(d) => d.id}
         searchPlaceholder={tr('Receipt, donor or reference…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.alumni.donations}>
             <Button onClick={() => setRecording(true)}>
               <Plus aria-hidden /> {tr('Record donation')}

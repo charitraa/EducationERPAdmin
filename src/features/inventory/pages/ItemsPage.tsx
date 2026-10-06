@@ -127,7 +127,7 @@ export default function ItemsPage() {
         list={list}
         getRowId={(i) => i.id}
         searchPlaceholder={tr('Search name or code…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.inventory.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add item')}

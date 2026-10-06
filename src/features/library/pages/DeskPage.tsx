@@ -15,6 +15,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { Copy, Loan, Member } from '../api/library.api'
 import { CopyPicker, LoanPicker, MemberPicker } from '../components/Pickers'
 import { useIssueBook, useLoans, useReturnBook } from '../hooks/useLibrary'
+import { useCount } from '@/shared/api/count'
 import { tr } from '@/lib/i18n'
 
 function IssueCard() {
@@ -99,8 +100,10 @@ function ReturnCard() {
 export default function DeskPage() {
   const { can } = usePermissions()
   const desk = can(PERMS.library.circulate)
-  const out = useLoans({ ...PICKER_PARAMS, status: 'issued' }, desk)
-  const overdue = (out.data?.results ?? []).filter((l) => l.is_overdue).sort((a, b) => a.due_at.localeCompare(b.due_at))
+  const out = useCount('library-issues', '/library/issues/', { status: 'issued' }, desk)
+  const late = useLoans({ ...PICKER_PARAMS, overdue: true, ordering: 'due_at' }, desk)
+  const overdue = late.data?.results ?? []
+  const more = (late.data?.count ?? 0) - overdue.length
   if (!desk) return <EmptyState title={tr('The desk is for library staff')} description={tr('Browse the catalog under Books.')} />
   return (
     <div className="grid gap-6">
@@ -109,7 +112,7 @@ export default function DeskPage() {
         <ReturnCard />
       </div>
       <section>
-        <SectionHeader title={tr('Overdue')} description={tr('{count} books out in all.', { count: out.data?.count ?? 0 })} />
+        <SectionHeader title={tr('Overdue')} description={tr('{count} books out in all.', { count: out.data ?? 0 })} />
         {overdue.length === 0 ? (
           <p className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">{tr('Nothing overdue.')}</p>
         ) : (
@@ -126,6 +129,11 @@ export default function DeskPage() {
               </li>
             ))}
           </ul>
+        )}
+        {more > 0 && (
+          <Link to="/library/loans?overdue=true" className="mt-2 inline-block text-sm underline">
+            {tr('{count} more overdue', { count: more })}
+          </Link>
         )}
       </section>
     </div>

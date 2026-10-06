@@ -35,7 +35,7 @@ export function PeopleStep({ kind }: { kind: 'staff' | 'students' }) {
       <StepNote>
         {kind === 'staff'
           ? tr('Add teachers and office staff, then give each a login and a role under Users. You can come back to this step any time.')
-          : tr('Add students directly, or record admissions and enroll them; parents are linked from a student’s page. You can come back to this step any time.')}
+          : tr('Add students one by one or import a spreadsheet, or record admissions and enroll them; parents are linked from a student’s page. You can come back to this step any time.')}
       </StepNote>
       <div className="flex flex-wrap gap-2">
         {kind === 'staff' ? (
@@ -54,9 +54,14 @@ export function PeopleStep({ kind }: { kind: 'staff' | 'students' }) {
         ) : (
           <>
             {hasPermission(PERMS.students.create) && (
-              <Button asChild variant="outline">
-                <Link to="/students/new">{tr('Add student')}</Link>
-              </Button>
+              <>
+                <Button asChild variant="outline">
+                  <Link to="/students/new">{tr('Add student')}</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/students/import">{tr('Import students')}</Link>
+                </Button>
+              </>
             )}
             {hasPermission(PERMS.admissions.view) && (
               <Button asChild variant="outline">

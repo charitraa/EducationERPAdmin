@@ -1,6 +1,7 @@
 import { AlarmClock, Wallet } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useBranchFilter } from '@/app/providers/BranchProvider'
 import { PermissionGate } from '@/components/common/PermissionGate'
 import { RowActions } from '@/components/common/RowActions'
 import { DataTable, type Column } from '@/components/data-display/DataTable'
@@ -29,7 +30,8 @@ export function InvoiceStanding({ invoice }: { invoice: Pick<InvoiceRow, 'status
 
 export default function InvoicesPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'source', 'academic_year'] })
+  const list = useListState({ filters: ['status', 'source', 'academic_year', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useInvoices(list.query)
   const years = useAcademicYearOptions()
   const [paying, setPaying] = useState<InvoiceRow | null>(null)
@@ -76,9 +78,18 @@ export default function InvoicesPage() {
           { name: 'status', label: tr('Status'), options: enumOptions('InvoiceStatusEnum') },
           { name: 'source', label: tr('Billed by'), options: enumOptions('InvoiceSourceEnum') },
           { name: 'academic_year', label: tr('Year'), options: (years.data ?? []).map((y) => ({ value: String(y.id), label: y.name })) },
+          branchFilter,
         ]}
         rowActions={(i) => <RowActions actions={[{ label: tr('Take payment'), icon: Wallet, permission: PERMS.finance.collect, hidden: i.status !== 'issued' || i.is_paid, onSelect: () => setPaying(i) }]} />}
-        empty={{ title: tr('No invoices yet'), description: tr('Invoices are generated from a fee structure, for a whole term at once or one student at a time.') }}
+        empty={{ title: tr('No invoices yet'), description: tr('Invoices are generated from a fee structure, for a whole term at once or one student at a time.'),
+          action: (
+            <PermissionGate permission={PERMS.finance.manage}>
+              <Button asChild variant="outline">
+                <Link to="/finance/fees">{tr('Go to fee structures')}</Link>
+              </Button>
+            </PermissionGate>
+          ),
+        }}
       />
       <RecordPaymentDialog invoice={paying} onClose={() => setPaying(null)} />
       <LateFeesDialog open={lateFees} onOpenChange={setLateFees} />

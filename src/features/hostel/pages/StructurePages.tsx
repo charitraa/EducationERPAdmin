@@ -419,7 +419,7 @@ export function RoomsPage() {
         list={list}
         getRowId={(r) => r.id}
         searchPlaceholder={tr('Room number or building…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hostel.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add room')}

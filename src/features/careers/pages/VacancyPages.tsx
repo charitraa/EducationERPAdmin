@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -192,7 +192,8 @@ function VacancyDialog({ open, record, onOpenChange }: { open: boolean; record: 
 /** Openings the school is hiring for. */
 export function VacanciesPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'staff_type'] })
+  const list = useListState({ filters: ['status', 'staff_type', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useVacancies(list.query)
   const [creating, setCreating] = useState(false)
   const { isMultiBranch } = useBranches()
@@ -214,7 +215,7 @@ export function VacanciesPage() {
         getRowId={(v) => v.id}
         searchPlaceholder={tr('Title or code…')}
         onRowClick={(v) => navigate(`/careers/vacancies/${v.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.careers.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('New vacancy')}
@@ -224,6 +225,7 @@ export function VacanciesPage() {
         filters={[
           { name: 'status', label: tr('Status'), options: enumOptions('VacancyStatusEnum') },
           { name: 'staff_type', label: tr('Staff type'), options: enumOptions('StaffTypeEnum') },
+          branchFilter,
         ]}
         empty={{ title: tr('No vacancies'), description: tr('Draft a vacancy, open it, and candidates apply from the careers page or their account.') }}
       />

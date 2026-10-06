@@ -193,7 +193,7 @@ export default function ScholarshipsPage() {
           list={list}
           getRowId={(g) => g.id}
           searchable={false}
-          toolbar={
+          create={
             <PermissionGate permission={PERMS.finance.manage}>
               <Button onClick={() => setGranting(true)} disabled={!scholarships.data?.results.length}>
                 <UserPlus aria-hidden /> {tr('Grant')}

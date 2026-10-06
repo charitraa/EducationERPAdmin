@@ -1,4 +1,4 @@
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, Trash2, Upload } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
@@ -21,9 +21,9 @@ const muted = (text: string) => <span className="text-muted-foreground">{text}</
 
 export default function StudentsListPage() {
   const navigate = useNavigate()
-  const { isMultiBranch, branches, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['status', 'gender', 'campus'], defaultOrdering: 'first_name' })
-  const query = useStudents({ ...list.query, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const { isMultiBranch, branches } = useBranches()
+  const list = useListState({ filters: ['status', 'gender', 'campus'], followBranch: true, defaultOrdering: 'first_name' })
+  const query = useStudents(list.query)
   const crud = useCrudState<Student>()
   const remove = useRemoveStudent()
 
@@ -71,7 +71,19 @@ export default function StudentsListPage() {
 
   return (
     <>
-      <PageHeader title={tr('Students')} description={tr('Everyone enrolled at your school, their class and where they stand.')} actions={addButton(tr('Add student'))} />
+      <PageHeader title={tr('Students')} description={tr('Everyone enrolled at your school, their class and where they stand.')} actions={
+          <>
+            <PermissionGate permission={PERMS.students.create}>
+              <Button asChild variant="outline">
+                <Link to="/students/import">
+                  <Upload aria-hidden /> {tr('Import')}
+                </Link>
+              </Button>
+            </PermissionGate>
+            {addButton(tr('Add student'))}
+          </>
+        }
+      />
       <DataTable
         ariaLabel={tr('Students')}
         columns={columns}
@@ -96,7 +108,7 @@ export default function StudentsListPage() {
         )}
         empty={{
           title: tr('No students yet'),
-          description: tr('Add students one at a time here, or enroll them from an approved admission.'),
+          description: tr('Add students one at a time, import a spreadsheet of them, or enroll them from an approved admission.'),
           action: addButton(tr('Add the first student')),
         }}
       />

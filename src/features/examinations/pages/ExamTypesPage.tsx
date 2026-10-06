@@ -80,18 +80,19 @@ export default function ExamTypesPage() {
     { id: 'description', header: tr('Description'), mobile: 'hidden', cell: (t) => t.description || <span className="text-muted-foreground">—</span> },
     { id: 'status', header: tr('Status'), cell: (t) => <StatusBadge status={t.is_active === false ? 'inactive' : 'active'} label={t.is_active === false ? tr('Not in use') : tr('In use')} /> },
   ]
+  const addButton = (
+    <PermissionGate permission={PERMS.exams.manage}>
+      <Button onClick={crud.openCreate}>
+        <Plus aria-hidden /> {tr('Add exam type')}
+      </Button>
+    </PermissionGate>
+  )
   return (
     <>
       <SectionHeader
         title={tr('Exam types')}
         description={tr('The kinds of exam you hold. Every exam has one.')}
-        action={
-          <PermissionGate permission={PERMS.exams.manage}>
-            <Button onClick={crud.openCreate}>
-              <Plus aria-hidden /> {tr('Add exam type')}
-            </Button>
-          </PermissionGate>
-        }
+        action={addButton}
       />
       <DataTable
         ariaLabel={tr('Exam types')}
@@ -109,7 +110,7 @@ export default function ExamTypesPage() {
             ]}
           />
         )}
-        empty={{ title: tr('No exam types yet'), description: tr('Add the kinds of exam you hold, such as Unit test and Final.') }}
+        empty={{ title: tr('No exam types yet'), description: tr('Add the kinds of exam you hold, such as Unit test and Final.'), action: addButton }}
       />
       <ExamTypeDialog open={crud.formOpen} record={crud.record} onOpenChange={(o) => !o && crud.closeForm()} />
       {crud.deleting && (

@@ -138,7 +138,7 @@ export function BoardPage() {
         list={list}
         getRowId={(p) => p.id}
         searchable={false}
-        toolbar={
+        create={
           <Button onClick={crud.openCreate}>
             <Plus aria-hidden /> {tr('Post a job')}
           </Button>

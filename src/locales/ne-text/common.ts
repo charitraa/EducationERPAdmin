@@ -116,7 +116,7 @@ export default {
   'Fines': 'जरिवानाहरू',
   'Forms': 'फारमहरू',
   'Go to': 'जानुहोस्',
-  'Go to a page, or search programs, subjects, classes…': 'कुनै पृष्ठमा जानुहोस्, वा अध्ययन कार्यक्रम, विषय, कक्षा खोज्नुहोस्…',
+  'Go to a page, or search people, applications, invoices…': 'कुनै पृष्ठमा जानुहोस्, वा व्यक्ति, निवेदन, बिल खोज्नुहोस्…',
   'Go to dashboard': 'ड्यासबोर्डमा जानुहोस्',
   'Grade scales': 'ग्रेड तालिकाहरू',
   'Hostel': 'छात्रावास',
@@ -195,6 +195,7 @@ export default {
   'Purchases': 'खरिदहरू',
   'Quick': 'छिटो',
   'Receipt': 'रसिद',
+  'Receipts': 'रसिदहरू',
   'Reload': 'पुनः लोड गर्नुहोस्',
   'Reload the page to continue.': 'जारी राख्न पृष्ठ पुनः लोड गर्नुहोस्।',
   'Remove file': 'फाइल हटाउनुहोस्',
@@ -277,4 +278,5 @@ export default {
   "Your role doesn't include this. If you need it, ask your school administrator to change your role.": 'तपाईंको भूमिकामा यो पर्दैन। चाहिएमा विद्यालयका प्रशासकलाई भूमिका परिवर्तन गर्न भन्नुहोस्।',
   'YYYY-MM-DD': 'YYYY-MM-DD',
   "Electives": "ऐच्छिक विषय",
+  'Import students': 'विद्यार्थी आयात',
 } satisfies Record<string, string>

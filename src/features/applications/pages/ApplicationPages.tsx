@@ -2,7 +2,7 @@ import { CheckCircle2, CornerUpLeft, FilePlus2, RotateCcw, Undo2, XCircle } from
 import { useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { PageHeader } from '@/components/common/PageHeader'
 import { DataTable, type Column } from '@/components/data-display/DataTable'
 import { ErrorState } from '@/components/data-display/ErrorState'
@@ -85,7 +85,8 @@ export function PendingApplicationsPage() {
 /** The office's view: every application at the branches it covers. */
 export function AllApplicationsPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'application_type__kind', 'application_type'] })
+  const list = useListState({ filters: ['status', 'application_type__kind', 'application_type', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useApplications(list.query)
   const types = useApplicationTypes({ ...PICKER_PARAMS })
   const { isMultiBranch } = useBranches()
@@ -100,7 +101,7 @@ export function AllApplicationsPage() {
         getRowId={(a) => a.id}
         searchPlaceholder={tr('Number or name…')}
         onRowClick={(a) => navigate(`/applications/${a.id}`)}
-        toolbar={
+        create={
           <Button onClick={() => setApplying(true)}>
             <FilePlus2 aria-hidden /> {tr('New application')}
           </Button>
@@ -109,6 +110,7 @@ export function AllApplicationsPage() {
           { name: 'status', label: tr('Status'), options: enumOptions('ApplicationStatusEnum') },
           { name: 'application_type__kind', label: tr('Kind'), options: enumOptions('ApplicationKindEnum') },
           { name: 'application_type', label: tr('Form'), options: (types.data?.results ?? []).map((t) => ({ value: String(t.id), label: t.name })) },
+          branchFilter,
         ]}
         empty={{ title: tr('No applications'), description: tr('Requests from students, parents and staff show here as they’re sent.') }}
       />
@@ -133,7 +135,7 @@ export function MyApplicationsPage() {
         getRowId={(a) => a.id}
         searchable={false}
         onRowClick={(a) => navigate(`/applications/${a.id}`)}
-        toolbar={
+        create={
           <Button onClick={() => setApplying(true)}>
             <FilePlus2 aria-hidden /> {tr('Apply')}
           </Button>

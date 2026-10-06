@@ -175,7 +175,7 @@ function Devices() {
         list={list}
         getRowId={(d) => d.id}
         searchable={false}
-        toolbar={
+        create={
           <Button onClick={crud.openCreate}>
             <Plus aria-hidden /> {tr('Add device')}
           </Button>
@@ -294,7 +294,7 @@ function Identities() {
         list={list}
         getRowId={(b) => b.id}
         searchPlaceholder={tr('Exact PIN…')}
-        toolbar={
+        create={
           <Button onClick={() => setAdding(true)}>
             <Plus aria-hidden /> {tr('Map a PIN')}
           </Button>

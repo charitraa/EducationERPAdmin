@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, Ban, Copy, KeyRound, Pencil, Plus, RefreshCw, ShieldPlus, X } from 'lucide-react'
+import { AlertTriangle, Ban, Copy, Pencil, Plus, RefreshCw, ShieldPlus, X } from 'lucide-react'
 import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { z } from 'zod'
@@ -231,7 +231,7 @@ export default function ApiKeysPage() {
         list={list}
         getRowId={(k) => k.id}
         searchPlaceholder={tr('Name or prefix…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.apiKeys.manage}>
             <Button onClick={() => setEditing('new')}>
               <Plus aria-hidden /> {tr('New key')}
@@ -249,7 +249,7 @@ export default function ApiKeysPage() {
             ]}
           />
         )}
-        empty={{ title: tr('No API keys'), description: tr('Create one when another system needs to read or write school data.'), action: <KeyRound className="h-5 w-5 text-muted-foreground" aria-hidden /> }}
+        empty={{ title: tr('No API keys'), description: tr('Create one when another system needs to read or write school data.') }}
       />
       <KeyDialog
         open={editing !== null}

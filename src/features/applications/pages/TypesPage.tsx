@@ -281,7 +281,7 @@ export function TypesPage() {
         getRowId={(t) => t.id}
         searchPlaceholder={tr('Name or code…')}
         onRowClick={crud.openEdit}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.applications.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('New form')}

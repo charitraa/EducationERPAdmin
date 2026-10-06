@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
+import { useBranchFilter } from '@/app/providers/BranchProvider'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
 import { SectionHeader } from '@/components/common/SectionHeader'
@@ -128,7 +129,8 @@ function AssetDialog({ open, record, onOpenChange }: { open: boolean; record: As
 /** The fixed-asset register: every tagged asset, where it is and who has it. */
 export default function AssetsPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'condition', 'store'] })
+  const list = useListState({ filters: ['status', 'condition', 'store', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useAssets(list.query)
   const { stores } = useInventoryOptions()
   const [creating, setCreating] = useState(false)
@@ -150,7 +152,7 @@ export default function AssetsPage() {
         getRowId={(a) => a.id}
         searchPlaceholder={tr('Tag, serial or item…')}
         onRowClick={(a) => navigate(`/inventory/assets/${a.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.inventory.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('Register asset')}
@@ -161,6 +163,7 @@ export default function AssetsPage() {
           { name: 'status', label: tr('Status'), options: enumOptions('AssetStatusEnum') },
           { name: 'condition', label: tr('Condition'), options: enumOptions('ConditionEnum') },
           { name: 'store', label: tr('Store'), options: stores },
+          branchFilter,
         ]}
         empty={{ title: tr('No assets yet'), description: tr('Assets come from receiving a purchase order, or register one by hand.') }}
       />

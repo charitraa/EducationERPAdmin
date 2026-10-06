@@ -2,14 +2,20 @@ import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { clampPageSize, DEFAULT_PAGE_SIZE } from '@/shared/api/pagination'
 import type { ListParams } from '@/shared/types/api'
+import { useSelectedBranchId } from '@/app/providers/BranchProvider'
 
 /**
  * List state (page, page size, search, ordering, filters) kept in the URL,
  * so a filtered list survives reload and can be shared as a link.
  * Changing anything but the page sends you back to page 1.
+ *
+ * `followBranch`: with no Branch filter chosen, list the header selector's
+ * branch (if any). Only for records that always belong to one branch; a
+ * plain `?campus=` hides org-wide ones (notices, events) whose campus is null.
  */
-export function useListState(opts: { filters?: readonly string[]; defaultOrdering?: string } = {}) {
+export function useListState(opts: { filters?: readonly string[]; defaultOrdering?: string; followBranch?: boolean } = {}) {
   const [params, setParams] = useSearchParams()
+  const selectedBranch = useSelectedBranchId()
   const filterNames = opts.filters ?? []
 
   const state = useMemo(() => {
@@ -56,6 +62,7 @@ export function useListState(opts: { filters?: readonly string[]; defaultOrderin
       search: state.search || undefined,
       ordering: state.ordering || undefined,
       ...state.filters,
+      ...(opts.followBranch && !state.filters.campus && selectedBranch ? { campus: String(selectedBranch) } : {}),
     } satisfies ListParams as ListParams,
     setPage: (page: number) => update({ page }, true),
     setPageSize: (size: number) => update({ page_size: size }),

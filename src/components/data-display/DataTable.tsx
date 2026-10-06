@@ -35,6 +35,8 @@ interface DataTableProps<T> {
   searchPlaceholder?: string
   filters?: FilterDef[]
   toolbar?: ReactNode
+  /** The "add one" button: shown in the toolbar, and again in the empty state when nothing exists yet. */
+  create?: ReactNode
   onRowClick?: (row: T) => void
   rowActions?: (row: T) => ReactNode
   /** Turns on row selection; rendered above the table while rows are selected. */
@@ -70,6 +72,7 @@ export function DataTable<T>({
   searchPlaceholder,
   filters,
   toolbar,
+  create,
   onRowClick,
   rowActions,
   bulkActions,
@@ -118,7 +121,7 @@ export function DataTable<T>({
   } else if (query.isError) {
     body = <ErrorState error={query.error} onRetry={() => void query.refetch()} />
   } else if (rows.length === 0) {
-    body = <EmptyState {...empty} filtered={list.isFiltered} onClearFilters={list.clearFilters} />
+    body = <EmptyState {...empty} action={empty.action ?? create} filtered={list.isFiltered} onClearFilters={list.clearFilters} />
   } else {
     const titleCol = columns.find((c) => c.mobile === 'title') ?? columns[0]!
     body = (
@@ -245,7 +248,12 @@ export function DataTable<T>({
   return (
     <div className="overflow-hidden rounded-lg border bg-card">
       <DataTableToolbar list={list} searchable={searchable} searchPlaceholder={searchPlaceholder} filters={filters}>
-        {toolbar}
+        {toolbar || create ? (
+          <>
+            {toolbar}
+            {create}
+          </>
+        ) : null}
       </DataTableToolbar>
       {selectable && selected.size > 0 && (
         <div className="flex items-center gap-3 border-b bg-accent/50 px-3 py-2 text-sm">

@@ -33,14 +33,14 @@ function Occupancy({ count, capacity }: { count: number; capacity: number | null
 }
 
 export default function ClassesPage() {
-  const { isMultiBranch, branches, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['academic_year', 'program', 'campus'], defaultOrdering: 'level' })
+  const { isMultiBranch, branches } = useBranches()
+  const list = useListState({ filters: ['academic_year', 'program', 'campus'], followBranch: true, defaultOrdering: 'level' })
   const years = useAcademicYearOptions()
   const current = useCurrentAcademicYear()
   const programs = useProgramOptions()
   // Default to this year's classes, and to the header's branch.
   const year = list.filters.academic_year ?? (current.data ? String(current.data.id) : undefined)
-  const query = useClasses({ ...list.query, academic_year: year, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const query = useClasses({ ...list.query, academic_year: year })
   const crud = useCrudState<SchoolClass>()
   const remove = useRemoveClass()
   const navigate = useNavigate()

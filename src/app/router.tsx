@@ -77,6 +77,7 @@ const SetupWizardPage = lazy(() => import('@/features/settings/setup/pages/Setup
 const StudentsListPage = lazy(() => import('@/features/students/pages/StudentsListPage'))
 const StudentDetailPage = lazy(() => import('@/features/students/pages/StudentDetailPage'))
 const StudentFormPage = lazy(() => import('@/features/students/pages/StudentFormPage'))
+const StudentImportPage = lazy(() => import('@/features/students/pages/StudentImportPage'))
 const AdmissionsListPage = lazy(() => import('@/features/admissions/pages/AdmissionsListPage'))
 const AdmissionDetailPage = lazy(() => import('@/features/admissions/pages/AdmissionDetailPage'))
 const ParentsListPage = lazy(() => import('@/features/parents/pages/ParentsListPage'))
@@ -255,6 +256,7 @@ const studentsRoutes: RouteObject = {
   children: [
     { index: true, element: page(StudentsListPage) },
     { path: 'new', handle: crumb(tr('Add student')), element: page(StudentFormPage, PERMS.students.create) },
+    { path: 'import', handle: crumb(tr('Import students')), element: page(StudentImportPage, PERMS.students.create) },
     { path: ':id', handle: crumb(tr('Student')), element: page(StudentDetailPage) },
     { path: ':id/edit', handle: crumb(tr('Edit')), element: page(StudentFormPage, PERMS.students.update) },
   ],

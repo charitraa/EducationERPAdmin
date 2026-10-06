@@ -102,7 +102,7 @@ export default function ComplaintsPage() {
         list={list}
         getRowId={(c) => c.id}
         searchPlaceholder={tr('Search complaints…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hostel.manage}>
             <Button onClick={() => setRecording(true)}>
               <MessageSquarePlus aria-hidden /> {tr('Record complaint')}

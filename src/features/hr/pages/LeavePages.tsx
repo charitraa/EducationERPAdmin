@@ -234,7 +234,7 @@ export function LeaveRequestsPage() {
         list={list}
         getRowId={(r) => r.id}
         searchPlaceholder={tr('Name or employee no.…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button onClick={() => setRecording(true)}>
               <CalendarPlus aria-hidden /> {tr('Record leave')}
@@ -313,7 +313,7 @@ export function LeaveBalancesPage() {
         list={list}
         getRowId={(b) => b.id}
         searchable={false}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.hr.manage}>
             <Button variant="outline" onClick={() => setOpening(true)} disabled={years.years.length === 0}>
               <FolderOpen aria-hidden /> {tr('Open a year')}

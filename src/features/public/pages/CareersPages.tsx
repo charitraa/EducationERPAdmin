@@ -8,9 +8,11 @@ import { DatePicker } from '@/components/forms/DatePicker'
 import { FormError } from '@/components/forms/FormError'
 import { FormField } from '@/components/forms/FormField'
 import { SelectControl } from '@/components/forms/SelectControl'
+import { UnsavedChangesDialog } from '@/components/forms/UnsavedChangesDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { formatDate } from '@/lib/dates'
 import { enumLabel, enumOptions } from '@/lib/formatters'
 import { publicApi, type PublicVacancy, type Receipt } from '../api/public.api'
@@ -95,6 +97,8 @@ export function PublicVacancyPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const apply = useMutation({ mutationFn: (data: Record<string, unknown>) => publicApi.apply(code, id, data, resume) })
+  const started = Boolean(cover || summary || skills || resume || education.length || experience.length || Object.values(answers).some(Boolean))
+  const blocker = useUnsavedChanges(started && !receipt)
 
   if (vacancy.isPending) return <PageLoader />
   if (vacancy.isError)
@@ -169,6 +173,7 @@ export function PublicVacancyPage() {
       </section>
 
       <form onSubmit={onSubmit} noValidate className="mt-8 grid gap-6">
+        <UnsavedChangesDialog blocker={blocker} />
         <h2 className="text-lg font-semibold">{tr('Apply')}</h2>
         <FormError message={message} />
         <fieldset className="grid gap-4 sm:grid-cols-3">

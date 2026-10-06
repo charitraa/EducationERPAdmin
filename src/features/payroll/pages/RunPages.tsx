@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -32,6 +32,7 @@ import { PERMS } from '@/shared/constants/permissions'
 import type { StatusTone } from '@/shared/constants/statuses'
 import type { BankSheet, ComputeResult, PayrollRun, PayslipRow } from '../api/payroll.api'
 import { useApproveRun, useBankSheet, useCancelRun, useComputeRun, useCreateRun, useMarkPaid, usePayslips, useRun, useRuns } from '../hooks/usePayroll'
+import { downloadCsv } from '@/lib/csv'
 import { tr } from '@/lib/i18n'
 
 const TONE: Record<string, StatusTone> = { draft: 'neutral', approved: 'info', paid: 'success', cancelled: 'muted' }
@@ -49,7 +50,8 @@ const runSchema = z
 /** Pay runs, newest first: one per branch per period. */
 export function RunsPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'campus'] })
+  const list = useListState({ filters: ['status', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useRuns(list.query)
   const create = useCreateRun()
   const { isMultiBranch, branches, selectedBranchId, defaultBranchId } = useBranches()
@@ -73,7 +75,7 @@ export function RunsPage() {
         getRowId={(r) => r.id}
         searchPlaceholder={tr('Period name…')}
         onRowClick={(r) => navigate(`/payroll/runs/${r.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.payroll.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('New run')}
@@ -82,7 +84,7 @@ export function RunsPage() {
         }
         filters={[
           { name: 'status', label: tr('Status'), options: enumOptions('PayrollRunStatusEnum') },
-          { name: 'campus', label: tr('Branch'), options: branches.map((b) => ({ value: String(b.id), label: b.name })), hidden: !isMultiBranch },
+          branchFilter,
         ]}
         empty={{ title: tr('No payroll runs yet'), description: tr('Open a run for a month, work out the payslips, approve them, then record the payment.') }}
       />
@@ -128,17 +130,11 @@ export function RunsPage() {
   )
 }
 
-const csvCell = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)
-
 /** The bank sheet as a CSV file, for the bank's bulk-transfer upload. */
 function downloadBankSheet(run: PayrollRun, sheet: BankSheet) {
   const header = [tr('Payslip'), tr('Employee no.'), tr('Name'), tr('Bank'), tr('Branch'), tr('Account name'), tr('Account number'), tr('Net pay')]
   const rows = sheet.rows.map((r) => [r.payslip, r.employee_number, r.staff_name, r.bank_name, r.bank_branch, r.account_name, r.account_number, r.net_pay])
-  const csv = [header, ...rows].map((row) => row.map(csvCell).join(',')).join('\r\n')
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
-  const a = Object.assign(document.createElement('a'), { href: url, download: `bank-sheet-${run.name.replace(/\W+/g, '-').toLowerCase()}.csv` })
-  a.click()
-  URL.revokeObjectURL(url)
+  downloadCsv(`bank-sheet-${run.name.replace(/\W+/g, '-').toLowerCase()}.csv`, [header, ...rows])
 }
 
 function BankSheetSection({ run }: { run: PayrollRun }) {

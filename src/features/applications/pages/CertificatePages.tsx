@@ -84,7 +84,7 @@ export function CertificatesPage() {
         getRowId={(c) => c.id}
         searchPlaceholder={tr('Number, title or student…')}
         onRowClick={(c) => navigate(`/certificates/${c.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.applications.certify}>
             <Button onClick={() => setIssuing(true)}>
               <FileBadge aria-hidden /> {tr('Issue certificate')}

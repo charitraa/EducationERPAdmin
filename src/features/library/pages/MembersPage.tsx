@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { PermissionGate } from '@/components/common/PermissionGate'
 import { RowActions } from '@/components/common/RowActions'
@@ -125,9 +125,10 @@ function MemberDialog({ open, record, onOpenChange }: { open: boolean; record: M
 
 export default function MembersPage() {
   const navigate = useNavigate()
-  const { isMultiBranch, branchName, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['membership_type', 'is_active'] })
-  const query = useMembers({ ...list.query, campus: selectedBranchId ?? undefined })
+  const { isMultiBranch, branchName } = useBranches()
+  const list = useListState({ filters: ['membership_type', 'is_active', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
+  const query = useMembers(list.query)
   const deactivate = useDeactivateMember()
   const [editing, setEditing] = useState<Member | 'new' | null>(null)
   const [leaving, setLeaving] = useState<Member | null>(null)
@@ -154,7 +155,7 @@ export default function MembersPage() {
         list={list}
         getRowId={(m) => m.id}
         searchPlaceholder={tr('Name, member or student no.…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.library.manage}>
             <Button onClick={() => setEditing('new')}>
               <UserPlus aria-hidden /> {tr('New member')}
@@ -164,6 +165,7 @@ export default function MembersPage() {
         filters={[
           { name: 'membership_type', label: tr('Type'), options: enumOptions('MembershipTypeEnum') },
           { name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('Active') }, { value: 'false', label: tr('Inactive') }] },
+          branchFilter,
         ]}
         rowActions={(m) => (
           <RowActions

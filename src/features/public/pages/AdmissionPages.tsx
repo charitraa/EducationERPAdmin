@@ -9,10 +9,12 @@ import { DatePicker } from '@/components/forms/DatePicker'
 import { FormError } from '@/components/forms/FormError'
 import { FormField } from '@/components/forms/FormField'
 import { SelectControl } from '@/components/forms/SelectControl'
+import { UnsavedChangesDialog } from '@/components/forms/UnsavedChangesDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDate, formatDateTime } from '@/lib/dates'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { enumLabel, enumOptions } from '@/lib/formatters'
 import type { StatusTone } from '@/shared/constants/statuses'
 import { publicApi, type PublicForm, type PublicOffer, type PublicStatus, type Receipt } from '../api/public.api'
@@ -112,6 +114,8 @@ export function AdmissionPage() {
   const [message, setMessage] = useState<string | null>(null)
   const [receipt, setReceipt] = useState<Receipt | null>(null)
   const submit = useMutation({ mutationFn: (input: Parameters<typeof publicApi.submit>[1]) => publicApi.submit(code, input) })
+  const started = Boolean(contact.name || contact.email || contact.phone || Object.values(answers).some(Boolean))
+  const blocker = useUnsavedChanges(started && !receipt)
 
   if (forms.isPending) return <PageLoader />
   if (forms.isError)
@@ -164,6 +168,7 @@ export function AdmissionPage() {
         <p className="rounded-lg border bg-card p-6 text-sm text-muted-foreground">{tr('Admissions aren’t open online right now. Please contact the school’s office.')}</p>
       ) : (
         <form onSubmit={onSubmit} noValidate className="grid gap-6">
+          <UnsavedChangesDialog blocker={blocker} />
           <FormError message={message} />
           <div className="grid gap-4 sm:grid-cols-2">
             {admissionForms.length > 1 && (

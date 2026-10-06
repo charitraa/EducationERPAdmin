@@ -1,5 +1,6 @@
 import { CalendarCheck, ClipboardCheck, ClipboardList, FileStack, GraduationCap, LifeBuoy, UserRound, Wallet } from 'lucide-react'
 import type { ComponentProps } from 'react'
+import { useSelectedBranchId } from '@/app/providers/BranchProvider'
 import { StatCard } from '@/components/data-display/StatCard'
 import { usePermissions } from '@/hooks/usePermissions'
 import { formatMoney } from '@/lib/currency'
@@ -21,11 +22,13 @@ export function DashboardStats() {
   const canAttendance = hasPermission(PERMS.attendance.view)
   const outstanding = useOutstandingFees(canFinance)
   const missing = useMissingAttendance(canAttendance)
+  const branch = useSelectedBranchId()
+  const inBranch: Record<string, string> = branch ? { campus: String(branch) } : {}
 
   return (
     <div className="grid grid-cols-2 gap-3 empty:hidden lg:grid-cols-4">
-      <CountCard label={tr('Active students')} icon={GraduationCap} resource="students" path="/students/" params={{ status: 'active' }} enabled={hasPermission(PERMS.students.view)} to="/students" />
-      <CountCard label={tr('Active staff')} icon={UserRound} resource="staff" path="/staff/" params={{ status: 'active' }} enabled={hasPermission(PERMS.staff.view)} to="/staff" />
+      <CountCard label={tr('Active students')} icon={GraduationCap} resource="students" path="/students/" params={{ ...inBranch, status: 'active' }} enabled={hasPermission(PERMS.students.view)} to="/students" />
+      <CountCard label={tr('Active staff')} icon={UserRound} resource="staff" path="/staff/" params={{ ...inBranch, status: 'active' }} enabled={hasPermission(PERMS.staff.view)} to="/staff" />
       {canAttendance && (
         <StatCard
           label={tr("Today's attendance")}
@@ -37,7 +40,7 @@ export function DashboardStats() {
           to="/attendance"
         />
       )}
-      <CountCard label={tr('Pending admissions')} icon={ClipboardList} resource="admissions" path="/admissions/" params={{ status: 'pending' }} enabled={hasPermission(PERMS.admissions.view)} to="/admissions" />
+      <CountCard label={tr('Pending admissions')} icon={ClipboardList} resource="admissions" path="/admissions/" params={{ ...inBranch, status: 'pending' }} enabled={hasPermission(PERMS.admissions.view)} to="/admissions" />
       {canFinance && (
         <StatCard
           label={tr('Overdue fees')}
@@ -49,7 +52,7 @@ export function DashboardStats() {
           to="/finance"
         />
       )}
-      <CountCard label={tr('Upcoming exams')} icon={ClipboardCheck} resource="exams" path="/exams/" params={{ status: 'scheduled' }} enabled={hasAnyPermission([PERMS.exams.view])} to="/examinations" />
+      <CountCard label={tr('Upcoming exams')} icon={ClipboardCheck} resource="exams" path="/exams/" params={{ ...inBranch, status: 'scheduled' }} enabled={hasAnyPermission([PERMS.exams.view])} to="/examinations" />
       <CountCard label={tr('Applications in review')} icon={FileStack} resource="applications" path="/applications/" params={{ status: 'in_review' }} enabled={hasPermission(PERMS.applications.view)} to="/applications" />
       <CountCard label={tr('Open support tickets')} icon={LifeBuoy} resource="support-tickets" path="/support/tickets/" params={{ status: 'open' }} enabled={hasPermission(PERMS.support.manage)} to="/support" />
     </div>

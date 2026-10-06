@@ -9,7 +9,7 @@ import { useCurrentAcademicYear } from '@/features/academics/academic-years/hook
 import { MySummary } from '@/features/self/components/MySummary'
 import { SetupChecklist } from '@/features/settings/setup/components/SetupChecklist'
 import { DashboardStats } from '../components/DashboardStats'
-import { WaitingForMe } from '../components/WaitingForMe'
+import { NeedsAttention, WaitingForMe } from '../components/WaitingForMe'
 
 function greeting() {
   const h = new Date().getHours()
@@ -54,7 +54,10 @@ export default function DashboardPage() {
           <DashboardStats />
           <MySummary />
         </div>
-        <WaitingForMe />
+        <div className="grid gap-5">
+          <WaitingForMe />
+          <NeedsAttention />
+        </div>
       </div>
     </div>
   )

@@ -65,7 +65,7 @@ export function AdmitCardsPanel({ exam }: { exam: Exam }) {
         list={list}
         getRowId={(c) => c.id}
         searchPlaceholder={tr('Search name, number, card…')}
-        toolbar={
+        create={
           manage && (
             <Button onClick={() => setGenerating(true)} disabled={exam.status === 'draft'}>
               <IdCard aria-hidden /> {tr('Issue admit cards')}

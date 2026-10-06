@@ -169,7 +169,7 @@ export default function TermResultsPage() {
         list={list}
         getRowId={(p) => p.id}
         searchable={false}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.exams.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('New term result')}

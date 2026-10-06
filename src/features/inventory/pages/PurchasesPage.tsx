@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Controller, useFieldArray } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
+import { useBranchFilter } from '@/app/providers/BranchProvider'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -129,7 +130,8 @@ function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 /** Purchase orders, from draft to delivered. */
 export default function PurchasesPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['status', 'supplier'] })
+  const list = useListState({ filters: ['status', 'supplier', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = usePurchases(list.query)
   const { suppliers } = useInventoryOptions()
   const [creating, setCreating] = useState(false)
@@ -152,7 +154,7 @@ export default function PurchasesPage() {
         getRowId={(o) => o.id}
         searchPlaceholder={tr('Order number or supplier…')}
         onRowClick={(o) => navigate(`/inventory/purchases/${o.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.inventory.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('New order')}
@@ -162,6 +164,7 @@ export default function PurchasesPage() {
         filters={[
           { name: 'status', label: tr('Status'), options: enumOptions('PurchaseOrderStatusEnum') },
           { name: 'supplier', label: tr('Supplier'), options: suppliers },
+          branchFilter,
         ]}
         empty={{ title: tr('No purchase orders yet') }}
       />

@@ -45,7 +45,7 @@ function ReasonDialog({ open, title, label, submitLabel, onClose, onSubmit }: { 
 
 /** Every loan, current and past. Filter to one member from the Members page. */
 export function LoansPage() {
-  const list = useListState({ filters: ['status', 'member'] })
+  const list = useListState({ filters: ['status', 'overdue', 'member'] })
   const query = useLoans(list.query)
   const ret = useReturnBook()
   const [returning, setReturning] = useState<{ loan: Loan; outcome: 'returned' | 'damaged' | 'lost' } | null>(null)
@@ -88,7 +88,10 @@ export function LoansPage() {
         list={list}
         getRowId={(l) => l.id}
         searchPlaceholder={tr('Accession no., title or member no.…')}
-        filters={[{ name: 'status', label: tr('Status'), options: enumOptions('IssueStatusEnum') }]}
+        filters={[
+          { name: 'status', label: tr('Status'), options: enumOptions('IssueStatusEnum') },
+          { name: 'overdue', label: tr('Due'), options: [{ value: 'true', label: tr('Overdue') }] },
+        ]}
         rowActions={(l) => (
           <RowActions
             actions={[

@@ -24,7 +24,7 @@ export default {
   'Add a branch': 'शाखा थप्नुहोस्',
   'Add a branch, or close one. With one branch, branch choices stay hidden.': 'शाखा थप्नुहोस्, वा बन्द गर्नुहोस्। एउटै शाखा भए शाखा छनोट लुकाइन्छ।',
   'Add one class per group of students, e.g. Grade 11 A and Grade 11 B. Students are placed into these.': 'हरेक विद्यार्थी समूहका लागि एउटा कक्षा थप्नुहोस्, जस्तै कक्षा ११ A र कक्षा ११ B। विद्यार्थीलाई यिनैमा राखिन्छ।',
-  'Add students directly, or record admissions and enroll them; parents are linked from a student’s page. You can come back to this step any time.': 'विद्यार्थी सिधै थप्नुहोस्, वा भर्ना दर्ता गरी भर्ना गराउनुहोस्; अभिभावक विद्यार्थीको पृष्ठबाट जोडिन्छन्। यो चरणमा जुनसुकै बेला फर्कन सक्नुहुन्छ।',
+  'Add students one by one or import a spreadsheet, or record admissions and enroll them; parents are linked from a student’s page. You can come back to this step any time.': 'विद्यार्थीहरू एक-एक गरी थप्नुहोस् वा स्प्रेडसिट आयात गर्नुहोस्, वा भर्ना दर्ता गरी भर्ना गर्नुहोस्; अभिभावकलाई विद्यार्थीको पृष्ठबाट जोडिन्छ। तपाईं यो चरणमा जुनसुकै बेला फर्कन सक्नुहुन्छ।',
   'Add teachers and office staff, then give each a login and a role under Users. You can come back to this step any time.': 'शिक्षक र कार्यालय कर्मचारी थप्नुहोस्, अनि ‘प्रयोगकर्ता’ मा हरेकलाई लगइन र भूमिका दिनुहोस्। यो चरणमा जुनसुकै बेला फर्कन सक्नुहुन्छ।',
   'Added': 'थपिएको',
   'Admission fee': 'भर्ना शुल्क',

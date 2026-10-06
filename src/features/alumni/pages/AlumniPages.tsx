@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -251,7 +251,8 @@ function GraduateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 /** Everyone who studied here: graduated through the system or added by hand. */
 export function AlumniListPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['academic_year', 'is_mentor', 'directory_visible'] })
+  const list = useListState({ filters: ['academic_year', 'is_mentor', 'directory_visible', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useAlumni(list.query)
   const [dialog, setDialog] = useState<'add' | 'graduate' | null>(null)
   const columns: Column<AlumniProfile>[] = [
@@ -281,7 +282,7 @@ export function AlumniListPage() {
         getRowId={(p) => p.id}
         searchPlaceholder={tr('Name, email, phone or student no.…')}
         onRowClick={(p) => navigate(`/alumni/${p.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.alumni.manage}>
             <Button variant="outline" onClick={() => setDialog('add')}>
               <UserPlus aria-hidden /> {tr('Add alumnus')}
@@ -294,6 +295,7 @@ export function AlumniListPage() {
         filters={[
           { name: 'is_mentor', label: tr('Mentor'), options: [{ value: 'true', label: tr('Mentors') }] },
           { name: 'directory_visible', label: tr('Directory'), options: [{ value: 'true', label: tr('Listed') }, { value: 'false', label: tr('Not listed') }] },
+          branchFilter,
         ]}
         empty={{ title: tr('No alumni yet'), description: tr('Graduate a class at the end of its final year, or add earlier graduates by hand.') }}
       />

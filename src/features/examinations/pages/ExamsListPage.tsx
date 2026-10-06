@@ -26,9 +26,9 @@ export const examDates = (e: Pick<Exam, 'start_date' | 'end_date'>) =>
 
 export default function ExamsListPage() {
   const navigate = useNavigate()
-  const { isMultiBranch, branches, branchName, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['status', 'exam_type', 'program', 'academic_year', 'campus'] })
-  const query = useExams({ ...list.query, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const { isMultiBranch, branches, branchName } = useBranches()
+  const list = useListState({ filters: ['status', 'exam_type', 'program', 'academic_year', 'campus'], followBranch: true })
+  const query = useExams(list.query)
   const types = useExamTypeOptions()
   const programs = useProgramOptions()
   const years = useAcademicYearOptions()
@@ -53,7 +53,7 @@ export default function ExamsListPage() {
         getRowId={(e) => e.id}
         searchPlaceholder={tr('Search exams…')}
         onRowClick={(e) => navigate(`/examinations/${e.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.exams.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('New exam')}

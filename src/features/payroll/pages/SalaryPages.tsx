@@ -196,7 +196,7 @@ export function SalariesPage() {
         list={list}
         getRowId={(s) => s.id}
         searchPlaceholder={tr('Name or employee no.…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.payroll.manage}>
             <Button onClick={() => setAssigning(true)}>
               <Plus aria-hidden /> {tr('Assign salary')}
@@ -313,7 +313,7 @@ export function AdjustmentsPage() {
         list={list}
         getRowId={(a) => a.id}
         searchable={false}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.payroll.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add adjustment')}

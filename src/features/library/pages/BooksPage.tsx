@@ -151,7 +151,7 @@ export default function BooksPage() {
         getRowId={(b) => b.id}
         searchPlaceholder={tr('Search title or ISBN…')}
         onRowClick={(b) => navigate(`/library/books/${b.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.library.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add book')}

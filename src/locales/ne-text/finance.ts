@@ -185,4 +185,5 @@ export default {
   'What each student is billed, what they’ve paid, and what’s still owed.': 'हरेक विद्यार्थीको बिल, तिरेको र अझै तिर्न बाँकी रकम।',
   'What one level of a program costs in one academic year. Once invoices are generated from it, its charges can’t change.': 'एक शैक्षिक वर्षमा अध्ययन कार्यक्रमको एउटा तहको शुल्क। यसबाट बिल बनेपछि शुल्क बदल्न सकिँदैन।',
   'Whole days.': 'पूरा दिन।',
+  'Go to fee structures': 'शुल्क संरचनामा जानुहोस्',
 } satisfies Record<string, string>

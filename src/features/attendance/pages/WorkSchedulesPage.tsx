@@ -208,19 +208,20 @@ export default function WorkSchedulesPage() {
     { id: 'default', header: '', cell: (s) => (s.is_default ? <StatusBadge status="current" label={tr('Default')} /> : null) },
   ]
 
+  const addButton = (
+    <PermissionGate permission={PERMS.attendance.manage}>
+      <Button onClick={crud.openCreate}>
+        <Plus aria-hidden /> {tr('Add schedule')}
+      </Button>
+    </PermissionGate>
+  )
   return (
     <div className="grid gap-8">
       <section>
         <SectionHeader
           title={tr('Work schedules')}
           description={tr('Staff days are worked out against these: late, half day, and which days count as working days.')}
-          action={
-            <PermissionGate permission={PERMS.attendance.manage}>
-              <Button onClick={crud.openCreate}>
-                <Plus aria-hidden /> {tr('Add schedule')}
-              </Button>
-            </PermissionGate>
-          }
+          action={addButton}
         />
         <DataTable
           ariaLabel={tr('Work schedules')}
@@ -237,7 +238,7 @@ export default function WorkSchedulesPage() {
               ]}
             />
           )}
-          empty={{ title: tr('No work schedules yet'), description: tr('Without one, staff check-ins are recorded but nobody is ever late or absent. Add a default for each branch.') }}
+          empty={{ title: tr('No work schedules yet'), description: tr('Without one, staff check-ins are recorded but nobody is ever late or absent. Add a default for each branch.'), action: addButton }}
         />
       </section>
       <section>

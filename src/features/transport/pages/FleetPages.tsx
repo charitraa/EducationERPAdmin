@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
-import { useBranches } from '@/app/providers/BranchProvider'
+import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PermissionGate } from '@/components/common/PermissionGate'
@@ -120,7 +120,8 @@ function VehicleDialog({ open, record, onOpenChange }: { open: boolean; record: 
 /** The fleet: every vehicle with its seats and status. */
 export function VehiclesPage() {
   const navigate = useNavigate()
-  const list = useListState({ filters: ['kind', 'is_active'] })
+  const list = useListState({ filters: ['kind', 'is_active', 'campus'], followBranch: true })
+  const branchFilter = useBranchFilter()
   const query = useVehicles(list.query)
   const [creating, setCreating] = useState(false)
   const columns: Column<Vehicle>[] = [
@@ -141,7 +142,7 @@ export function VehiclesPage() {
         getRowId={(v) => v.id}
         searchPlaceholder={tr('Name or registration…')}
         onRowClick={(v) => navigate(`/transport/vehicles/${v.id}`)}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.transport.manage}>
             <Button onClick={() => setCreating(true)}>
               <Plus aria-hidden /> {tr('Add vehicle')}
@@ -151,6 +152,7 @@ export function VehiclesPage() {
         filters={[
           { name: 'kind', label: tr('Kind'), options: enumOptions('VehicleKindEnum') },
           { name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('In service') }, { value: 'false', label: tr('Off the road') }] },
+          branchFilter,
         ]}
         empty={{ title: tr('No vehicles yet') }}
       />
@@ -382,7 +384,7 @@ const driverSchema = z.object({ staff: z.string().min(1, tr('Choose a staff memb
 
 /** Drivers and assistants, with licence expiry. Crew members are staff. */
 export function CrewPage() {
-  const list = useListState({ filters: ['role', 'is_active'] })
+  const list = useListState({ filters: ['role', 'is_active', 'license_expiring_within'] })
   const query = useDrivers(list.query)
   const staff = useStaffOptions()
   const create = useCreateDriver()
@@ -406,7 +408,7 @@ export function CrewPage() {
         list={list}
         getRowId={(d) => d.id}
         searchPlaceholder={tr('Name or licence number…')}
-        toolbar={
+        create={
           <PermissionGate permission={PERMS.transport.manage}>
             <Button onClick={crud.openCreate}>
               <Plus aria-hidden /> {tr('Add crew member')}
@@ -416,6 +418,7 @@ export function CrewPage() {
         filters={[
           { name: 'role', label: tr('Role'), options: enumOptions('CrewRoleEnum') },
           { name: 'is_active', label: tr('Status'), options: [{ value: 'true', label: tr('On duty') }, { value: 'false', label: tr('Off duty') }] },
+          { name: 'license_expiring_within', label: tr('Licence expires'), options: [{ value: '0', label: tr('Already expired') }, { value: '30', label: tr('Within 30 days') }, { value: '90', label: tr('Within 90 days') }] },
         ]}
         rowActions={(d) => (
           <RowActions

@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { FilterDef } from '@/components/common/FilterPanel'
 import { useAuth } from '@/hooks/useAuth'
+import { tr } from '@/lib/i18n'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import type { Id } from '@/shared/types/api'
 import type { Campus } from '@/shared/types/organization'
@@ -86,4 +88,15 @@ export function useBranches() {
   const ctx = useContext(BranchContext)
   if (!ctx) throw new Error('useBranches must be used inside <BranchProvider>')
   return ctx
+}
+
+/** The header's branch, or null for all (and outside the signed-in layout). */
+export function useSelectedBranchId(): Id | null {
+  return useContext(BranchContext)?.selectedBranchId ?? null
+}
+
+/** The `campus` list filter, shown only when there are several branches. */
+export function useBranchFilter(): FilterDef {
+  const { isMultiBranch, branches } = useBranches()
+  return { name: 'campus', label: tr('Branch'), hidden: !isMultiBranch, options: branches.map((b) => ({ value: String(b.id), label: b.name })) }
 }

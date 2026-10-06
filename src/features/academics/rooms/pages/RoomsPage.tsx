@@ -18,10 +18,10 @@ import { useRemoveRoom, useRooms } from '../hooks/useRooms'
 import { tr } from '@/lib/i18n'
 
 export default function RoomsPage() {
-  const { isMultiBranch, branches, selectedBranchId } = useBranches()
-  const list = useListState({ filters: ['campus', 'room_type', 'is_active'], defaultOrdering: 'code' })
+  const { isMultiBranch, branches } = useBranches()
+  const list = useListState({ filters: ['campus', 'room_type', 'is_active'], followBranch: true, defaultOrdering: 'code' })
   // The header's branch choice applies unless the user picked one here.
-  const query = useRooms({ ...list.query, campus: list.filters.campus ?? selectedBranchId ?? undefined })
+  const query = useRooms(list.query)
   const crud = useCrudState<Room>()
   const remove = useRemoveRoom()
 
