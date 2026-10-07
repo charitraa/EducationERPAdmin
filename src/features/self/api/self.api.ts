@@ -3,7 +3,7 @@ import type { ApplicationRow, Certificate } from '@/features/applications/api/ap
 import type { AttendanceRecord, StaffDay, StaffReportRow, StudentReport } from '@/features/attendance/api/attendance.api'
 import type { Interview, JobOffer } from '@/features/careers/api/careers.api'
 import type { Event, Registration } from '@/features/events/api/events.api'
-import type { ReportCard, Transcript } from '@/features/examinations/api/examinations.api'
+import type { AdmitCardData, ReportCard, Transcript } from '@/features/examinations/api/examinations.api'
 import type { Statement } from '@/features/finance/api/finance.api'
 import type { Allocation, Complaint } from '@/features/hostel/api/hostel.api'
 import type { Contract, EmployeeProfile, LeaveBalance, LeaveRequest, StaffDocument } from '@/features/hr/api/hr.api'
@@ -57,19 +57,7 @@ export interface MyExam {
   admit_card: { id: Id; card_number: string; status: string; withheld_reason: string } | null
 }
 
-/** `/admit-cards/me/`: a card as printed. */
-export interface AdmitCardData {
-  card_number: string
-  status: string
-  withheld_reason: string
-  exam: { id: Id; name: string; type: string; start_date: string; end_date: string; instructions: string }
-  student: { id: Id; name: string; student_number: string }
-  campus: string
-  program: string
-  section: string
-  seat: MyExam['seat']
-  papers: MyExam['papers']
-}
+export type { AdmitCardData }
 
 /** `/events/me/`: published events at the student's campus, with their registration. */
 export type MyEvent = Event & { my_registration: Registration | null }

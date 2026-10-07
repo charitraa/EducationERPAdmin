@@ -42,7 +42,7 @@ export function AppShell() {
       </Sheet>
       <div className="lg:pl-60 print:pl-0">
         <Header onOpenMenu={() => setMenuOpen(true)} onOpenSearch={() => setSearchOpen(true)} />
-        <main id="main" className="mx-auto max-w-[1600px] px-3 pb-24 pt-5 sm:px-5 md:pb-10">
+        <main id="main" className="mx-auto max-w-[1600px] px-3 pb-24 pt-5 sm:px-5 md:pb-10 print:max-w-none print:p-0">
           <Outlet />
         </main>
       </div>

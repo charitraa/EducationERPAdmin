@@ -1,5 +1,6 @@
-import { Ban, CheckCircle2, IdCard } from 'lucide-react'
+import { Ban, CheckCircle2, IdCard, Printer } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { RowActions } from '@/components/common/RowActions'
@@ -65,6 +66,15 @@ export function AdmitCardsPanel({ exam }: { exam: Exam }) {
         list={list}
         getRowId={(c) => c.id}
         searchPlaceholder={tr('Search name, number, card…')}
+        toolbar={
+          (cards.data?.count ?? 0) > 0 && (
+            <Button asChild variant="outline">
+              <Link to={`/examinations/${exam.id}/admit-cards/print`}>
+                <Printer aria-hidden /> {tr('Print')}
+              </Link>
+            </Button>
+          )
+        }
         create={
           manage && (
             <Button onClick={() => setGenerating(true)} disabled={exam.status === 'draft'}>

@@ -1,5 +1,6 @@
-import { Eraser, LayoutGrid, Plus, Trash2, UserPlus } from 'lucide-react'
+import { Eraser, LayoutGrid, Plus, Printer, Trash2, UserPlus } from 'lucide-react'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Controller } from 'react-hook-form'
 import { z } from 'zod'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
@@ -188,18 +189,25 @@ export function SeatingPanel({ exam }: { exam: Exam }) {
           title={tr('Seat plan')}
           description={tr('Students from different classes alternate, so neighbours aren’t classmates. Making a new plan replaces the old one.')}
           action={
-            manage && (
-              <div className="flex gap-2">
-                {(seats.data?.count ?? 0) > 0 && (
+            <div className="flex gap-2">
+              {(seats.data?.count ?? 0) > 0 && (
+                <Button asChild variant="outline">
+                  <Link to={`/examinations/${exam.id}/seating/print`}>
+                    <Printer aria-hidden /> {tr('Print')}
+                  </Link>
+                </Button>
+              )}
+              {manage && (seats.data?.count ?? 0) > 0 && (
                   <Button variant="outline" onClick={() => setClearing(true)}>
                     <Eraser aria-hidden /> {tr('Clear')}
                   </Button>
                 )}
+              {manage && (
                 <Button onClick={() => void previewPlan()} disabled={exam.status === 'draft' || seatPlan.isPending}>
                   <LayoutGrid aria-hidden /> {tr('Make seat plan')}
                 </Button>
-              </div>
-            )
+              )}
+            </div>
           }
         />
         {manage && exam.status === 'draft' && <p className="mb-2 text-sm text-muted-foreground">{tr('Schedule the exam first: seating follows who sits it.')}</p>}

@@ -1,4 +1,4 @@
-import { Eye, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Plus, Trash2, Upload } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
@@ -59,7 +59,19 @@ export default function StaffListPage() {
 
   return (
     <>
-      <PageHeader title={tr('Staff')} description={tr('Teachers and everyone else who works at the school.')} actions={addButton(tr('Add staff member'))} />
+      <PageHeader title={tr('Staff')} description={tr('Teachers and everyone else who works at the school.')} actions={
+          <>
+            <PermissionGate permission={PERMS.staff.create}>
+              <Button asChild variant="outline">
+                <Link to="/staff/import">
+                  <Upload aria-hidden /> {tr('Import')}
+                </Link>
+              </Button>
+            </PermissionGate>
+            {addButton(tr('Add staff member'))}
+          </>
+        }
+      />
       <DataTable
         ariaLabel={tr('Staff')}
         columns={columns}

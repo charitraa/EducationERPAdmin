@@ -14,3 +14,16 @@ export const PICKER_PARAMS: ListParams = { page: 1, page_size: MAX_PAGE_SIZE }
 export function emptyPage<T>(): Paginated<T> {
   return { count: 0, total_pages: 0, page: 1, page_size: DEFAULT_PAGE_SIZE, next: null, previous: null, results: [] }
 }
+
+/**
+ * Every row of a list, page by page at the largest size. For print views
+ * that need the whole set (a class's admit cards, an exam's seats).
+ */
+export async function fetchAllPages<T>(list: (params: ListParams) => Promise<Paginated<T>>, params: ListParams = {}): Promise<T[]> {
+  const rows: T[] = []
+  for (let page = 1; ; page++) {
+    const data = await list({ ...params, page, page_size: MAX_PAGE_SIZE })
+    rows.push(...data.results)
+    if (!data.next || page >= data.total_pages) return rows
+  }
+}

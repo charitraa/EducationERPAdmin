@@ -30,6 +30,20 @@ export type ResultPlanInput = Schema<'ResultPlanRequest'>
 
 // The shapes below are hand-written: these actions are typed `None` in the OpenAPI.
 
+/** A card as printed: `/admit-cards/{id}/data/` and each item of `/admit-cards/me/`. */
+export interface AdmitCardData {
+  card_number: string
+  status: string
+  withheld_reason: string
+  exam: { id: Id; name: string; type: string; start_date: string; end_date: string; instructions: string }
+  student: { id: Id; name: string; student_number: string }
+  campus: string
+  program: string
+  section: string
+  seat: { room: string; seat_number: string | number } | null
+  papers: Array<{ subject_name: string; date: string | null; start_time: string | null; end_time: string | null }>
+}
+
 /** A paper a teacher marks (from `/mark-sheets/mine/`). */
 export interface MyPaper {
   exam: Id

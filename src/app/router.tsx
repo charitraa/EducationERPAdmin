@@ -85,6 +85,7 @@ const ParentDetailPage = lazy(() => import('@/features/parents/pages/ParentDetai
 const StaffListPage = lazy(() => import('@/features/staff/pages/StaffListPage'))
 const StaffDetailPage = lazy(() => import('@/features/staff/pages/StaffDetailPage'))
 const StaffFormPage = lazy(() => import('@/features/staff/pages/StaffFormPage'))
+const StaffImportPage = lazy(() => import('@/features/staff/pages/StaffImportPage'))
 const UsersListPage = lazy(() => import('@/features/users/pages/UsersListPage'))
 const UserDetailPage = lazy(() => import('@/features/users/pages/UserDetailPage'))
 const RolesListPage = lazy(() => import('@/features/roles/pages/RolesListPage'))
@@ -115,6 +116,8 @@ const WorkSchedulesPage = lazy(() => import('@/features/attendance/pages/WorkSch
 const AttendanceDevicesPage = lazy(() => import('@/features/attendance/pages/DevicesPage'))
 const ExamsListPage = lazy(() => import('@/features/examinations/pages/ExamsListPage'))
 const ExamDetailPage = lazy(() => import('@/features/examinations/pages/ExamDetailPage'))
+const AdmitCardsPrintPage = lazy(() => import('@/features/examinations/pages/ExamPrintPages').then((m) => ({ default: m.AdmitCardsPrintPage })))
+const SeatPlanPrintPage = lazy(() => import('@/features/examinations/pages/ExamPrintPages').then((m) => ({ default: m.SeatPlanPrintPage })))
 const MarkSheetsPage = lazy(() => import('@/features/examinations/pages/MarkSheetsPage'))
 const MarkEntryPage = lazy(() => import('@/features/examinations/pages/MarkEntryPage'))
 const ResultsPage = lazy(() => import('@/features/examinations/pages/ResultsPage'))
@@ -145,6 +148,7 @@ const PurchasesPage = lazy(() => import('@/features/inventory/pages/PurchasesPag
 const PurchaseDetailPage = lazy(() => import('@/features/inventory/pages/PurchasesPage').then((m) => ({ default: m.PurchaseDetailPage })))
 const AssetsPage = lazy(() => import('@/features/inventory/pages/AssetsPage'))
 const AssetDetailPage = lazy(() => import('@/features/inventory/pages/AssetsPage').then((m) => ({ default: m.AssetDetailPage })))
+const AssetLabelsPage = lazy(() => import('@/features/inventory/pages/AssetLabelsPage'))
 const AssignmentsPage = lazy(() => import('@/features/inventory/pages/AssetActivityPages').then((m) => ({ default: m.AssignmentsPage })))
 const MaintenancePage = lazy(() => import('@/features/inventory/pages/AssetActivityPages').then((m) => ({ default: m.MaintenancePage })))
 const InventorySetupPage = lazy(() => import('@/features/inventory/pages/InventorySetupPage'))
@@ -182,6 +186,7 @@ const OffersPage = lazy(() => import('@/features/careers/pages/CandidatePages').
 const JobBoardPage = lazy(() => import('@/features/careers/pages/BoardPage').then((m) => ({ default: m.BoardPage })))
 const AlumniListPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.AlumniListPage })))
 const AlumnusPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.AlumnusPage })))
+const AlumniImportPage = lazy(() => import('@/features/alumni/pages/AlumniImportPage'))
 const MentorsPage = lazy(() => import('@/features/alumni/pages/AlumniPages').then((m) => ({ default: m.MentorsPage })))
 const AlumniEventsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.AlumniEventsPage })))
 const CampaignsPage = lazy(() => import('@/features/alumni/pages/GivingPages').then((m) => ({ default: m.CampaignsPage })))
@@ -289,6 +294,7 @@ const staffRoutes: RouteObject = {
   children: [
     { index: true, element: page(StaffListPage) },
     { path: 'new', handle: crumb(tr('Add staff member')), element: page(StaffFormPage, PERMS.staff.create) },
+    { path: 'import', handle: crumb(tr('Import staff')), element: page(StaffImportPage, PERMS.staff.create) },
     { path: ':id', handle: crumb(tr('Staff member')), element: page(StaffDetailPage) },
     { path: ':id/edit', handle: crumb(tr('Edit')), element: page(StaffFormPage, PERMS.staff.update) },
   ],
@@ -425,6 +431,8 @@ const examinationsRoutes: RouteObject = {
     },
     { path: 'mark-sheets/:id', handle: crumb(tr('Marks')), element: page(MarkEntryPage) },
     { path: ':id', handle: crumb(tr('Exam')), element: page(ExamDetailPage, PERMS.exams.view) },
+    { path: ':id/admit-cards/print', handle: crumb(tr('Print admit cards')), element: page(AdmitCardsPrintPage, PERMS.exams.view) },
+    { path: ':id/seating/print', handle: crumb(tr('Print seat plan')), element: page(SeatPlanPrintPage, PERMS.exams.view) },
   ],
 }
 
@@ -491,6 +499,7 @@ const inventoryRoutes: RouteObject = {
       ],
     },
     { path: 'purchases/:id', handle: crumb(trc('purchase', 'Order')), element: page(PurchaseDetailPage) },
+    { path: 'assets/labels', handle: crumb(tr('Asset labels')), element: page(AssetLabelsPage) },
     { path: 'assets/:id', handle: crumb(tr('Asset')), element: page(AssetDetailPage) },
   ],
 }
@@ -648,6 +657,7 @@ const alumniRoutes: RouteObject = {
         { path: 'donations', handle: crumb(tr('Donations')), element: page(DonationsPage) },
       ],
     },
+    { path: 'import', handle: crumb(tr('Import alumni')), element: page(AlumniImportPage, PERMS.alumni.manage) },
     { path: ':id', handle: crumb(tr('Alumnus')), element: page(AlumnusPage) },
   ],
 }

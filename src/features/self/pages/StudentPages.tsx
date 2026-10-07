@@ -11,11 +11,11 @@ import { FormField } from '@/components/forms/FormField'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { CertificateDocument } from '@/features/applications/pages/CertificatePages'
+import { AdmitCardDocument } from '@/features/examinations/components/AdmitCardDocument'
 import { ReportCardView, TranscriptView } from '@/features/examinations/components/ReportCardView'
 import { ResultBadge } from '@/features/examinations/components/ResultBits'
 import { Money } from '@/features/finance/components/money'
 import { hhmm } from '@/features/timetable/api/timetable.api'
-import { useAuth } from '@/hooks/useAuth'
 import { toast } from '@/hooks/useToast'
 import { formatDate, formatDateTime } from '@/lib/dates'
 import { enumLabel } from '@/lib/formatters'
@@ -98,7 +98,6 @@ export function MyExamsPage() {
 export function MyAdmitCardPage() {
   const exam = Number(useParams().examId)
   const q = useMyAdmitCard({ ...useChildParam(), exam })
-  const { user } = useAuth()
   return (
     <Loaded query={q}>
       {(cards) => {
@@ -117,66 +116,7 @@ export function MyAdmitCardPage() {
                 </Button>
               }
             />
-            <article className="rounded-lg border bg-card p-6 print:border-0 print:p-0">
-              <header className="border-b pb-3 text-center">
-                <p className="text-lg font-semibold">{user?.organization?.name}</p>
-                <p className="text-sm text-muted-foreground">{c.campus}</p>
-                <h1 className="mt-3 text-xl font-bold uppercase tracking-wide">{tr('Admit card')}</h1>
-                <p className="text-sm">
-                  {c.exam.name} · {c.exam.type}
-                </p>
-              </header>
-              <dl className="my-4 grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <dt className="text-xs text-muted-foreground">{tr('Student')}</dt>
-                  <dd className="font-medium">{c.student.name}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">{tr('Card number')}</dt>
-                  <dd className="font-mono">{c.card_number}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">{tr('Student number')}</dt>
-                  <dd className="font-mono">{c.student.student_number}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">{tr('Class')}</dt>
-                  <dd>
-                    {c.program} · {c.section}
-                  </dd>
-                </div>
-                {c.seat && (
-                  <div>
-                    <dt className="text-xs text-muted-foreground">{tr('Seat')}</dt>
-                    <dd>
-                      {tr('{room}, seat {seat_number}', { room: c.seat.room, seat_number: c.seat.seat_number })}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-              <table className="w-full text-sm">
-                <thead className="border-y text-left text-xs text-muted-foreground">
-                  <tr>
-                    <th className="py-1.5">{tr('Paper')}</th>
-                    <th className="py-1.5">{tr('Date')}</th>
-                    <th className="py-1.5">{tr('Time')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {c.papers.map((p, i) => (
-                    <tr key={i}>
-                      <td className="py-1.5">{p.subject_name}</td>
-                      <td className="py-1.5 tabular-nums">{p.date ? formatDate(p.date) : '—'}</td>
-                      <td className="py-1.5 tabular-nums">{p.start_time ? `${hhmm(p.start_time)}–${hhmm(p.end_time)}` : '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {c.exam.instructions && <p className="mt-4 whitespace-pre-wrap text-xs">{c.exam.instructions}</p>}
-              <footer className="mt-14 flex justify-end">
-                <div className="w-48 border-t pt-2 text-center text-xs">{tr('Exam controller')}</div>
-              </footer>
-            </article>
+            <AdmitCardDocument card={c} />
           </div>
         )
       }}

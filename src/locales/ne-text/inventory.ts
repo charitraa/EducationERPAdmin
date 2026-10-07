@@ -188,4 +188,12 @@ export default {
   'Where it is and who has it change through the asset’s actions.': 'यो कहाँ छ र कोसँग छ भन्ने सम्पत्तिका कार्यहरूबाट बदलिन्छ।',
   'Who has had it': 'कस-कससँग रह्यो',
   'With {holder}': '{holder} सँग',
+  'Disposed assets get no label.': 'हटाइएका सम्पत्तिको लेबल बन्दैन।',
+  'No assets to label': 'लेबल लगाउने सम्पत्ति छैन',
+  'Print label': 'लेबल छाप्नुहोस्',
+  'Print labels': 'लेबल छाप्नुहोस्',
+  'Print {count} labels': '{count} लेबल छाप्नुहोस्',
+  'QR code for {tag}': '{tag} को QR कोड',
+  'S/N {serial}': 'क्र.सं. {serial}',
+  '{labels} on {sheets}. Use A4 sticker sheets of 21 (63.5 × 38.1 mm), print at 100% scale, and stick each label where it’s easy to scan.': '{sheets} मा {labels}। २१ वटाको A4 स्टिकर पाना (63.5 × 38.1 mm) प्रयोग गर्नुहोस्, १००% स्केलमा छाप्नुहोस्, र प्रत्येक लेबल स्क्यान गर्न सजिलो ठाउँमा टाँस्नुहोस्।',
 } satisfies Record<string, string>

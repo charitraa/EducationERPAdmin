@@ -59,6 +59,9 @@ export const purchasesApi = {
 export const purchaseKeys = createQueryKeys('inventory-purchases')
 
 const assetsBase = createResourceApi<Asset, AssetInput>('/inventory/assets/')
+/** The asset-list filters that "Print labels" carries over to the labels page. */
+export const LABEL_FILTERS = ['status', 'condition', 'store', 'campus', 'search'] as const
+
 export const assetsApi = {
   list: assetsBase.list,
   get: assetsBase.get,

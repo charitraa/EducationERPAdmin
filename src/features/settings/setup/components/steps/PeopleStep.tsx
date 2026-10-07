@@ -34,16 +34,21 @@ export function PeopleStep({ kind }: { kind: 'staff' | 'students' }) {
       </ul>
       <StepNote>
         {kind === 'staff'
-          ? tr('Add teachers and office staff, then give each a login and a role under Users. You can come back to this step any time.')
+          ? tr('Add teachers and office staff one by one or import a spreadsheet, then give each a login and a role under Users. You can come back to this step any time.')
           : tr('Add students one by one or import a spreadsheet, or record admissions and enroll them; parents are linked from a student’s page. You can come back to this step any time.')}
       </StepNote>
       <div className="flex flex-wrap gap-2">
         {kind === 'staff' ? (
           <>
             {hasPermission(PERMS.staff.create) && (
-              <Button asChild variant="outline">
-                <Link to="/staff/new">{tr('Add staff member')}</Link>
-              </Button>
+              <>
+                <Button asChild variant="outline">
+                  <Link to="/staff/new">{tr('Add staff member')}</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/staff/import">{tr('Import staff')}</Link>
+                </Button>
+              </>
             )}
             {hasPermission(PERMS.users.view) && (
               <Button asChild variant="outline">

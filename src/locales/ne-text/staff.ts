@@ -25,4 +25,6 @@ export default {
   'They’re active again.': 'उनी फेरि सक्रिय भए।',
   'Unique in your school.': 'तपाईंको विद्यालयमा अद्वितीय।',
   'Your account can’t see any branch; ask an administrator.': 'तपाईंको खाताले कुनै शाखा देख्न सक्दैन; प्रशासकलाई भन्नुहोस्।',
+  'Add all your teachers and office staff at once from a spreadsheet. Logins and roles are given afterwards, from Users.': 'सबै शिक्षक र कार्यालय कर्मचारी स्प्रेडसिटबाट एकैपटक थप्नुहोस्। लगइन र भूमिका पछि प्रयोगकर्ताहरूबाट दिइन्छ।',
+  'See staff': 'कर्मचारी हेर्नुहोस्',
 } satisfies Record<string, string>

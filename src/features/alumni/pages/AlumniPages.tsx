@@ -1,7 +1,7 @@
-import { GraduationCap, Pencil, Plus, Trash2, UserPlus } from 'lucide-react'
+import { GraduationCap, Pencil, Plus, Trash2, Upload, UserPlus } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Controller } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useBranchFilter, useBranches } from '@/app/providers/BranchProvider'
 import { DeleteDialog } from '@/components/common/DeleteDialog'
@@ -284,6 +284,11 @@ export function AlumniListPage() {
         onRowClick={(p) => navigate(`/alumni/${p.id}`)}
         create={
           <PermissionGate permission={PERMS.alumni.manage}>
+            <Button asChild variant="outline">
+              <Link to="/alumni/import">
+                <Upload aria-hidden /> {tr('Import')}
+              </Link>
+            </Button>
             <Button variant="outline" onClick={() => setDialog('add')}>
               <UserPlus aria-hidden /> {tr('Add alumnus')}
             </Button>
@@ -297,7 +302,7 @@ export function AlumniListPage() {
           { name: 'directory_visible', label: tr('Directory'), options: [{ value: 'true', label: tr('Listed') }, { value: 'false', label: tr('Not listed') }] },
           branchFilter,
         ]}
-        empty={{ title: tr('No alumni yet'), description: tr('Graduate a class at the end of its final year, or add earlier graduates by hand.') }}
+        empty={{ title: tr('No alumni yet'), description: tr('Graduate a class at the end of its final year, or add earlier graduates by hand or from a spreadsheet.') }}
       />
       <ProfileDialog open={dialog === 'add'} record={null} onOpenChange={(o) => !o && setDialog(null)} />
       <GraduateDialog open={dialog === 'graduate'} onOpenChange={(o) => !o && setDialog(null)} />

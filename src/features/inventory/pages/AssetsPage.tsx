@@ -1,7 +1,7 @@
-import { ArrowRightLeft, Ban, Pencil, Plus, Undo2, UserPlus, Wrench } from 'lucide-react'
+import { ArrowRightLeft, Ban, Pencil, Plus, Undo2, UserPlus, Wrench, QrCode as QrCodeIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Controller } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { useBranchFilter } from '@/app/providers/BranchProvider'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -32,7 +32,7 @@ import { optionalIsoDate } from '@/lib/validation'
 import { PICKER_PARAMS } from '@/shared/api/pagination'
 import { PERMS } from '@/shared/constants/permissions'
 import type { StatusTone } from '@/shared/constants/statuses'
-import type { Asset, AssetCondition, Disposal, Maintenance } from '../api/inventory.api'
+import { LABEL_FILTERS, type Asset, type AssetCondition, type Disposal, type Maintenance } from '../api/inventory.api'
 import {
   useAsset,
   useAssets,
@@ -134,6 +134,8 @@ export default function AssetsPage() {
   const query = useAssets(list.query)
   const { stores } = useInventoryOptions()
   const [creating, setCreating] = useState(false)
+  const labelParams = new URLSearchParams(Object.entries(list.query).filter(([k, v]) => (LABEL_FILTERS as readonly string[]).includes(k) && v != null && v !== '').map(([k, v]) => [k, String(v)]))
+  const labelsLink = `/inventory/assets/labels${labelParams.size ? `?${labelParams}` : ''}`
   const columns: Column<Asset>[] = [
     { id: 'tag', header: tr('Tag'), className: 'font-mono text-xs', cell: (a) => a.tag },
     { id: 'item', header: tr('Asset'), mobile: 'title', cell: (a) => <span className="font-medium">{a.item_name}</span> },
@@ -152,6 +154,20 @@ export default function AssetsPage() {
         getRowId={(a) => a.id}
         searchPlaceholder={tr('Tag, serial or item…')}
         onRowClick={(a) => navigate(`/inventory/assets/${a.id}`)}
+        toolbar={
+          (query.data?.count ?? 0) > 0 && (
+            <Button asChild variant="outline">
+              <Link to={labelsLink}>
+                <QrCodeIcon aria-hidden /> {tr('Print labels')}
+              </Link>
+            </Button>
+          )
+        }
+        bulkActions={(selected, clear) => (
+          <Button size="sm" variant="outline" onClick={() => (clear(), navigate(`/inventory/assets/labels?ids=${selected.map((a) => a.id).join(',')}`))}>
+            <QrCodeIcon aria-hidden /> {tr('Print {count} labels', { count: selected.length })}
+          </Button>
+        )}
         create={
           <PermissionGate permission={PERMS.inventory.manage}>
             <Button onClick={() => setCreating(true)}>
@@ -264,38 +280,47 @@ export function AssetDetailPage() {
           </span>
         }
         actions={
-          manage && (
-            <>
-              {a.status === 'in_store' && (
-                <Button onClick={() => setDialog('assign')}>
-                  <UserPlus aria-hidden /> {tr('Assign')}
-                </Button>
-              )}
-              {a.status === 'assigned' && (
-                <Button onClick={() => setDialog('return')}>
-                  <Undo2 aria-hidden /> {tr('Take back')}
-                </Button>
-              )}
-              {a.status === 'in_store' && (
-                <Button variant="outline" onClick={() => setDialog('move')}>
-                  <ArrowRightLeft aria-hidden /> {tr('Move')}
-                </Button>
-              )}
-              {a.status !== 'maintenance' && (
-                <Button variant="outline" onClick={() => setDialog('maintain')}>
-                  <Wrench aria-hidden /> {tr('Maintenance')}
-                </Button>
-              )}
-              <Button variant="outline" onClick={() => setDialog('edit')}>
-                <Pencil aria-hidden /> {tr('Edit')}
+          <>
+            {a.status !== 'disposed' && (
+              <Button asChild variant="outline">
+                <Link to={`/inventory/assets/labels?ids=${a.id}`}>
+                  <QrCodeIcon aria-hidden /> {tr('Print label')}
+                </Link>
               </Button>
-              {a.status === 'in_store' && (
-                <Button variant="outline" onClick={() => setDialog('dispose')}>
-                  <Ban aria-hidden /> {tr('Dispose')}
+            )}
+            {manage && (
+              <>
+                {a.status === 'in_store' && (
+                  <Button onClick={() => setDialog('assign')}>
+                    <UserPlus aria-hidden /> {tr('Assign')}
+                  </Button>
+                )}
+                {a.status === 'assigned' && (
+                  <Button onClick={() => setDialog('return')}>
+                    <Undo2 aria-hidden /> {tr('Take back')}
+                  </Button>
+                )}
+                {a.status === 'in_store' && (
+                  <Button variant="outline" onClick={() => setDialog('move')}>
+                    <ArrowRightLeft aria-hidden /> {tr('Move')}
+                  </Button>
+                )}
+                {a.status !== 'maintenance' && (
+                  <Button variant="outline" onClick={() => setDialog('maintain')}>
+                    <Wrench aria-hidden /> {tr('Maintenance')}
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setDialog('edit')}>
+                  <Pencil aria-hidden /> {tr('Edit')}
                 </Button>
-              )}
-            </>
-          )
+                {a.status === 'in_store' && (
+                  <Button variant="outline" onClick={() => setDialog('dispose')}>
+                    <Ban aria-hidden /> {tr('Dispose')}
+                  </Button>
+                )}
+              </>
+            )}
+          </>
         }
       />
       <dl className="mb-6 grid gap-3 rounded-lg border bg-card p-4 text-sm sm:grid-cols-4">

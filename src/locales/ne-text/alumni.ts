@@ -68,7 +68,6 @@ export default {
   'Goal': 'लक्ष्य',
   'Graduate': 'उत्तीर्ण गराउनुहोस्',
   'Graduate a class': 'कक्षा उत्तीर्ण गराउनुहोस्',
-  'Graduate a class at the end of its final year, or add earlier graduates by hand.': 'अन्तिम वर्षको अन्त्यमा कक्षा उत्तीर्ण गराउनुहोस्, वा पहिलेका उत्तीर्णहरू हातले थप्नुहोस्।',
   'graduated {date}': '{date} मा उत्तीर्ण',
   'Graduated on': 'उत्तीर्ण मिति',
   'Guests included. Empty: no limit.': 'पाहुनासमेत। खाली: सीमा छैन।',
@@ -146,4 +145,8 @@ export default {
   'Who’s coming': 'को आउँदैछन्',
   'Whole organization': 'पूरै संस्था',
   'Work': 'काम',
+  'Bring in earlier graduates from your registers or an old system. New classes are graduated from Alumni instead.': 'आफ्ना रजिस्टर वा पुरानो प्रणालीबाट पहिलेका स्नातकहरू ल्याउनुहोस्। नयाँ कक्षाहरू भने पूर्वविद्यार्थीबाट स्नातक गराइन्छ।',
+  'Graduate a class at the end of its final year, or add earlier graduates by hand or from a spreadsheet.': 'अन्तिम वर्षको अन्त्यमा कक्षालाई स्नातक गराउनुहोस्, वा पहिलेका स्नातकहरू हातैले वा स्प्रेडसिटबाट थप्नुहोस्।',
+  'In the directory': 'निर्देशिकामा',
+  'See alumni': 'पूर्वविद्यार्थी हेर्नुहोस्',
 } satisfies Record<string, string>

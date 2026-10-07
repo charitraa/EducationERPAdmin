@@ -102,3 +102,22 @@
     padding-bottom: max(env(safe-area-inset-bottom), 0px);
   }
 }
+
+/*
+ * Asset tag labels on A4 sticker sheets of 21 (3 × 7, 63.5 × 38.1 mm). The
+ * labels page sets the sheet margins itself (an @page rule while it's open).
+ */
+@media print {
+  .asset-labels {
+    display: grid;
+    grid-template-columns: repeat(3, 63.5mm);
+    grid-auto-rows: 38.1mm;
+    column-gap: 2.5mm;
+    row-gap: 0;
+  }
+  .asset-label {
+    height: 38.1mm;
+    padding: 3mm;
+    break-inside: avoid;
+  }
+}
