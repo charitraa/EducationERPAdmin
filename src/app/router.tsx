@@ -33,6 +33,8 @@ const ForgotPasswordPage = lazy(() => import('@/features/authentication/pages/Fo
 const ResetPasswordPage = lazy(() => import('@/features/authentication/pages/ResetPasswordPage'))
 const SignupPage = lazy(() => import('@/features/authentication/pages/SignupPage'))
 const SignupVerifyPage = lazy(() => import('@/features/authentication/pages/SignupVerifyPage'))
+const TermsOfServicePage = lazy(() => import('@/features/landing/pages/LegalPage').then((m) => ({ default: () => <m.default kind="terms" /> })))
+const PrivacyPage = lazy(() => import('@/features/landing/pages/LegalPage').then((m) => ({ default: () => <m.default kind="privacy" /> })))
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const SelfMyTimetablePage = lazy(() => import('@/features/self/pages/SharedPages').then((m) => ({ default: m.MyTimetablePage })))
@@ -723,6 +725,8 @@ export const router = createBrowserRouter([
   { path: '/reset-password', element: page(ResetPasswordPage) },
   { path: '/signup', element: page(SignupPage) },
   { path: '/signup/verify', element: page(SignupVerifyPage) },
+  { path: '/terms', element: page(TermsOfServicePage) },
+  { path: '/privacy', element: page(PrivacyPage) },
   {
     path: '/public/:organizationCode',
     children: [

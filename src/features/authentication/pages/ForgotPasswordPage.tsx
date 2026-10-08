@@ -12,11 +12,13 @@ import { applyServerErrors } from '@/lib/errors'
 import { passwordResetApi } from '../api/account.api'
 import { AuthLayout } from '../components/AuthLayout'
 import { tr } from '@/lib/i18n'
+import { usePageMeta } from '@/hooks/usePageMeta'
 
 const schema = z.object({ email: z.string().trim().min(1, tr('Enter your email.')).email(tr('Enter a valid email.')) })
 
 /** Asks for a reset link. The answer is the same whether or not the account exists. */
 export default function ForgotPasswordPage() {
+  usePageMeta({ title: tr('Reset your password · Education ERP'), noindex: true })
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
   const form = useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema), defaultValues: { email: '' } })

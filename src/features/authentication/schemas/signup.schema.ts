@@ -6,7 +6,7 @@ export const ORG_CODE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
 
 export const signupSchema = z
   .object({
-    organization_name: z.string().trim().min(2, tr('Enter your school or college name.')).max(200),
+    organization_name: z.string().trim().min(2, tr('Enter your institution name.')).max(200),
     organization_code: z
       .string()
       .trim()
@@ -21,6 +21,7 @@ export const signupSchema = z
     phone: z.string().trim().max(32),
     password: z.string().min(8, tr('At least 8 characters.')),
     confirm: z.string(),
+    terms: z.boolean().refine((v) => v, tr('Please accept the Terms of Service and Privacy Policy.')),
   })
   .refine((v) => v.password === v.confirm, { path: ['confirm'], message: tr("Passwords don't match.") })
 

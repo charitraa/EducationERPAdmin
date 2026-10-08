@@ -31,15 +31,24 @@ export function isSessionRejected(err: unknown): boolean {
 /**
  * Trade the refresh token for a new pair. The backend rotates refresh tokens,
  * so concurrent 401s must share one call: a second call with the old token would fail.
+ * A remembered session is shared by every tab, so another tab may rotate it
+ * first; then the stored token has changed and one more try with it succeeds.
  */
 export function refreshSession(): Promise<string> {
-  refreshing ??= (async () => {
+  const trade = async (attempt: number): Promise<string> => {
     const refresh = tokens.getRefresh()
     if (!refresh) throw new Error('No session')
-    const { data } = await bare.post<TokenPair>('/auth/refresh/', { refresh })
-    tokens.set(data)
-    return data.access
-  })().finally(() => {
+    try {
+      const { data } = await bare.post<TokenPair>('/auth/refresh/', { refresh })
+      tokens.set(data)
+      return data.access
+    } catch (err) {
+      const newer = tokens.getRefresh()
+      if (attempt === 0 && isSessionRejected(err) && newer && newer !== refresh) return trade(1)
+      throw err
+    }
+  }
+  refreshing ??= trade(0).finally(() => {
     refreshing = null
   })
   return refreshing

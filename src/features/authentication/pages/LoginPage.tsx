@@ -6,8 +6,11 @@ import { Link, Navigate, useLocation, useNavigate, type Location } from 'react-r
 import { FormError } from '@/components/forms/FormError'
 import { FormField } from '@/components/forms/FormField'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/useAuth'
+import { usePageMeta } from '@/hooks/usePageMeta'
+import { tokens } from '@/lib/auth'
 import { applyServerErrors } from '@/lib/errors'
 import { t, useLocale, tr } from '@/lib/i18n'
 import { toApiError } from '@/shared/api/errors'
@@ -16,6 +19,7 @@ import { loginSchema, type LoginForm } from '../schemas/login.schema'
 
 export default function LoginPage() {
   useLocale()
+  usePageMeta({ title: tr('Log in · Education ERP'), description: tr('Log in to Education ERP to manage your school or college: students, teachers, attendance, exams and fees.') })
   const { status, login, sessionExpired } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -23,6 +27,7 @@ export default function LoginPage() {
   // Keep the query too: deep links such as `/scan/class?t=…` carry what they need in it.
   const back = from ? `${from.pathname}${from.search}${from.hash}` : '/'
   const [needsOtp, setNeedsOtp] = useState(false)
+  const [remember, setRemember] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
   const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema), defaultValues: { email: '', password: '', otp: '' } })
   const {
@@ -39,6 +44,7 @@ export default function LoginPage() {
       return
     }
     try {
+      tokens.remember(remember)
       await login(needsOtp ? { email, password, otp } : { email, password })
       navigate(back, { replace: true })
     } catch (err) {
@@ -55,13 +61,13 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      title={needsOtp ? tr('Two-step verification') : t('auth.signIn')}
-      subtitle={needsOtp ? t('auth.otpHint') : tr('Use the email your school registered for you.')}
+      title={needsOtp ? tr('Two-step verification') : tr('Welcome back')}
+      subtitle={needsOtp ? t('auth.otpHint') : tr('Log in to manage your institution.')}
       footer={
         <>
-          {tr('New school?')}{' '}
+          {tr("Don't have an account?")}{' '}
           <Link to="/signup" className="font-medium text-primary hover:underline">
-            {tr('Create an account')}
+            {tr('Create a free account')}
           </Link>
         </>
       }
@@ -76,6 +82,15 @@ export default function LoginPage() {
           <FormField label={t('auth.password')} error={errors.password?.message}>
             <Input {...register('password')} type="password" autoComplete="current-password" />
           </FormField>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+            <label className="flex cursor-pointer items-center gap-2">
+              <Checkbox checked={remember} onCheckedChange={(v) => setRemember(v === true)} />
+              {tr('Remember me')}
+            </label>
+            <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground">
+              {t('auth.forgot')}
+            </Link>
+          </div>
         </div>
         {needsOtp && (
           <FormField label={t('auth.otp')} error={errors.otp?.message} description={tr('Lost your phone? Type one of your recovery codes instead.')}>
@@ -84,9 +99,9 @@ export default function LoginPage() {
         )}
         <Button type="submit" className="h-10" disabled={isSubmitting}>
           {isSubmitting ? <Loader2 className="animate-spin" aria-hidden /> : needsOtp && <ShieldCheck aria-hidden />}
-          {needsOtp ? tr('Verify and sign in') : t('auth.signIn')}
+          {needsOtp ? tr('Verify and sign in') : tr('Log in')}
         </Button>
-        {needsOtp ? (
+        {needsOtp && (
           <button
             type="button"
             className="text-sm text-muted-foreground hover:text-foreground"
@@ -97,10 +112,6 @@ export default function LoginPage() {
           >
             {tr('Use a different account')}
           </button>
-        ) : (
-          <Link to="/forgot-password" className="justify-self-start text-sm text-muted-foreground hover:text-foreground">
-            {t('auth.forgot')}
-          </Link>
         )}
       </form>
     </AuthLayout>

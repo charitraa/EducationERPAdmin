@@ -5,8 +5,8 @@ import { applicationKeys, applicationsApi, certificateKeys, certificatesApi, typ
 
 export const { useList: useApplicationTypes, useCreate: useCreateApplicationType, useUpdate: useUpdateApplicationType, useRemove: useRemoveApplicationType } = createResourceHooks(typesApi, typeKeys)
 
-export function useAvailableTypes() {
-  return useQuery({ queryKey: [...typeKeys.all, 'available'], queryFn: typesApi.available, staleTime: 5 * 60_000 })
+export function useAvailableTypes(enabled = true) {
+  return useQuery({ queryKey: [...typeKeys.all, 'available'], queryFn: typesApi.available, staleTime: 5 * 60_000, enabled })
 }
 
 export function useApplications(params: ListParams, enabled = true) {

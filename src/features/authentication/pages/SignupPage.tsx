@@ -8,9 +8,11 @@ import { FormError } from '@/components/forms/FormError'
 import { FormField } from '@/components/forms/FormField'
 import { SelectControl } from '@/components/forms/SelectControl'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDebounce } from '@/hooks/useDebounce'
+import { usePageMeta } from '@/hooks/usePageMeta'
 import { applyServerErrors, errorMessage } from '@/lib/errors'
 import { ApiError, toApiError } from '@/shared/api/errors'
 import { signupApi, signupKeys, type SignupConfig } from '../api/account.api'
@@ -51,7 +53,7 @@ const signInLink = (
   <>
     {tr('Already have an account?')}{' '}
     <Link to="/login" className="font-medium text-primary hover:underline">
-      {tr('Sign in')}
+      {tr('Log in')}
     </Link>
   </>
 )
@@ -143,6 +145,7 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
       phone: '',
       password: '',
       confirm: '',
+      terms: false,
     },
   })
   const {
@@ -156,7 +159,7 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
 
   const nameField = register('organization_name')
 
-  const submit = form.handleSubmit(async ({ confirm: _confirm, ...values }) => {
+  const submit = form.handleSubmit(async ({ confirm: _confirm, terms: _terms, ...values }) => {
     setServerError(null)
     let captchaToken = ''
     try {
@@ -177,19 +180,19 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
 
   return (
     <AuthLayout
-      title={tr('Set up your school')}
+      title={tr('Create your free institution account')}
       subtitle={
         config.requires_approval
-          ? tr("You'll confirm your email, then we review the request and let you know when your school is ready.")
-          : tr("You'll confirm your email, then the setup guide walks you through the rest.")
+          ? tr("Get your school or college online in a few minutes. You'll confirm your email, then we review the request and let you know when it's ready.")
+          : tr("Get your school or college online in a few minutes. You'll confirm your email, then the setup guide walks you through the rest.")
       }
       footer={signInLink}
     >
       <form onSubmit={submit} noValidate className="grid gap-4">
         <FormError message={serverError} />
         <fieldset className="grid gap-4">
-          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr('Your school')}</legend>
-          <FormField label={tr('School or college name')} required error={errors.organization_name?.message}>
+          <legend className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr('Your institution')}</legend>
+          <FormField label={tr('Institution name')} required error={errors.organization_name?.message}>
             <Input
               {...nameField}
               onChange={(e) => {
@@ -224,7 +227,7 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
             />
           </FormField>
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label={tr('Type')} required error={errors.organization_type?.message}>
+            <FormField label={tr('Institution type')} required error={errors.organization_type?.message}>
               {(p) => <Controller control={control} name="organization_type" render={({ field }) => <SelectControl {...p} value={field.value} onChange={field.onChange} options={config.organization_types} />} />}
             </FormField>
             <FormField label={tr('Time zone')} required error={errors.timezone?.message}>
@@ -264,10 +267,45 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
           </div>
         </fieldset>
 
+        <div className="grid gap-1">
+          <label className="flex cursor-pointer items-start gap-2 text-sm">
+            <Controller
+              control={control}
+              name="terms"
+              render={({ field }) => (
+                <Checkbox className="mt-0.5" checked={field.value} onCheckedChange={(v) => field.onChange(v === true)} aria-invalid={!!errors.terms} aria-describedby={errors.terms ? 'signup-terms-error' : undefined} />
+              )}
+            />
+            <span>
+              {/* One sentence, so translations can put the links where their grammar needs them. */}
+              {tr('I agree to the {terms} and {privacy}.')
+                .split(/(\{terms\}|\{privacy\})/)
+                .map((part, i) =>
+                  part === '{terms}' ? (
+                    <Link key={i} to="/terms" target="_blank" className="font-medium text-primary hover:underline">
+                      {tr('Terms of Service')}
+                    </Link>
+                  ) : part === '{privacy}' ? (
+                    <Link key={i} to="/privacy" target="_blank" className="font-medium text-primary hover:underline">
+                      {tr('Privacy Policy')}
+                    </Link>
+                  ) : (
+                    part
+                  ),
+                )}
+            </span>
+          </label>
+          {errors.terms && (
+            <p id="signup-terms-error" className="text-xs text-danger">
+              {errors.terms.message}
+            </p>
+          )}
+        </div>
+
         <Captcha provider={config.captcha_provider} siteKey={config.captcha_site_key} action="signup" onReady={(h) => (captcha.current = h)} />
         <Button type="submit" className="h-10" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-          {tr('Create account')}
+          {tr('Create free account')}
         </Button>
       </form>
     </AuthLayout>
@@ -276,12 +314,13 @@ function SignupFormView({ config, onSent }: { config: SignupConfig; onSent: (ema
 
 /** Organization signup: `GET /signup/config/` decides whether the form shows at all. */
 export default function SignupPage() {
+  usePageMeta({ title: tr('Create a free account · Education ERP'), description: tr('Create a free Education ERP account for your school or college and get started in a few minutes. No setup fee, nothing to install.') })
   const [sentTo, setSentTo] = useState<string | null>(null)
   const config = useQuery({ queryKey: signupKeys.config, queryFn: signupApi.config, retry: false, retryOnMount: false, staleTime: 5 * 60_000 })
 
   if (config.isPending)
     return (
-      <AuthLayout title={tr('Set up your school')}>
+      <AuthLayout title={tr('Create your free institution account')}>
         <div className="grid gap-4" aria-busy="true">
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-10 w-full" />
@@ -292,7 +331,7 @@ export default function SignupPage() {
 
   if (config.isError)
     return (
-      <AuthLayout title={tr('Set up your school')} footer={signInLink}>
+      <AuthLayout title={tr('Create your free institution account')} footer={signInLink}>
         <div role="alert" className="mb-4 flex gap-3 rounded-md border bg-warning-soft p-4 text-sm text-warning">
           <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <p>{errorMessage(config.error)}</p>
@@ -305,7 +344,7 @@ export default function SignupPage() {
 
   if (!config.data.enabled)
     return (
-      <AuthLayout title={tr('Set up your school')} footer={signInLink}>
+      <AuthLayout title={tr('Create your free institution account')} footer={signInLink}>
         <div className="flex gap-3 rounded-md border bg-muted/40 p-4 text-sm">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
           <p>{tr("Online sign-up isn't open on this server. Contact the people who run it and they'll create your school's account for you.")}</p>

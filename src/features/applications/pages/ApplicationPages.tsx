@@ -34,6 +34,7 @@ import {
   useApplications,
   useApplicationTypes,
   useApproveApplication,
+  useAvailableTypes,
   useMyApplications,
   usePendingApplications,
   useRejectApplication,
@@ -300,7 +301,12 @@ type Acting = 'approve' | 'reject' | 'send_back' | 'withdraw' | 'resubmit' | nul
 export function ApplicationDetailPage() {
   const id = Number(useParams().id)
   const app = useApplication(Number.isFinite(id) ? id : null)
-  const types = useApplicationTypes({ ...PICKER_PARAMS })
+  const { can } = usePermissions()
+  // Applicants and approvers outside the office can't list the forms; the
+  // ones they can fill in still carry the extra questions and the steps.
+  const office = can(PERMS.applications.view)
+  const types = useApplicationTypes({ ...PICKER_PARAMS }, { enabled: office })
+  const available = useAvailableTypes(!office)
   const approve = useApproveApplication()
   const reject = useRejectApplication()
   const sendBack = useSendBackApplication()
@@ -308,20 +314,22 @@ export function ApplicationDetailPage() {
   const resubmit = useResubmitApplication()
   const pending = usePendingApplications({ page_size: 100 })
   const { user } = useAuth()
-  const { can } = usePermissions()
   const [acting, setActing] = useState<Acting>(null)
   const [data, setData] = useState<FormData>({})
   if (app.isPending) return <PageLoader />
   if (app.isError) return <ErrorState error={app.error} onRetry={() => void app.refetch()} />
   const a = app.data
-  const type = types.data?.results.find((t) => t.id === a.application_type)
+  const type = office
+    ? types.data?.results.find((t) => t.id === a.application_type)
+    : available.data?.find((t) => t.id === a.application_type)
   const extra: FieldDefinition[] = type?.fields ?? []
+  const steps = (type?.steps ?? []).map((s, i) => (typeof s === 'string' ? { sequence: i + 1, name: s } : s))
   const kind = a.kind as ApplicationKind
   const open = a.status === 'in_review' || a.status === 'returned'
   const decides = a.status === 'in_review' && (pending.data?.results ?? []).some((p) => p.id === a.id)
   const isApplicant = a.applicant != null && a.applicant === user?.id
-  const lastStep = type ? a.step === type.steps.length : false
-  const needs = lastStep ? type?.decision_fields ?? [] : []
+  const lastStep = type ? a.step === steps.length : false
+  const needs = lastStep && type && 'decision_fields' in type ? type.decision_fields : []
   const close = (o: boolean) => !o && setActing(null)
 
   return (
@@ -398,7 +406,7 @@ export function ApplicationDetailPage() {
           {type && (
             <Section title={tr('Approval steps')}>
               <ol className="grid gap-1.5 text-sm">
-                {type.steps.map((s) => {
+                {steps.map((s) => {
                   const done = a.status === 'approved' || (s.sequence ?? 0) < a.step!
                   const now = a.status === 'in_review' && s.sequence === a.step
                   return (
