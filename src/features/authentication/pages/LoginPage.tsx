@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePageMeta } from '@/hooks/usePageMeta'
 import { tokens } from '@/lib/auth'
 import { applyServerErrors } from '@/lib/errors'
+import { safeBack } from '@/lib/safeRedirect'
 import { t, useLocale, tr } from '@/lib/i18n'
 import { toApiError } from '@/shared/api/errors'
 import { AuthLayout } from '../components/AuthLayout'
@@ -25,7 +26,7 @@ export default function LoginPage() {
   const location = useLocation()
   const from = (location.state as { from?: Location } | null)?.from
   // Keep the query too: deep links such as `/scan/class?t=…` carry what they need in it.
-  const back = from ? `${from.pathname}${from.search}${from.hash}` : '/'
+  const back = safeBack(from ? `${from.pathname}${from.search}${from.hash}` : '/')
   const [needsOtp, setNeedsOtp] = useState(false)
   const [remember, setRemember] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
